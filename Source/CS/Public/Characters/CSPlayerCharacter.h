@@ -13,6 +13,7 @@ class UInputAction;
 class UCameraComponent;
 class USpringArmComponent;
 class USkeletalMeshComponent;
+class UAnimMontage;
 
 UCLASS()
 class CS_API ACSPlayerCharacter : public ACSBaseCharacter
@@ -28,6 +29,8 @@ public:
 
 	void CrouchStart(const FInputActionValue& Value);
 	void CrouchEnd(const FInputActionValue& Value);
+	void PlayAttackMontage();
+	void PlayHitReactMontage();
 
 	/*
 	* Callback function for input
@@ -43,9 +46,19 @@ public:
 	UInputAction* JumpAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* CrouchAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* AttackAction;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* AttackMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* HitReactMontage;
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	class UCSAttributeComponent* Attribute;
 
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

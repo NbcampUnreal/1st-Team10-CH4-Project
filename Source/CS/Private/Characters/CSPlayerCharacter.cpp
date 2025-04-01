@@ -9,7 +9,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "CSAnimInstance.h"
+#include "Components/CSAttributeComponent.h"
 
 ACSPlayerCharacter::ACSPlayerCharacter()
 {
@@ -28,6 +29,8 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
+
+	Attribute = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->Crouch(true);
@@ -61,7 +64,7 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
-
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::PlayAttackMontage);
 	}
 }
 
@@ -111,3 +114,27 @@ void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 	SetActorRotation(NewRotation);
 }
 
+void ACSPlayerCharacter::PlayAttackMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && AttackMontage)
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+		FName SectionName;
+		SectionName = "Kick2";
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ACSPlayerCharacter::PlayHitReactMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName;
+		SectionName = "HitReact1";
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
