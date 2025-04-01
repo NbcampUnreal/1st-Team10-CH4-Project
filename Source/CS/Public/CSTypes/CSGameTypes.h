@@ -3,23 +3,18 @@
 #include "CoreMinimal.h"
 #include "CSGameTypes.generated.h"
 
-// 예시
 UENUM(BlueprintType)
 enum class EMatchType : uint8
 {
-	Single,
-	Versus,
-	Coop
+	EMT_Single UMETA(DisplayName = "SinglePlay"),
+	EMT_Versus UMETA(DisplayName = "Versus"),
+	EMT_Coop UMETA(DisplayName = "Coop")
 };
 
-//USTRUCT(BlueprintType)
-//struct FSinglePlaySettings
-//{
-//    GENERATED_BODY()
-//
-//    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-//    int32 DifficultyLevel;
-//
-//    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-//    FName StartMapName;
-//};
+UENUM(BlueprintType)
+enum class EMatchPhase : uint8
+{
+	EMP_Waiting    UMETA(DisplayName = "Waiting"),
+	EMP_Playing    UMETA(DisplayName = "Playing"),
+	EMP_Finished   UMETA(DisplayName = "Finished")
+};
