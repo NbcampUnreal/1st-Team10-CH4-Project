@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "CSBaseCharacter.h"
 #include "InputActionValue.h"
-#include "CSCharacterTypes.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSPlayerCharacter.generated.h"
 
 class UInputMappingContext;
