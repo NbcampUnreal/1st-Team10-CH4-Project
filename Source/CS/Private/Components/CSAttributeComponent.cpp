@@ -2,30 +2,29 @@
 
 
 #include "Components/CSAttributeComponent.h"
+#include "Net/UnrealNetwork.h"
 
 UCSAttributeComponent::UCSAttributeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicated(true);
 }
-
 
 void UCSAttributeComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void UCSAttributeComponent::ReceiveDamage(float Damage)
+void UCSAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Health -= Damage;
-	if (!IsAlive())
-	{
-		// TODO:Call the death function
-	}
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UCSAttributeComponent, Health);
+	DOREPLIFETIME(UCSAttributeComponent, MaxHealth);
 }
 
 bool UCSAttributeComponent::IsAlive()
 {
-	return Health > 0;
+	return Health > 0.f;
 }
 
 float UCSAttributeComponent::GetHealthPercent()
@@ -39,3 +38,12 @@ void UCSAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 }
 
+void UCSAttributeComponent::OnRep_Health()
+{
+	UE_LOG(LogTemp, Log, TEXT("Health Replicated: %f"), Health);
+}
+
+void UCSAttributeComponent::OnRep_MaxHealth()
+{
+	UE_LOG(LogTemp, Log, TEXT("MaxHealth Replicated: %f"), MaxHealth);
+}
