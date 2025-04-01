@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "CSCharacterTypes.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSAnimInstance.generated.h"
 
 /**

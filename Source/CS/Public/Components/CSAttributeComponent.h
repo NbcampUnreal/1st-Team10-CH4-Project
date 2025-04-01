@@ -15,12 +15,10 @@ class CS_API UCSAttributeComponent : public UActorComponent
 public:	
 	UCSAttributeComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
-
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
