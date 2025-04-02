@@ -11,11 +11,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CSAnimInstance.h"
 #include "Components/CSAttributeComponent.h"
+#include "Components/CSCombatComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ACSPlayerCharacter::ACSPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->Crouch(true);
+	SetReplicateMovement(true);
 
 	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -30,16 +35,15 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 
-	Attribute = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
-
-	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->Crouch(true);
+	AttributeComponent = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
+	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 }
 
 void ACSPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
@@ -64,7 +68,7 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::PlayAttackMontage);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::PlayAttackMontage);
 	}
 }
 
@@ -100,18 +104,14 @@ void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 	const FVector ForwardDirection = FVector(0.f, -1.f, 0.f); // Y축 방향
 	AddMovementInput(ForwardDirection, MovementVector.X);
 
-	if (MovementVector.X > 0.f)
+	if (AttributeComponent)
 	{
-		FacingDirection = EFacingDirection::EFD_FacingRight;
+		AttributeComponent->UpdateFacingDirection(MovementVector.X);
+		EFacingDirection Facing = AttributeComponent->GetFacingDirection();
+		float TargetYaw = (Facing == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
+		FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
+		SetActorRotation(NewRotation);
 	}
-	else if (MovementVector.X < 0.f)
-	{
-		FacingDirection = EFacingDirection::EFD_FacingLeft;
-	}
-
-	float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
-	FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
-	SetActorRotation(NewRotation);
 }
 
 void ACSPlayerCharacter::PlayAttackMontage()
@@ -122,8 +122,9 @@ void ACSPlayerCharacter::PlayAttackMontage()
 	{
 		AnimInstance->Montage_Play(AttackMontage);
 		FName SectionName;
-		SectionName = "Kick2";
+		SectionName = "Kick1";
 		AnimInstance->Montage_JumpToSection(SectionName);
+		StartAttack();
 	}
 }
 
@@ -136,5 +137,35 @@ void ACSPlayerCharacter::PlayHitReactMontage()
 		FName SectionName;
 		SectionName = "HitReact1";
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ACSPlayerCharacter::StartAttack()
+{
+	if (CombatComponent)
+	{
+		if (HasAuthority())
+		{
+			CombatComponent->SetIsAttacking(true);
+		}
+		else
+		{
+			CombatComponent->ServerStartAttack();
+		}
+	}
+}
+
+void ACSPlayerCharacter::EndAttack()
+{
+	if (CombatComponent)
+	{
+		if (HasAuthority())
+		{
+			CombatComponent->SetIsAttacking(false);
+		}
+		else
+		{
+			CombatComponent->ServerEndAttack();
+		}
 	}
 }
