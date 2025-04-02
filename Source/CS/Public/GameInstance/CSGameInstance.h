@@ -11,15 +11,17 @@ class CS_API UCSGameInstance : public UGameInstance
 	GENERATED_BODY()
     
 public:
+    UCSGameInstance() : MatchType(EMatchType::EMT_None), SelectedMap(NAME_None) {}
+
     UPROPERTY(BlueprintReadWrite, Category = "Match")
     EMatchType MatchType;
 
     UPROPERTY(BlueprintReadWrite, Category = "Map")
-    FName SelectedMapName;
+    FName SelectedMap;
 
     UFUNCTION(BlueprintCallable)
     void SetMatchType(EMatchType NewType) { MatchType = NewType; }
 
     UFUNCTION(BlueprintCallable)
-    void SetSelectedMapName(FName MapName) { SelectedMapName = MapName; }
+    void SetSelectedMapName(FName MapName) { SelectedMap = MapName; }
 };

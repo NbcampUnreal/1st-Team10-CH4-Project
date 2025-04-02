@@ -9,4 +9,7 @@ class CS_API ACSLobbyGameState : public AGameState
 {
 	GENERATED_BODY()
 	
+public:
+	bool AreAllPlayerReady() const;
+
 };
