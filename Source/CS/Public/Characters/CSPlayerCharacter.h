@@ -32,6 +32,12 @@ public:
 	void PlayAttackMontage();
 	void PlayHitReactMontage();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void StartAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void EndAttack();
+
 	/*
 	* Callback function for input
 	*/
@@ -54,11 +60,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* HitReactMontage;
 
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	class UCSAttributeComponent* Attribute;
+	class UCSAttributeComponent* AttributeComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UCSCombatComponent* CombatComponent;
 
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -73,5 +83,6 @@ private:
 	UCameraComponent* ViewCamera;
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
+
 
 };

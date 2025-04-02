@@ -3,6 +3,10 @@
 
 #include "Controller/CSPlayerController.h"
 
+ACSPlayerController::ACSPlayerController()
+{
+}
+
 void ACSPlayerController::SetPlayerRole(int PlayerRole)
 {
 	CharacterRole = PlayerRole;
@@ -11,7 +15,5 @@ void ACSPlayerController::SetPlayerRole(int PlayerRole)
 void ACSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Log, TEXT("Player %d has joined!"), CharacterRole);
 }
 

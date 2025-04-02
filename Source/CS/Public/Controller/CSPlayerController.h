@@ -12,6 +12,7 @@ class CS_API ACSPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	ACSPlayerController();
 	void SetPlayerRole(int PlayerRole);
 
 protected:
