@@ -1,34 +1,42 @@
 #include "GameModes/CSMainMenuGameMode.h"
 #include "Kismet/GameplayStatics.h"
-
-ACSMainMenuGameMode::ACSMainMenuGameMode()
-{
-	MatchType = EMainMenuMatchType::SinglePlayer;
-}
+#include "GameInstance/CSGameInstance.h"
+#include "GameFramework/PlayerController.h"
+#include "Controller/CSPlayerController.h"
 
 void ACSMainMenuGameMode::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	// 메인 메뉴 초기화 로직을 여기에 추가할 수 있습니다.
 }
 
-void ACSMainMenuGameMode::StartSinglePlayer()
+void ACSMainMenuGameMode::PostLogin(APlayerController* NewPlayer)
 {
-	UGameplayStatics::OpenLevel(this, FName("TutorialMap"));
+    Super::PostLogin(NewPlayer);
+
+    if (ACSPlayerController* PC = Cast<ACSPlayerController>(NewPlayer))
+    {
+        // 클라이언트 RPC 호출 (아직 구현되지 않았을 수 있으므로 주의)
+        // PC->Client_ShowUI(MainMenuWidgetClass);
+    }
 }
 
-void ACSMainMenuGameMode::StartMultiplayer()
+void ACSMainMenuGameMode::TryStartMatch()
 {
-	// 멀티플레이어 모드를 시작하는 로직을 여기에 추가합니다.
-	// 예: 멀티플레이어 로비로 이동
-}
-
-void ACSMainMenuGameMode::QuitGame()
-{
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	if (PlayerController)
-	{
-		PlayerController->ConsoleCommand("quit");
-	}
+    if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
+    {
+        switch (GI->MatchType)
+        {
+        case EMatchType::EMT_Single:
+            UGameplayStatics::OpenLevel(this, FName("TutorialLevel"));
+            break;
+        case EMatchType::EMT_Versus:
+        case EMatchType::EMT_Coop:
+            UGameplayStatics::OpenLevel(this, FName("LobbyLevel"));
+            break;
+        default:
+            UE_LOG(LogTemp, Warning, TEXT("[MainMenu] Invalid MatchType set in GameInstance."));
+            break;
+        }
+    }
 }
