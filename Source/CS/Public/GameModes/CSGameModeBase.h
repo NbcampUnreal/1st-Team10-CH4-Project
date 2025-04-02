@@ -5,6 +5,12 @@
 #include "CSTypes/CSGameTypes.h"
 #include "CSGameModeBase.generated.h"
 
+/**
+ * 전투 전용 GameMode 베이스 클래스.
+ * 메뉴/로비 등에서는 사용하지 않음.
+ * MatchType에 따라 싱글, 대전, 협동 전투 초기화 로직을 분기 처리함.
+ */
+
 UCLASS()
 class CS_API ACSGameModeBase : public AGameMode
 {
