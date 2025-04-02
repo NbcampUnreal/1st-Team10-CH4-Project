@@ -96,7 +96,6 @@ void ACSPlayerCharacter::CrouchEnd(const FInputActionValue& Value)
 
 void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 {
-
 	if (ActionState != ECharacterTypes::ECT_Unoccupied) return;
 
 	const FVector2D MovementVector = Value.Get<FVector2D>();
