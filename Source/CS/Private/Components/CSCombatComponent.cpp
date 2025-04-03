@@ -40,10 +40,16 @@ void UCSCombatComponent::SetIsAttacking(bool bAttacking)
     }
 }
 
-void UCSCombatComponent::SetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
+void UCSCombatComponent::MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
 {
     ServerPlayMontage = PlayMontage;
     ServerSection = Section;
+}
+
+void UCSCombatComponent::ServerSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
+{
+    MultiSetMontageData(PlayMontage, Section);
+    ServerStartAttack();
 }
 
 void UCSCombatComponent::OnRep_IsAttacking()
@@ -53,8 +59,8 @@ void UCSCombatComponent::OnRep_IsAttacking()
     {
         if (bIsAttacking)
         {
-            //FString Ftext = ServerSection.ToString();
-            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%s"), *Ftext));
+            FString Ftext = ServerSection.ToString();
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%s"), *Ftext));
             Character->PlayPlayerMontage(ServerPlayMontage, ServerSection);
         }
     }

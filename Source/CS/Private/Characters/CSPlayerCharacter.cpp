@@ -147,12 +147,12 @@ void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
 	{
 		if (HasAuthority())
 		{
-			CombatComponent->SetMontageData(PlayMontage, Section);
+			CombatComponent->MultiSetMontageData(PlayMontage, Section);
 			CombatComponent->SetIsAttacking(true);
 		}
 		else
 		{
-			CombatComponent->ServerStartAttack();
+			CombatComponent->ServerSetMontageData(PlayMontage, Section);
 		}
 	}
 }

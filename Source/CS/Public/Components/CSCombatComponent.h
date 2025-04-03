@@ -22,14 +22,20 @@ public:
     void SetIsAttacking(bool bAttacking);
 
     UFUNCTION(NetMulticast, Reliable)
-    void SetMontageData(UAnimMontage* PlayMontage, FName Section);
-    void SetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section);
+    void MultiSetMontageData(UAnimMontage* PlayMontage, FName Section);
+    void MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section);
+
+    UFUNCTION(Server, Reliable)
+    void ServerSetMontageData(UAnimMontage* PlayMontage, FName Section);
+    void ServerSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section);
 
     UFUNCTION(Server, Reliable)
     void ServerStartAttack();
+    void ServerStartAttack_Implementation();
 
     UFUNCTION(Server, Reliable)
     void ServerEndAttack();
+    void ServerEndAttack_Implementation();
 
     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
