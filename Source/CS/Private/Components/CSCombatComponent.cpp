@@ -31,8 +31,6 @@ void UCSCombatComponent::SetIsAttacking(bool bAttacking)
         bool bOldValue = bIsAttacking;
         bIsAttacking = bAttacking;
 
-        //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%d, %d"), bOldValue, bIsAttacking));
-
         if (bOldValue != bIsAttacking)
         {    
             OnRep_IsAttacking();

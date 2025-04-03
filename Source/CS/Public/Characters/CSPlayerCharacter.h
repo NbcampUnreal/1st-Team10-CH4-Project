@@ -36,6 +36,9 @@ public:
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void DuringAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void EndAttack();
 
 	/*
@@ -71,6 +74,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCSCombatComponent* CombatComponent;
 
+	int32 iCombo_1_Cnt;
+	int32 iCombo_2_Cnt;
+	bool bCanCombo;
+
+	UFUNCTION(BlueprintCallable, Category = "Combo")
+	void ComboReset();
+	UFUNCTION(BlueprintCallable, Category = "Combo")
+	void ComboCheck();
+
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	ECharacterTypes ActionState = ECharacterTypes::ECT_Unoccupied; // 기본 상태
@@ -84,6 +96,5 @@ private:
 	UCameraComponent* ViewCamera;
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
-
 
 };

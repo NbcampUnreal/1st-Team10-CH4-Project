@@ -37,6 +37,11 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 
 	AttributeComponent = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
+
+	// Combo Data Reset
+	iCombo_1_Cnt = 0;
+	iCombo_2_Cnt = 0;
+	bCanCombo = true;
 }
 
 void ACSPlayerCharacter::BeginPlay()
@@ -51,6 +56,19 @@ void ACSPlayerCharacter::BeginPlay()
 			Subsystem->AddMappingContext(MappingContext, 0);
 		}
 	}
+}
+
+void ACSPlayerCharacter::ComboReset()
+{
+	iCombo_1_Cnt = 0;
+	iCombo_2_Cnt = 0;
+	bCanCombo = true;
+}
+
+void ACSPlayerCharacter::ComboCheck()
+{
+	bCanCombo = true;
+	DuringAttack();
 }
 
 void ACSPlayerCharacter::Tick(float DeltaTime)
@@ -121,6 +139,7 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 
 	if (AnimInstance && PlayMontage)
 	{
+		bCanCombo = false;
 		AnimInstance->Montage_Play(PlayMontage);
 		FName SectionName;
 		SectionName = Section;
@@ -157,8 +176,25 @@ void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
 	}
 }
 
+void ACSPlayerCharacter::DuringAttack()
+{
+	if (CombatComponent)
+	{
+		if (HasAuthority())
+		{
+			CombatComponent->SetIsAttacking(false);
+		}
+		else
+		{
+			CombatComponent->ServerEndAttack();
+		}
+	}
+}
+
 void ACSPlayerCharacter::EndAttack()
 {
+	ComboReset();
+
 	if (CombatComponent)
 	{
 		if (HasAuthority())

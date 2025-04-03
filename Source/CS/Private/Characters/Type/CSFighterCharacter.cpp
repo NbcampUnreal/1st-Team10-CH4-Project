@@ -29,7 +29,6 @@ void ACSFighterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
 }
 
 void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -38,24 +37,62 @@ void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// Combo_1
-		EnhancedInputComponent->BindAction(HCombo1Action, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayHCombo1Montage);
-		EnhancedInputComponent->BindAction(HCombo2Action, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayHCombo2Montage);
-		EnhancedInputComponent->BindAction(HCombo3Action, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayHCombo3Montage);
+		EnhancedInputComponent->BindAction(P_ComboAction, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayPComboAnim);
+		EnhancedInputComponent->BindAction(K_ComboAction, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayKComboAnim);
 	}
 }
 
-void ACSFighterCharacter::PlayHCombo1Montage()
+/* Combo 1 */
+void ACSFighterCharacter::PlayPCombo1Montage()
 {
-	PlayPlayerMontage(HAttackMontage, "Kick1");
+	iCombo_2_Cnt++;
+	PlayPlayerMontage(P_AttackMontage, "Punch1");
 }
 
-void ACSFighterCharacter::PlayHCombo2Montage()
+void ACSFighterCharacter::PlayPCombo2Montage()
 {
-	PlayPlayerMontage(HAttackMontage, "Kick1");
+	iCombo_2_Cnt++;
+	PlayPlayerMontage(P_AttackMontage, "Punch2");
 }
 
-void ACSFighterCharacter::PlayHCombo3Montage()
+void ACSFighterCharacter::PlayPCombo3Montage()
 {
-	PlayPlayerMontage(HAttackMontage, "Kick1");
+	PlayPlayerMontage(P_AttackMontage, "Punch3");
 }
+
+void ACSFighterCharacter::PlayPComboAnim()
+{
+	if (!bCanCombo) return;
+
+	if (iCombo_2_Cnt == 0) PlayPCombo1Montage();
+	else if (iCombo_2_Cnt == 1) PlayPCombo2Montage();
+	else if (iCombo_2_Cnt == 2) PlayPCombo3Montage();
+}
+
+/* Combo 2 */
+void ACSFighterCharacter::PlayKCombo1Montage()
+{
+	iCombo_1_Cnt++;
+	PlayPlayerMontage(K_AttackMontage, "Kick1");
+}
+
+void ACSFighterCharacter::PlayKCombo2Montage()
+{
+	iCombo_1_Cnt++;
+	PlayPlayerMontage(K_AttackMontage, "Kick2");
+}
+
+void ACSFighterCharacter::PlayKCombo3Montage()
+{
+	PlayPlayerMontage(K_AttackMontage, "Kick3");
+}
+
+void ACSFighterCharacter::PlayKComboAnim()
+{
+	if (!bCanCombo) return;
+
+	if (iCombo_1_Cnt == 0) PlayKCombo1Montage();
+	else if (iCombo_1_Cnt == 1) PlayKCombo2Montage();
+	else if (iCombo_1_Cnt == 2) PlayKCombo3Montage();
+}
+
