@@ -4,6 +4,7 @@
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
 #include "Managers/CSSpawnManager.h"
+#include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSLobbyGameMode::ACSLobbyGameMode()
@@ -21,21 +22,13 @@ void ACSLobbyGameMode::BeginPlay()
 	{
 		MatchType = CSGameInstance->MatchType;
 	}
-
-	switch (MatchType)
-	{
-	case EMatchType::EMT_Versus:
-		InitVersusLobby();
-		break;
-	case EMatchType::EMT_Coop:
-		InitCoopLobby();
-		break;
-	}
 }
 
 void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+
+	SetViewLobbyCam(NewPlayer);
 
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(NewPlayer))
 	{
@@ -88,7 +81,15 @@ void ACSLobbyGameMode::TryStartMatch()
 	{
 		if (CSGameInstance->SelectedMap != NAME_None)
 		{
-			UGameplayStatics::OpenLevel(GetWorld(), CSGameInstance->SelectedMap);
+			// 맵 경로 문자열로 변환
+			FString MapPath = CSGameInstance->SelectedMap.ToString();
+
+			// listen 옵션을 붙여서 리슨서버 유지
+			FString TravelURL = MapPath + TEXT("?listen");
+
+			// 서버 전용 레벨 이동 함수
+			bUseSeamlessTravel = true;
+			GetWorld()->ServerTravel(TravelURL);
 		}
 	}
 }
@@ -104,14 +105,6 @@ void ACSLobbyGameMode::ChangeTeam(ACSPlayerController* Player)
 
 		PositionLobbyCharacters();
 	}
-}
-
-void ACSLobbyGameMode::InitVersusLobby()
-{
-}
-
-void ACSLobbyGameMode::InitCoopLobby()
-{
 }
 
 void ACSLobbyGameMode::PositionLobbyCharacters()
@@ -187,4 +180,18 @@ bool ACSLobbyGameMode::IsTeamBalanced()
 	}
 
 	return Team_0 == Team_1;
+}
+
+void ACSLobbyGameMode::SetViewLobbyCam(APlayerController* NewPlayer)
+{
+	TArray<AActor*> FoundCameras;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+
+	if (FoundCameras.Num() > 0)
+	{
+		if (ACameraActor* LobbyCam = Cast<ACameraActor>(FoundCameras[0]))
+		{
+			NewPlayer->SetViewTarget(LobbyCam);
+		}
+	}
 }

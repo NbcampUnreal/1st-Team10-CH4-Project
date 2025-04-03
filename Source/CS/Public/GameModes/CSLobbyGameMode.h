@@ -16,15 +16,19 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
+	UFUNCTION(BlueprintCallable)
 	void StartMatchIfReady();
+
+	UFUNCTION(BlueprintCallable)
 	void TryStartMatch();
+
+	UFUNCTION(BlueprintCallable)
 	void ChangeTeam(class ACSPlayerController* Player);
 
 protected:
 	EMatchType MatchType;
 
-	void InitVersusLobby();
-	void InitCoopLobby();
 	void PositionLobbyCharacters();
 	bool IsTeamBalanced();
+	void SetViewLobbyCam(APlayerController* NewPlayer);
 };
