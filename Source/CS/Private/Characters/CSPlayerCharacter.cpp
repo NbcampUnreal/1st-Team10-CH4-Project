@@ -42,6 +42,7 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 void ACSPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 	{
@@ -58,6 +59,7 @@ void ACSPlayerCharacter::Tick(float DeltaTime)
 
 }
 
+
 void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -68,7 +70,7 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::PlayAttackMontage);
+		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::PlayAttackMontage);
 	}
 }
 
@@ -113,17 +115,17 @@ void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void ACSPlayerCharacter::PlayAttackMontage()
+void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	if (AnimInstance && AttackMontage)
+	if (AnimInstance && PlayMontage)
 	{
-		AnimInstance->Montage_Play(AttackMontage);
+		AnimInstance->Montage_Play(PlayMontage);
 		FName SectionName;
-		SectionName = "Kick1";
+		SectionName = Section;
 		AnimInstance->Montage_JumpToSection(SectionName);
-		StartAttack();
+		StartAttack(PlayMontage, Section);
 	}
 }
 
@@ -139,12 +141,13 @@ void ACSPlayerCharacter::PlayHitReactMontage()
 	}
 }
 
-void ACSPlayerCharacter::StartAttack()
+void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
 {
 	if (CombatComponent)
 	{
 		if (HasAuthority())
 		{
+			CombatComponent->SetMontageData(PlayMontage, Section);
 			CombatComponent->SetIsAttacking(true);
 		}
 		else

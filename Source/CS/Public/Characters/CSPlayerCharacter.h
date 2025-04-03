@@ -29,11 +29,11 @@ public:
 
 	void CrouchStart(const FInputActionValue& Value);
 	void CrouchEnd(const FInputActionValue& Value);
-	void PlayAttackMontage();
+	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
 	void PlayHitReactMontage();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void StartAttack();
+	void StartAttack(UAnimMontage* PlayMontage, FName Section);
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void EndAttack();
@@ -43,6 +43,7 @@ public:
 	*/
 
 	void Move(const FInputActionValue& Value);
+
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* MappingContext;

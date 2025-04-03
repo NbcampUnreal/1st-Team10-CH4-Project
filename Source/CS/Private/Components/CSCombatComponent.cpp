@@ -31,11 +31,19 @@ void UCSCombatComponent::SetIsAttacking(bool bAttacking)
         bool bOldValue = bIsAttacking;
         bIsAttacking = bAttacking;
 
+        //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%d, %d"), bOldValue, bIsAttacking));
+
         if (bOldValue != bIsAttacking)
-        {
+        {    
             OnRep_IsAttacking();
         }
     }
+}
+
+void UCSCombatComponent::SetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
+{
+    ServerPlayMontage = PlayMontage;
+    ServerSection = Section;
 }
 
 void UCSCombatComponent::OnRep_IsAttacking()
@@ -45,7 +53,9 @@ void UCSCombatComponent::OnRep_IsAttacking()
     {
         if (bIsAttacking)
         {
-            Character->PlayAttackMontage();
+            //FString Ftext = ServerSection.ToString();
+            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%s"), *Ftext));
+            Character->PlayPlayerMontage(ServerPlayMontage, ServerSection);
         }
     }
 }

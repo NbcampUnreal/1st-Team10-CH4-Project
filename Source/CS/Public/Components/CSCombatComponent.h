@@ -21,6 +21,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void SetIsAttacking(bool bAttacking);
 
+    UFUNCTION(NetMulticast, Reliable)
+    void SetMontageData(UAnimMontage* PlayMontage, FName Section);
+    void SetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section);
+
     UFUNCTION(Server, Reliable)
     void ServerStartAttack();
 
@@ -31,6 +35,9 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+
+    UAnimMontage* ServerPlayMontage;
+    FName ServerSection;
 
 private:
     UPROPERTY(ReplicatedUsing = OnRep_IsAttacking)
