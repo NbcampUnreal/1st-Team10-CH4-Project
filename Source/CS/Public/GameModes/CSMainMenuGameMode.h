@@ -12,15 +12,9 @@ class CS_API ACSMainMenuGameMode : public AGameMode
 
 public:
     virtual void BeginPlay() override;
-    virtual void PostLogin(APlayerController* NewPlayer) override;
 
-    // MatchTypeÀÌ ¼±ÅÃµÈ ÈÄ GameInstance °ªÀ» ±â¹İÀ¸·Î ¸ÊÀ» ¿¬´Ù (¼­¹ö¿¡¼­¸¸ È£ÃâµÊ)
-    // PlayerController¿¡¼­ Server RPC·Î ÀÌ ÇÔ¼ö¸¦ È£ÃâÇÏ¸é, ¼±ÅÃµÈ MatchTypeÀ¸·Î Level ÀüÈ¯µÊ
-    // Server RPCÀÇ °æ¿ì¿£ ¿¹¸¦µé¾î RequestStartMatch ÇÔ¼ö°¡ ÀÖ´Ù°í ÇÏ¸é °Å±â¼­ GameMdoe->TryStartMatch¸¦ È£ÃâÇÏ´Â ¹æ½Ä
+    // MatchTypeì´ ì„ íƒëœ í›„ GameInstance ê°’ì„ ê¸°ë°˜ìœ¼ë¡œ ë§µì„ ì—°ë‹¤ (ì„œë²„ì—ì„œë§Œ í˜¸ì¶œë¨)
+    // PlayerControllerì—ì„œ Server RPCë¡œ ì´ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ë©´, ì„ íƒëœ MatchTypeìœ¼ë¡œ Level ì „í™˜ë¨
+    // Server RPCì˜ ê²½ìš°ì—” ì˜ˆë¥¼ë“¤ì–´ RequestStartMatch í•¨ìˆ˜ê°€ ìˆë‹¤ê³  í•˜ë©´ ê±°ê¸°ì„œ GameMode->TryStartMatchë¥¼ í˜¸ì¶œí•˜ëŠ” ë°©ì‹
     void TryStartMatch();
-
-protected:
-    // ¸ŞÀÎ ¸Ş´º UI Å¬·¡½º ¼³Á¤ (GameMode¿¡¼­ Controller¿¡°Ô Àü´ŞÇÒ ¿ëµµ)
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSubclassOf<class UUserWidget> MainMenuWidgetClass;
 };

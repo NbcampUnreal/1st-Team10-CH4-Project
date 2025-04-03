@@ -10,17 +10,6 @@ void ACSMainMenuGameMode::BeginPlay()
 
 }
 
-void ACSMainMenuGameMode::PostLogin(APlayerController* NewPlayer)
-{
-    Super::PostLogin(NewPlayer);
-
-    if (ACSPlayerController* PC = Cast<ACSPlayerController>(NewPlayer))
-    {
-        // 클라이언트 RPC 호출 (아직 구현되지 않았을 수 있으므로 주의)
-        // PC->Client_ShowUI(MainMenuWidgetClass);
-    }
-}
-
 void ACSMainMenuGameMode::TryStartMatch()
 {
     if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
