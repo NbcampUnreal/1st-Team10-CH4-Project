@@ -24,13 +24,16 @@ public:
 	ACSPlayerCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void Jump() override;
 
 	void CrouchStart(const FInputActionValue& Value);
 	void CrouchEnd(const FInputActionValue& Value);
-	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
-	void PlayHitReactMontage();
+ 	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
+
+ 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
+ 	void PlayHitReactMontage();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
@@ -40,6 +43,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void EndAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void StopMovement();
+	void StopMovement_Implementation();
 
 	/*
 	* Callback function for input
@@ -84,11 +91,14 @@ protected:
 	void ComboCheck();
 
 private:
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_ActionState)
 	ECharacterTypes ActionState = ECharacterTypes::ECT_Unoccupied; // 기본 상태
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EFacingDirection FacingDirection = EFacingDirection::EFD_FacingRight; // 기본 방향
+
+	UFUNCTION()
+	void OnRep_ActionState();
 
 	/* Character Components */
 
