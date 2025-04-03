@@ -23,7 +23,10 @@ public:
 	void TryStartMatch();
 
 	UFUNCTION(BlueprintCallable)
-	void ChangeTeam(class ACSPlayerController* Player);
+	void ChangeTeam(APlayerController* Player);
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerSelection(APlayerController* Player, FName CharacterID);
 
 protected:
 	EMatchType MatchType;

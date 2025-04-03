@@ -13,6 +13,9 @@ class CS_API UCSGameInstance : public UGameInstance
 public:
     UCSGameInstance() : MatchType(EMatchType::EMT_None), SelectedMap(NAME_None) {}
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
+    UDataTable* CharacterData;
+
     UPROPERTY(BlueprintReadWrite, Category = "Match")
     EMatchType MatchType;
 

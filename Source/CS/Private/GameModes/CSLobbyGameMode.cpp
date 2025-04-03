@@ -44,6 +44,8 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
 	}
 
+	SetPlayerSelection(NewPlayer, FName("Fingter"));
+
 	PositionLobbyCharacters();
 }
 
@@ -94,7 +96,7 @@ void ACSLobbyGameMode::TryStartMatch()
 	}
 }
 
-void ACSLobbyGameMode::ChangeTeam(ACSPlayerController* Player)
+void ACSLobbyGameMode::ChangeTeam(APlayerController* Player)
 {
 	if (ACSPlayerState* CSPlayerState = Player->GetPlayerState<ACSPlayerState>())
 	{
@@ -163,6 +165,14 @@ void ACSLobbyGameMode::PositionLobbyCharacters()
 				}
 			}
 		}
+	}
+}
+
+void ACSLobbyGameMode::SetPlayerSelection(APlayerController* Player, FName CharacterID)
+{
+	if (ACSPlayerState* CSPlayerState = Player->GetPlayerState<ACSPlayerState>())
+	{
+		CSPlayerState->SelectedCharacterID = CharacterID;
 	}
 }
 

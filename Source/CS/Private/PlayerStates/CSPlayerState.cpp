@@ -1,5 +1,7 @@
 #include "PlayerStates/CSPlayerState.h"
+#include "Controller/CSPlayerController.h"
 #include "GameModes/CSLobbyGameMode.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 ACSPlayerState::ACSPlayerState()
@@ -17,7 +19,6 @@ void ACSPlayerState::BeginPlay()
 
 	// 향후 MatchType 기반 초기화 필요 시 GameInstance 참조 가능
 	// UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
-
 }
 
 void ACSPlayerState::SetIsReady(bool bNewReady)
@@ -36,11 +37,34 @@ void ACSPlayerState::SetIsReady(bool bNewReady)
 void ACSPlayerState::OnRep_IsReady()
 {
 	// 클라이언트 UI 갱신(Ready 상태)
+	/*if (!ISLocalPlayerState()) return;
+	
+	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
+	{
+		CSPlayerController->Client_UpdateReadyUI(bIsReady);
+	}*/
 }
 
 void ACSPlayerState::OnRep_TeamID()
 {
 	// 클라이언트 UI 갱신(Team 이름 및 색상)
+	/*if (!ISLocalPlayerState()) return;
+	
+	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
+	{
+		CSPlayerController->Client_UpdateTeamUI(TeamID);
+	}*/
+}
+
+void ACSPlayerState::OnRep_CharacterID()
+{
+	// 클라이언트 UI 갱신(Character Mesh 등)
+	/*if (!ISLocalPlayerState()) return;
+
+	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
+	{
+		CSPlayerController->Client_UpdateCharacterUI(SelectedCharacterID);
+	}*/
 }
 
 void ACSPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -50,6 +74,15 @@ void ACSPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACSPlayerState, bIsReady);
 	DOREPLIFETIME(ACSPlayerState, PlayerIndex);
 	DOREPLIFETIME(ACSPlayerState, TeamID);
+	DOREPLIFETIME(ACSPlayerState, SelectedCharacterID);
+}
+
+bool ACSPlayerState::ISLocalPlayerState() const
+{
+	APlayerController* LocalController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!LocalController) return false;
+
+	return LocalController->PlayerState == this;
 }
 
 
