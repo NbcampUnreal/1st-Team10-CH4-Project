@@ -38,6 +38,8 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 	AttributeComponent = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+
 	// Combo Data Reset
 	iCombo_1_Cnt = 0;
 	iCombo_2_Cnt = 0;
@@ -71,6 +73,18 @@ void ACSPlayerCharacter::ComboCheck()
 	DuringAttack();
 }
 
+void ACSPlayerCharacter::OnRep_ActionState()
+{
+	if (ActionState == ECharacterTypes::ECT_Attacking)
+	{
+		StopMovement();
+	}
+	else if (ActionState == ECharacterTypes::ECT_Unoccupied)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
+}
+
 void ACSPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -90,6 +104,12 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
 		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::PlayAttackMontage);
 	}
+}
+
+void ACSPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ACSPlayerCharacter, ActionState);
 }
 
 void ACSPlayerCharacter::Jump()
@@ -148,16 +168,22 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 	}
 }
 
-void ACSPlayerCharacter::PlayHitReactMontage()
+void ACSPlayerCharacter::PlayHitReactMontage_Implementation()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
 	if (AnimInstance && HitReactMontage)
 	{
 		AnimInstance->Montage_Play(HitReactMontage);
-		FName SectionName;
-		SectionName = "HitReact1";
+		FName SectionName = "HitReact1";
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+}
+
+void ACSPlayerCharacter::StopMovement_Implementation()
+{
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->MaxWalkSpeed = 0.f;
 }
 
 void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
@@ -166,6 +192,9 @@ void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
 	{
 		if (HasAuthority())
 		{
+			ActionState = ECharacterTypes::ECT_Attacking;
+			OnRep_ActionState();
+			StopMovement();
 			CombatComponent->MultiSetMontageData(PlayMontage, Section);
 			CombatComponent->SetIsAttacking(true);
 		}
@@ -206,4 +235,6 @@ void ACSPlayerCharacter::EndAttack()
 			CombatComponent->ServerEndAttack();
 		}
 	}
+	ActionState = ECharacterTypes::ECT_Unoccupied;
+	OnRep_ActionState();
 }

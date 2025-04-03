@@ -60,6 +60,7 @@ void UCSCombatComponent::OnRep_IsAttacking()
             FString Ftext = ServerSection.ToString();
             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("%s"), *Ftext));
             Character->PlayPlayerMontage(ServerPlayMontage, ServerSection);
+            Character->StopMovement();
         }
     }
 }
