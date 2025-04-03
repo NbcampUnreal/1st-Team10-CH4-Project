@@ -17,8 +17,6 @@ void ACSPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 향후 MatchType 기반 초기화 필요 시 GameInstance 참조 가능
-	// UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
 }
 
 void ACSPlayerState::SetIsReady(bool bNewReady)
@@ -41,7 +39,7 @@ void ACSPlayerState::OnRep_IsReady()
 	
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		CSPlayerController->Client_UpdateReadyUI(bIsReady);
+		CSPlayerController->UpdateReadyUI(bIsReady);
 	}*/
 }
 
@@ -52,7 +50,7 @@ void ACSPlayerState::OnRep_TeamID()
 	
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		CSPlayerController->Client_UpdateTeamUI(TeamID);
+		CSPlayerController->UpdateTeamUI(TeamID);
 	}*/
 }
 
@@ -63,7 +61,7 @@ void ACSPlayerState::OnRep_CharacterID()
 
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		CSPlayerController->Client_UpdateCharacterUI(SelectedCharacterID);
+		CSPlayerController->UpdateCharacterUI(SelectedCharacterID);
 	}*/
 }
 

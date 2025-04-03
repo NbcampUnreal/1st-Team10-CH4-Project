@@ -79,17 +79,13 @@ void ACSLobbyGameMode::StartMatchIfReady()
 
 void ACSLobbyGameMode::TryStartMatch()
 {
-	if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+	if (const ACSLobbyGameState* LobbyGameState = GetGameState<ACSLobbyGameState>())
 	{
-		if (CSGameInstance->SelectedMap != NAME_None)
+		if (LobbyGameState->SelectedMap != NAME_None)
 		{
-			// 맵 경로 문자열로 변환
-			FString MapPath = CSGameInstance->SelectedMap.ToString();
-
-			// listen 옵션을 붙여서 리슨서버 유지
+			FString MapPath = LobbyGameState->SelectedMap.ToString();
 			FString TravelURL = MapPath + TEXT("?listen");
 
-			// 서버 전용 레벨 이동 함수
 			bUseSeamlessTravel = true;
 			GetWorld()->ServerTravel(TravelURL);
 		}
