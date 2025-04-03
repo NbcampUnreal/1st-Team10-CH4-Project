@@ -23,15 +23,25 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
 	UInputMappingContext* FighterMappingContext;
-	UPROPERTY(EditAnywhere, Category = "Input|Fighter|Combo1")
+	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
 	UInputAction* P_ComboAction;
-	UPROPERTY(EditAnywhere, Category = "Input|Fighter|Combo2")
+	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
 	UInputAction* K_ComboAction;
+	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
+	UInputAction* P_Casting;
+	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
+	UInputAction* K_Casting;
+	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
+	UInputAction* Guard;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* P_AttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* K_AttackMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* P_CastingMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* K_CastingMontage;
 
 private:
 	// Combo_1(Punch)
@@ -45,4 +55,8 @@ private:
 	void PlayKCombo2Montage();
 	void PlayKCombo3Montage();
 	void PlayKComboAnim();
+
+	// Casting
+	void PlayPCastingAnim();
+	void PlayKCastingAnim();
 };
