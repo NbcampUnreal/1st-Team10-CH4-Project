@@ -22,3 +22,8 @@ UBehaviorTree* AAIBaseCharacter::GetBehaviorTree() const
 {
 	return Tree;
 }
+
+APatrolPath* AAIBaseCharacter::GetPatrolPath() const
+{
+	return PatrolPath;
+}
