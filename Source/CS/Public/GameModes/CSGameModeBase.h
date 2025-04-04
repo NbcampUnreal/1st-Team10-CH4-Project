@@ -24,6 +24,7 @@ public:
 
 	virtual void HandleStartGame();
 	virtual void HandleEndGame();
+	virtual void HandlePlayerDeath(AController* DeadPlayer) {}
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

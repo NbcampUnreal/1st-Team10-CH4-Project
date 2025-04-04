@@ -31,6 +31,16 @@ bool ACSLobbyGameState::AreAllPlayerReady() const
     return true;
 }
 
+void ACSLobbyGameState::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (HasAuthority())
+    {
+        SelectedMap = FName("Map_Default");
+    }
+}
+
 void ACSLobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);

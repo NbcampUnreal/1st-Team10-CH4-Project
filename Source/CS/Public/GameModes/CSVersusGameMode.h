@@ -13,29 +13,38 @@ public:
 	ACSVersusGameMode();
 
 	virtual void BeginPlay() override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 	virtual void InitVersusLogic() override;
+	virtual void HandleStartGame() override;
+	virtual void HandlePlayerDeath(AController* DeadPlayer) override;
 
 	void SpawnPlayerAtTeamSlots();
-	void StartMatchCountDown();
-	void HandlePlayerDeath(AController* DeadPlayer);
 	void CheckWinCondition();
 	void TriggerSuddenDeath();
 	void FinishMatch(int32 WinningTeamID);
 	void ReturnToLobby();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameRule")
+	int32 MatchTimeLimit;
+
 private:
+
+	class UCSGameInstance* CSGameInstance;
+	class ACSVersusGameState* CSGameState;
+
+	FTimerHandle MatchTimerHandle;
 	FTimerHandle ReturnToLobbyHandle;
 
-	bool bIsSuddenDeath;
-	float MatchTimeLimit;
-	float ElapsedTime;
+	FIntPoint AlivePlayersPerTeam;
 
-	int32 AliveTeam0;
-	int32 AliveTeam1;
+	int32 LoggedInPlayerCount;
+	int32 ExpectedPlayerCount;
 
-	void UpdateAliveTeams();
+	void UpdateAliveTeams(class ACSPlayerState* PlayerState);
+	void StartMatchTimeCountDown();
+	void UpdateMatchTime();
 };
 

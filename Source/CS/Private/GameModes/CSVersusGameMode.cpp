@@ -1,50 +1,89 @@
 #include "GameModes/CSVersusGameMode.h"
-//#include "GameStates/CSVersusGameState.h"
+#include "GameInstance/CSGameInstance.h"
+#include "GameStates/CSVersusGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
+#include "Characters/CSBaseCharacter.h"
 #include "Managers/CSSpawnManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "EngineUtils.h"
-#include "TimerManager.h"
 
 ACSVersusGameMode::ACSVersusGameMode()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    MatchTimeLimit = 90.0f;
-    ElapsedTime = 0.0f;
-    bIsSuddenDeath = false;
+	MatchTimerHandle.Invalidate();
+	ReturnToLobbyHandle.Invalidate();
 
-    /*GameStateClass = ACSVersusGameState::StaticClass();*/
+    MatchTimeLimit = 90.0f;
+
+	AlivePlayersPerTeam = { 0,0 };
+	LoggedInPlayerCount = 0;
+	ExpectedPlayerCount = 0;
+
+    GameStateClass = ACSVersusGameState::StaticClass();
 }
 
 void ACSVersusGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+	CSGameInstance = GetGameInstance<UCSGameInstance>();
+	CSGameState = GetGameState<ACSVersusGameState>();
+
+	if (CSGameInstance)
+	{
+		ExpectedPlayerCount = CSGameInstance->ExpectedPlayerCount;
+	}
+}
+
+void ACSVersusGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	
+	LoggedInPlayerCount++;
+
+	if (LoggedInPlayerCount == ExpectedPlayerCount)
+	{
+		InitVersusLogic();
+	}
 }
 
 void ACSVersusGameMode::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
-    if (MatchPhase == EMatchPhase::EMP_Playing)
-    {
-        ElapsedTime += DeltaSeconds;
-
-        if (!bIsSuddenDeath && ElapsedTime >= MatchTimeLimit)
-        {
-            TriggerSuddenDeath();
-        }
-    }
 }
 
 void ACSVersusGameMode::InitVersusLogic()
 {
-    bIsSuddenDeath = false;
-    ElapsedTime = 0.0f;
+	int32 AlivePlayers = LoggedInPlayerCount / 2;
+	AlivePlayersPerTeam = { AlivePlayers,AlivePlayers };
+
+	CSGameState->bIsSuddenDeath = false;
 
     SpawnPlayerAtTeamSlots();
-    StartMatchCountDown();
+	HandleStartGame();
+}
+
+void ACSVersusGameMode::HandleStartGame()
+{
+	Super::HandleStartGame();
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState);
+		if (!CSPlayerState) return;
+
+		APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner());
+		if (!PlayerController) return;
+
+		APawn* Pawn = PlayerController->GetPawn();
+		if (!Pawn) return;
+
+		Pawn->EnableInput(PlayerController);
+	}
+
+	StartMatchTimeCountDown();
 }
 
 void ACSVersusGameMode::SpawnPlayerAtTeamSlots()
@@ -52,105 +91,113 @@ void ACSVersusGameMode::SpawnPlayerAtTeamSlots()
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
 
-	TArray<ACSSpawnManager*> SpawnManagers;
+	TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap;
 	for (AActor* Actor : FoundActors)
 	{
-		if (ACSSpawnManager* SM = Cast<ACSSpawnManager>(Actor))
+		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
 		{
-			SpawnManagers.Add(SM);
+			SlotMap.Add(SpawnManager->SlotType, SpawnManager);
 		}
 	}
 
-	TMap<int32, TArray<ESpawnSlotType>> TeamSlotPriority;
-	TeamSlotPriority.Add(0, { ESpawnSlotType::Versus_Team0_Slot0, ESpawnSlotType::Versus_Team0_Slot1, ESpawnSlotType::Versus_Team0_Slot2 });
-	TeamSlotPriority.Add(1, { ESpawnSlotType::Versus_Team1_Slot0, ESpawnSlotType::Versus_Team1_Slot1, ESpawnSlotType::Versus_Team1_Slot2 });
+	TMap<int32, int32> TeamSlotIndex;
+	TeamSlotIndex.Add(0, 0); // Team 0 -> Slot0
+	TeamSlotIndex.Add(1, 0); // Team 1 -> Slot0
 
-	TMap<int32, TArray<ACSPlayerState*>> TeamMap;
-	/*for (APlayerState* PlayerState : GameState->PlayerArray)
+	if (!CSGameInstance || !CSGameInstance->CharacterData) return;
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
 	{
-		if (ACSPlayerState* CSPS = Cast<ACSPlayerState>(PlayerState))
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
 		{
-			TeamMap.FindOrAdd(CSPS->TeamID).Add(CSPS);
-		}
-	}*/
+			int32 TeamID = CSPlayerState->TeamID;
+			int32 SlotIndex = TeamSlotIndex[TeamID];
 
-	for (auto& TeamEntry : TeamMap)
-	{
-		int32 TeamID = TeamEntry.Key;
-		TArray<ACSPlayerState*>& Players = TeamEntry.Value;
-		int32 MaxSlot = FMath::Min(Players.Num(), TeamSlotPriority[TeamID].Num());
+			ESpawnSlotType SlotType = (TeamID == 0)
+				? (SlotIndex == 0 ? ESpawnSlotType::Versus_Team0_Slot0 : ESpawnSlotType::Versus_Team0_Slot1)
+				: (SlotIndex == 0 ? ESpawnSlotType::Versus_Team1_Slot0 : ESpawnSlotType::Versus_Team1_Slot1);
 
-		for (int32 i = 0; i < MaxSlot; ++i)
-		{
-			ESpawnSlotType SlotType = TeamSlotPriority[TeamID][i];
-
-			for (ACSSpawnManager* SM : SpawnManagers)
+			if (ACSSpawnManager* SpawnPoint = SlotMap.FindRef(SlotType))
 			{
-				if (SM->SlotType == SlotType)
+				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 				{
-					if (AController* PC = Cast<AController>(Players[i]->GetOwner()))
-					{
-						// TODO: 캐릭터 ID로 클래스 가져오기
-						FVector SpawnLoc = SM->GetActorLocation();
-						FRotator SpawnRot = SM->GetActorRotation();
+					FString Context = TEXT("Spawning Character");
+					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, Context);
 
-						// 임시 캐릭터 클래스 - 실제로는 DataTable 참조 필요
-						TSubclassOf<APawn> CharacterClass = DefaultPawnClass;
-						APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnLoc, SpawnRot);
-						if (SpawnedPawn)
-						{
-							PC->Possess(SpawnedPawn);
-						}
+					if (!Row || !Row->CharacterClass.IsValid()) continue;
+					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
+					
+					FVector SpawnLocation = SpawnPoint->GetActorLocation();
+					FRotator SpawnRotation = SpawnPoint->GetActorRotation();
+
+					APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnLocation, SpawnRotation);
+					if (SpawnedPawn)
+					{
+						PlayerController->Possess(SpawnedPawn);
+						SpawnedPawn->DisableInput(PlayerController);
 					}
-					break;
 				}
 			}
+
+			TeamSlotIndex[TeamID]++;
 		}
 	}
 }
 
-void ACSVersusGameMode::StartMatchCountDown()
+void ACSVersusGameMode::StartMatchTimeCountDown()
 {
-	HandleStartGame();
-	// TODO: 클라에 카운트다운 UI 표시 요청
+	if (CSGameState)
+	{
+		CSGameState->RemainingMatchTime = MatchTimeLimit;
+	}
+
+	GetWorldTimerManager().SetTimer(MatchTimerHandle, this, &ACSVersusGameMode::UpdateMatchTime, 1.0f, true);
+}
+
+void ACSVersusGameMode::UpdateMatchTime()
+{
+	if (CSGameState)
+	{
+		CSGameState->RemainingMatchTime--;
+
+		if (CSGameState->RemainingMatchTime <= 0)
+		{
+			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
+			TriggerSuddenDeath();
+		}
+	}
 }
 
 void ACSVersusGameMode::HandlePlayerDeath(AController* DeadPlayer)
 {
-	UpdateAliveTeams();
-	CheckWinCondition();
+	if (ACSPlayerState* CSPlayerState = DeadPlayer ? DeadPlayer->GetPlayerState<ACSPlayerState>() : nullptr)
+	{
+		// 1. 죽은 표시
+		CSPlayerState->bIsAlive = false;
+
+		// 2. 팀 생존자 수 갱신
+		UpdateAliveTeams(CSPlayerState);
+
+		// 3. 승리 조건 판별
+		CheckWinCondition();
+	}
 }
 
-void ACSVersusGameMode::UpdateAliveTeams()
+void ACSVersusGameMode::UpdateAliveTeams(ACSPlayerState* PlayerState)
 {
-	/*AliveTeam0 = 0;
-	AliveTeam1 = 0;
-
-	for (APlayerState* PS : GameState->PlayerArray)
+	if (PlayerState)
 	{
-		if (ACSPlayerState* CSPS = Cast<ACSPlayerState>(PS))
-		{
-			if (AController* PC = Cast<AController>(CSPS->GetOwner()))
-			{
-				if (APawn* Pawn = PC->GetPawn())
-				{
-					if (!Pawn->IsPendingKill())
-					{
-						(CSPS->TeamID == 0) ? AliveTeam0++ : AliveTeam1++;
-					}
-				}
-			}
-		}
-	}*/
+		(PlayerState->TeamID == 0) ? AlivePlayersPerTeam.X-- : AlivePlayersPerTeam.Y--;
+	}
 }
 
 void ACSVersusGameMode::CheckWinCondition()
 {
-	if (AliveTeam0 == 0 && AliveTeam1 > 0)
+	if (AlivePlayersPerTeam.X == 0 && AlivePlayersPerTeam.Y > 0)
 	{
 		FinishMatch(1);
 	}
-	else if (AliveTeam1 == 0 && AliveTeam0 > 0)
+	else if (AlivePlayersPerTeam.Y == 0 && AlivePlayersPerTeam.X > 0)
 	{
 		FinishMatch(0);
 	}
@@ -158,21 +205,54 @@ void ACSVersusGameMode::CheckWinCondition()
 
 void ACSVersusGameMode::TriggerSuddenDeath()
 {
-	bIsSuddenDeath = true;
-	// TODO: 클라에 서든데스 진입 UI/연출 요청
+	CSGameState->bIsSuddenDeath = true;
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		{
+			if (!CSPlayerState->bIsAlive) continue;
+
+			if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
+			{
+				if (APawn* Pawn = PlayerController->GetPawn())
+				{
+					if (ACSBaseCharacter* Character = Cast<ACSBaseCharacter>(Pawn))
+					{
+						/*Character->ActivateSuddenDeathMode();*/ // 캐릭터 공격력 증가하는 함수 필요.
+					}
+				}
+			}
+		}
+	}
 }
 
 void ACSVersusGameMode::FinishMatch(int32 WinningTeamID)
 {
 	HandleEndGame();
-	// TODO: 승리 연출 (카메라 전환, UI 등)
+
+	// 승리 연출 구현 필요(카메라 전환, 승리 팀 캐릭터 배치 등)
+	// UI는 OnMatchPhaseChanged(EMatchPhase MatchPhase) 함수에서 적용
 
 	GetWorld()->GetTimerManager().SetTimer(ReturnToLobbyHandle, this, &ACSVersusGameMode::ReturnToLobby, 10.0f, false);
 }
 
 void ACSVersusGameMode::ReturnToLobby()
 {
+	if (CSGameInstance)
+	{
+		CSGameInstance->ResetLobbySettings();
+	}
+
+	for (APlayerState* PlayerState : CSGameState->PlayerArray)
+	{
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		{
+			CSPlayerState->ResetLobbySettings(); 
+		}
+	}
+
 	bUseSeamlessTravel = true;
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen"));
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen")); // 맵 정리되면 수정 필요
 }
 

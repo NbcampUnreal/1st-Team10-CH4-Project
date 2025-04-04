@@ -1,6 +1,7 @@
 #include "PlayerStates/CSPlayerState.h"
-#include "Controller/CSPlayerController.h"
 #include "GameModes/CSLobbyGameMode.h"
+#include "Controller/CSPlayerController.h"
+#include "Characters/CSBaseCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -9,8 +10,10 @@ ACSPlayerState::ACSPlayerState()
 	bReplicates = true;
 
 	bIsReady = false;
+	bIsAlive = true;
 	TeamID = -1;
 	PlayerIndex = -1;
+	SelectedCharacterID = NAME_None;
 }
 
 void ACSPlayerState::BeginPlay()
@@ -32,37 +35,44 @@ void ACSPlayerState::SetIsReady(bool bNewReady)
 	}
 }
 
+void ACSPlayerState::ResetLobbySettings()
+{
+	bIsReady = false;
+	SelectedCharacterID = NAME_None;
+	bIsAlive = true;
+}
+
 void ACSPlayerState::OnRep_IsReady()
 {
 	// 클라이언트 UI 갱신(Ready 상태)
-	/*if (!ISLocalPlayerState()) return;
+	if (!ISLocalPlayerState()) return;
 	
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		CSPlayerController->UpdateReadyUI(bIsReady);
-	}*/
+		/*CSPlayerController->UpdateReadyUI(bIsReady);*/
+	}
 }
 
 void ACSPlayerState::OnRep_TeamID()
 {
 	// 클라이언트 UI 갱신(Team 이름 및 색상)
-	/*if (!ISLocalPlayerState()) return;
+	if (!ISLocalPlayerState()) return;
 	
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		CSPlayerController->UpdateTeamUI(TeamID);
-	}*/
+		/*CSPlayerController->UpdateTeamUI(TeamID);*/
+	}
 }
 
 void ACSPlayerState::OnRep_CharacterID()
 {
 	// 클라이언트 UI 갱신(Character Mesh 등)
-	/*if (!ISLocalPlayerState()) return;
+	if (!ISLocalPlayerState()) return;
 
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		CSPlayerController->UpdateCharacterUI(SelectedCharacterID);
-	}*/
+		/*CSPlayerController->UpdateCharacterUI(SelectedCharacterID);*/
+	}
 }
 
 void ACSPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -73,6 +83,7 @@ void ACSPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACSPlayerState, PlayerIndex);
 	DOREPLIFETIME(ACSPlayerState, TeamID);
 	DOREPLIFETIME(ACSPlayerState, SelectedCharacterID);
+	DOREPLIFETIME(ACSPlayerState, bIsAlive);
 }
 
 bool ACSPlayerState::ISLocalPlayerState() const

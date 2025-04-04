@@ -17,7 +17,6 @@ void ACSGameModeBase::BeginPlay()
 		MatchType = GI->MatchType;
 	}
 
-	InitMatchLogic();
 	SetMatchPhase(EMatchPhase::EMP_Waiting);
 }
 

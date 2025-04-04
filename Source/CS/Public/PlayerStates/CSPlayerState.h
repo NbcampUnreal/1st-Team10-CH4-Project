@@ -17,6 +17,8 @@ public:
 
     UFUNCTION(BlueprintCallable)
     void SetIsReady(bool bNewReady);
+    UFUNCTION(BlueprintCallable)
+    void ResetLobbySettings();
 
     UFUNCTION()
     void OnRep_IsReady();
@@ -31,8 +33,11 @@ public:
     int32 TeamID;
     UPROPERTY(ReplicatedUsing = OnRep_CharacterID)
     FName SelectedCharacterID;
+    
     UPROPERTY(Replicated)
     int32 PlayerIndex;
+    UPROPERTY(Replicated)
+    bool bIsAlive;
 
 protected:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
