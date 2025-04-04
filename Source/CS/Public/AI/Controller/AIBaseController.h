@@ -2,8 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "AIBaseController.generated.h"
 
 UCLASS()
@@ -11,15 +10,18 @@ class CS_API AAIBaseController : public AAIController
 {
     GENERATED_BODY()
 
-protected:
-    virtual void BeginPlay() override;
-
 public:
-    AAIBaseController();
+    explicit AAIBaseController(FObjectInitializer const& FObjectInitializer);
+    
+protected:
+    virtual void OnPossess(APawn* InPawn) override;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
-    UBehaviorTree* BehaviorTreeAsset;
+private:
+    class UAISenseConfig_Sight* SenseConfig;
+    
+    UFUNCTION()
+    void SetupPerceptionSystem();
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-    UBlackboardComponent* BlackboardComponent;
+    UFUNCTION()
+    void OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus);
 };
