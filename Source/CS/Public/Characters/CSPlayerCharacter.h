@@ -34,6 +34,7 @@ public:
 
  	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
  	void PlayHitReactMontage();
+	void PlayHitReactMontage_Implementation();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
