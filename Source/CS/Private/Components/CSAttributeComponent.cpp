@@ -3,6 +3,7 @@
 
 #include "Components/CSAttributeComponent.h"
 #include "Characters/CSPlayerCharacter.h"
+#include "Controller/CSPlayerController.h"
 #include "Net/UnrealNetwork.h"
 
 UCSAttributeComponent::UCSAttributeComponent()
@@ -21,7 +22,6 @@ void UCSAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCSAttributeComponent, Health);
 	DOREPLIFETIME(UCSAttributeComponent, MaxHealth);
-	DOREPLIFETIME(UCSAttributeComponent, FacingDirection);
 }
 
 bool UCSAttributeComponent::IsAlive()
@@ -34,39 +34,6 @@ float UCSAttributeComponent::GetHealthPercent()
 	return Health / MaxHealth;
 }
 
-void UCSAttributeComponent::ServerUpdateFacingDirection_Implementation(float XInput)
-{
-    UpdateFacingDirection(XInput);
-}
-
-void UCSAttributeComponent::UpdateFacingDirection(float XInput)
-{
-    if (GetOwner()->HasAuthority())
-    {
-        if (XInput > 0.f)
-        {
-            FacingDirection = EFacingDirection::EFD_FacingRight;
-        }
-        else if (XInput < 0.f)
-        {
-            FacingDirection = EFacingDirection::EFD_FacingLeft;
-        }
-    }
-    else
-    {
-        ServerUpdateFacingDirection(XInput);
-    }
-}
-
-void UCSAttributeComponent::ServerUpdateRotation_Implementation(FRotator NewRotation)
-{
-    ACSPlayerCharacter* PlayerCharacter = Cast<ACSPlayerCharacter>(GetOwner());
-    if (PlayerCharacter)
-    {
-        PlayerCharacter->SetActorRotation(NewRotation);
-    }
-}
-
 void UCSAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -75,28 +42,24 @@ void UCSAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 void UCSAttributeComponent::OnRep_Health()
 {
 	UE_LOG(LogTemp, Log, TEXT("Health Replicated: %f"), Health);
+
+	AActor* Owner = GetOwner();
+	if (Owner)
+	{
+		ACSPlayerCharacter* PlayerCharacter = Cast<ACSPlayerCharacter>(Owner);
+
+		if (PlayerCharacter)
+		{
+			ACSPlayerController* PlayerController = Cast<ACSPlayerController>(PlayerCharacter->GetController());
+			if (PlayerController)
+			{
+				PlayerController->HealthUpdate(Health, MaxHealth);
+			}
+		}
+	}
 }
 
 void UCSAttributeComponent::OnRep_MaxHealth()
 {
 	UE_LOG(LogTemp, Log, TEXT("MaxHealth Replicated: %f"), MaxHealth);
-}
-
-void UCSAttributeComponent::OnRep_FacingDirection()
-{
-    ACSPlayerCharacter* PlayerCharacter = Cast<ACSPlayerCharacter>(GetOwner());
-    if (PlayerCharacter)
-    {
-        float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
-        FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
-
-        if (GetOwner()->HasAuthority())
-        {
-            PlayerCharacter->SetActorRotation(NewRotation);
-        }
-        else
-        {
-            ServerUpdateRotation(NewRotation);
-        }
-    }
 }

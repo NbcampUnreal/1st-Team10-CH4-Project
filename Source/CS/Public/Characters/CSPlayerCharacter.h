@@ -91,11 +91,20 @@ protected:
 	void ComboCheck();
 
 private:
+	void UpdateFacingDirection(float XInput);
+	void UpdateRotation();
+
 	UPROPERTY(ReplicatedUsing = OnRep_ActionState)
 	ECharacterTypes ActionState = ECharacterTypes::ECT_Unoccupied; // 기본 상태
 
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	EFacingDirection FacingDirection = EFacingDirection::EFD_FacingRight; // 기본 방향
+	UPROPERTY(ReplicatedUsing = OnRep_FacingDirection)
+	EFacingDirection FacingDirection = EFacingDirection::EFD_FacingRight;
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetFacingDirection(EFacingDirection NewDirection);
+
+	UFUNCTION()
+	void OnRep_FacingDirection();
 
 	UFUNCTION()
 	void OnRep_ActionState();
