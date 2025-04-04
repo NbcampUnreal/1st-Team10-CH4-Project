@@ -110,6 +110,7 @@ void ACSPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ACSPlayerCharacter, ActionState);
+	DOREPLIFETIME(ACSPlayerCharacter, FacingDirection);
 }
 
 void ACSPlayerCharacter::Jump()
@@ -143,14 +144,7 @@ void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 	const FVector ForwardDirection = FVector(0.f, -1.f, 0.f); // Y축 방향
 	AddMovementInput(ForwardDirection, MovementVector.X);
 
-	if (AttributeComponent)
-	{
-		AttributeComponent->UpdateFacingDirection(MovementVector.X);
-		EFacingDirection Facing = AttributeComponent->GetFacingDirection();
-		float TargetYaw = (Facing == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
-		FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
-		SetActorRotation(NewRotation);
-	}
+	UpdateFacingDirection(MovementVector.X);
 }
 
 void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section)
@@ -237,4 +231,44 @@ void ACSPlayerCharacter::EndAttack()
 	}
 	ActionState = ECharacterTypes::ECT_Unoccupied;
 	OnRep_ActionState();
+}
+
+void ACSPlayerCharacter::UpdateFacingDirection(float XInput)
+{
+	EFacingDirection CurrentDirection = FacingDirection;
+
+	if (XInput > 0.f)
+	{
+		CurrentDirection = EFacingDirection::EFD_FacingRight;
+	}
+	else if (XInput < 0.f)
+	{
+		CurrentDirection = EFacingDirection::EFD_FacingLeft;
+	}
+
+	if (CurrentDirection != FacingDirection && IsLocallyControlled())
+	{
+		ServerSetFacingDirection(CurrentDirection);
+	}
+}
+
+void ACSPlayerCharacter::ServerSetFacingDirection_Implementation(EFacingDirection NewDirection)
+{
+	if (HasAuthority())
+	{
+		FacingDirection = NewDirection;
+		OnRep_FacingDirection();
+	}
+}
+
+void ACSPlayerCharacter::UpdateRotation()
+{
+	float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
+	FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
+	SetActorRotation(NewRotation);
+}
+
+void ACSPlayerCharacter::OnRep_FacingDirection()
+{
+	UpdateRotation();
 }
