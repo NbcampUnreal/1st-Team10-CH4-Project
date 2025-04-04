@@ -167,13 +167,16 @@ void ACSPlayerCharacter::StopMovement_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = 0.f;
 }
 
-void ACSPlayerCharacter::ServerSpawnProjectile_Implementation()
+void ACSPlayerCharacter::ServerSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer)
 {
+	MultiSpawnProjectile(SpawnPlayer);
 }
 
-void ACSPlayerCharacter::MultiSpawnProjectile_Implementation()
+void ACSPlayerCharacter::MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer)
 {
 	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = SpawnPlayer;
+	SpawnParams.Instigator = SpawnPlayer;
 
 	GetWorld()->SpawnActor<AActor>(
 		CastProjectile,

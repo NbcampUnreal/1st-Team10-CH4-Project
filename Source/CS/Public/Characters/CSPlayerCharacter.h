@@ -50,12 +50,12 @@ public:
 	void StopMovement_Implementation();
 
 	UFUNCTION(Server, Reliable)
-	void ServerSpawnProjectile();
-	void ServerSpawnProjectile_Implementation();
+	void ServerSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
+	void ServerSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MultiSpawnProjectile();
-	void MultiSpawnProjectile_Implementation();
+	void MultiSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
+	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
 
 	/*
 	* Callback function for input
