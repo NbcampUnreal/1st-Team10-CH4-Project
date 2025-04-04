@@ -49,6 +49,14 @@ public:
 	void StopMovement();
 	void StopMovement_Implementation();
 
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnProjectile();
+	void ServerSpawnProjectile_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSpawnProjectile();
+	void MultiSpawnProjectile_Implementation();
+
 	/*
 	* Callback function for input
 	*/
@@ -78,16 +86,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	class UCSAttributeComponent* AttributeComponent;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCSCombatComponent* CombatComponent;
 
-	int32 iCombo_1_Cnt;
-	int32 iCombo_2_Cnt;
-	bool bCanCombo;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
+	//TSubclassOf<class ACSProjectileBase> CastProjectile;
 
-	UFUNCTION(BlueprintCallable, Category = "Combo")
-	void ComboReset();
+	// Montage animation server connect function "DuringAttack" Check
 	UFUNCTION(BlueprintCallable, Category = "Combo")
 	void ComboCheck();
 

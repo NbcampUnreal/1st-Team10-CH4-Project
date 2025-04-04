@@ -6,6 +6,11 @@ UCSCombatComponent::UCSCombatComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
     SetIsReplicated(true);
+
+    // Reset Combo Data
+    iCombo_1_Cnt = 0;
+    iCombo_2_Cnt = 0;
+    bCanCombo = true;
 }
 
 void UCSCombatComponent::BeginPlay()
@@ -17,6 +22,43 @@ void UCSCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(UCSCombatComponent, bIsAttacking);
+}
+
+void UCSCombatComponent::Combo1CntIncrease()
+{
+    iCombo_1_Cnt++;
+}
+
+int32 UCSCombatComponent::GetCombo1Cnt()
+{
+    return iCombo_1_Cnt;
+}
+
+void UCSCombatComponent::Combo2CntIncrease()
+{
+    iCombo_2_Cnt++;
+}
+
+int32 UCSCombatComponent::GetCombo2Cnt()
+{
+    return iCombo_2_Cnt;
+}
+
+void UCSCombatComponent::CanComboChange(bool Check)
+{
+    bCanCombo = Check;
+}
+
+bool UCSCombatComponent::GetCanCombo()
+{
+    return bCanCombo;
+}
+
+void UCSCombatComponent::ResetComboData()
+{
+    iCombo_1_Cnt = 0;
+    iCombo_2_Cnt = 0;
+    bCanCombo = true;
 }
 
 void UCSCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

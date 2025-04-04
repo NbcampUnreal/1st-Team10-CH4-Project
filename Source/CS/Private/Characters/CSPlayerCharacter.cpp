@@ -39,11 +39,6 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
-
-	// Combo Data Reset
-	iCombo_1_Cnt = 0;
-	iCombo_2_Cnt = 0;
-	bCanCombo = true;
 }
 
 void ACSPlayerCharacter::BeginPlay()
@@ -60,16 +55,9 @@ void ACSPlayerCharacter::BeginPlay()
 	}
 }
 
-void ACSPlayerCharacter::ComboReset()
-{
-	iCombo_1_Cnt = 0;
-	iCombo_2_Cnt = 0;
-	bCanCombo = true;
-}
-
 void ACSPlayerCharacter::ComboCheck()
 {
-	bCanCombo = true;
+	CombatComponent->CanComboChange(true);
 	DuringAttack();
 }
 
@@ -90,7 +78,6 @@ void ACSPlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
 
 void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -153,7 +140,7 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 
 	if (AnimInstance && PlayMontage)
 	{
-		bCanCombo = false;
+		CombatComponent->CanComboChange(false);
 		AnimInstance->Montage_Play(PlayMontage);
 		FName SectionName;
 		SectionName = Section;
@@ -178,6 +165,26 @@ void ACSPlayerCharacter::StopMovement_Implementation()
 {
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->MaxWalkSpeed = 0.f;
+}
+
+void ACSPlayerCharacter::ServerSpawnProjectile_Implementation()
+{
+}
+
+void ACSPlayerCharacter::MultiSpawnProjectile_Implementation()
+{
+	/*
+	if (CastProjectile)
+	{
+		FActorSpawnParameters SpawnParams;
+
+		GetWorld()->SpawnActor<AActor>(
+			CastProjectile,
+			GetActorLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+	}*/
 }
 
 void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
@@ -216,10 +223,12 @@ void ACSPlayerCharacter::DuringAttack()
 
 void ACSPlayerCharacter::EndAttack()
 {
-	ComboReset();
+	//ComboReset();
 
 	if (CombatComponent)
 	{
+		CombatComponent->ResetComboData();
+
 		if (HasAuthority())
 		{
 			CombatComponent->SetIsAttacking(false);

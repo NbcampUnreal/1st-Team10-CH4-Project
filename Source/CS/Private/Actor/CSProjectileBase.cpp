@@ -31,20 +31,9 @@ void ACSProjectileBase::BeginPlay()
 void ACSProjectileBase::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Damage Event
+	AActor* SpawnActor = GetOwner();
 
 	ServerDestroyProjectile();
-}
-
-void ACSProjectileBase::ServerSpawnProjectile_Implementation(ACSPlayerCharacter* Player)
-{
-	MultiSpawnProjectile(Player);
-}
-
-void ACSProjectileBase::MultiSpawnProjectile_Implementation(ACSPlayerCharacter* Player)
-{
-	SpawnPlayer = Player;
-
-	// Actor Spawn
 }
 
 void ACSProjectileBase::ServerDestroyProjectile_Implementation()

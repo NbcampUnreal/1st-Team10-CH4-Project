@@ -39,11 +39,26 @@ public:
 
     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+    // Combo Function
+    void Combo1CntIncrease();
+    int32 GetCombo1Cnt();
+    void Combo2CntIncrease();
+    int32 GetCombo2Cnt();
+    void CanComboChange(bool Check);
+    bool GetCanCombo();
+    UFUNCTION(BlueprintCallable, Category = "Combo")
+    void ResetComboData();
+
 protected:
     virtual void BeginPlay() override;
 
     UAnimMontage* ServerPlayMontage;
     FName ServerSection;
+
+    // Combo Data
+    int32 iCombo_1_Cnt;
+    int32 iCombo_2_Cnt;
+    bool bCanCombo;
 
 private:
     UPROPERTY(ReplicatedUsing = OnRep_IsAttacking)

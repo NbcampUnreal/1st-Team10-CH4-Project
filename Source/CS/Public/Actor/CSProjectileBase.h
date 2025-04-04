@@ -40,13 +40,4 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiDestoryProjectile();
 	void MultiDestoryProjectile_Implementation();
-
-	UFUNCTION(Server, Reliable)
-	void ServerSpawnProjectile(ACSPlayerCharacter* Player);
-	void ServerSpawnProjectile_Implementation(ACSPlayerCharacter* Player);
-	UFUNCTION(NetMulticast, Reliable)
-	void MultiSpawnProjectile(ACSPlayerCharacter* Player);
-	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* Player);
-
-	ACSPlayerCharacter* SpawnPlayer;
 };
