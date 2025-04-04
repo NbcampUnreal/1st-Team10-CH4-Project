@@ -4,7 +4,6 @@
 
 ACSSingleLobbyGameState::ACSSingleLobbyGameState()
 {
-	// 생성자에서 초기화할 내용이 있다면 추가.
 }
 
 

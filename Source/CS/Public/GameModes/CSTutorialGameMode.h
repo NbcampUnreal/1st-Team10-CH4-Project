@@ -4,9 +4,13 @@
 #include "GameModes/CSGameModeBase.h"
 #include "CSTutorialGameMode.generated.h"
 
+class APawn;
+class AController;
+class APlayerController;
+
 /**
- * 튜토리얼 레벨을 위한 게임 모드
- * 실제 전투/게임플레이 로직이 시작
+ * 튜토리얼 레벨을 위한 게임 모드.
+ * 플레이어는 이 모드에서 죽지 않으며, 특정 구역 도달 시 다음 스테이지로 이동함.
  */
 UCLASS()
 class CS_API ACSTutorialGameMode : public ACSGameModeBase
@@ -18,22 +22,28 @@ public:
 
 	virtual void HandleMatchIsWaitingToStart() override;
 
-	/** 특정 플레이어에 대해 어떤 Pawn 클래스를 스폰할지 결정합니다. */
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	// 튜토리얼 목표 달성, 종료 등 관련 함수 추가 가능
-	// UFUNCTION(...)
-	// void CompleteTutorialObjective(APlayerController* Player, FName ObjectiveID);
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+	virtual void RestartPlayer(AController* NewPlayer) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Game Flow")
+	void PlayerEnteredStageTransitionZone(APlayerController* Player);
 
 protected:
 	virtual void InitSinglePlayLogic() override;
 
-	virtual void PostLogin(APlayerController* NewPlayer) override;
+	// PostLogin은 특별히 변경할 내용 없으면 부모 클래스 것 사용.
 
-	virtual void RestartPlayer(AController* NewPlayer) override;
-
-	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
-
+	/** 캐릭터 선택 정보를 가져오지 못했을 경우 사용할 기본 Pawn 클래스. */
 	UPROPERTY(EditDefaultsOnly, Category = "Defaults")
 	TSubclassOf<APawn> FallbackDefaultPawnClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Game Flow")
+	FName StageLevelName = FName("Stage1Level");
+
+private:
+	/** 플레이어 Pawn을 무적으로 설정하는 내부 함수. */
+	void MakePlayerInvulnerable(AController* PlayerController);
 };
