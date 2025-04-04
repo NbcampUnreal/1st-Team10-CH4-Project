@@ -13,6 +13,8 @@
 #include "Components/CSAttributeComponent.h"
 #include "Components/CSCombatComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 ACSPlayerCharacter::ACSPlayerCharacter()
 {
@@ -279,4 +281,14 @@ void ACSPlayerCharacter::UpdateRotation()
 void ACSPlayerCharacter::OnRep_FacingDirection()
 {
 	UpdateRotation();
+}
+
+void ACSPlayerCharacter::SetupStimulusSource()
+{
+	StimulusSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("Stimulus"));
+	if (StimulusSource)
+	{
+		StimulusSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
+		StimulusSource->RegisterWithPerceptionSystem();
+	}
 }
