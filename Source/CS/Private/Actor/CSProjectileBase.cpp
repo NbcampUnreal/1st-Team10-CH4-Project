@@ -35,6 +35,18 @@ void ACSProjectileBase::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	ServerDestroyProjectile();
 }
 
+void ACSProjectileBase::ServerSpawnProjectile_Implementation(ACSPlayerCharacter* Player)
+{
+	MultiSpawnProjectile(Player);
+}
+
+void ACSProjectileBase::MultiSpawnProjectile_Implementation(ACSPlayerCharacter* Player)
+{
+	SpawnPlayer = Player;
+
+	// Actor Spawn
+}
+
 void ACSProjectileBase::ServerDestroyProjectile_Implementation()
 {
 	GetWorld()->GetTimerManager().ClearTimer(DestroyProjectile);

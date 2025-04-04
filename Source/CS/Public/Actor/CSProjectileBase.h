@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/CSPlayerCharacter.h"
 #include "GameFramework/Actor.h"
 #include "CSProjectileBase.generated.h"
 
@@ -20,13 +21,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	USceneComponent* SceneComp;
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	USphereComponent* SphereComp;
-
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Porjectile|Control")
 	float speed;
@@ -36,7 +36,17 @@ protected:
 public:	
 	UFUNCTION(Server, Reliable)
 	void ServerDestroyProjectile();
-
+	void ServerDestroyProjectile_Implementation();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiDestoryProjectile();
+	void MultiDestoryProjectile_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnProjectile(ACSPlayerCharacter* Player);
+	void ServerSpawnProjectile_Implementation(ACSPlayerCharacter* Player);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSpawnProjectile(ACSPlayerCharacter* Player);
+	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* Player);
+
+	ACSPlayerCharacter* SpawnPlayer;
 };
