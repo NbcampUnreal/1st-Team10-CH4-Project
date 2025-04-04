@@ -90,8 +90,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCSCombatComponent* CombatComponent;
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile")
-	//TSubclassOf<class ACSProjectileBase> CastProjectile;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TSubclassOf<AActor> CastProjectile;
 
 	// Montage animation server connect function "DuringAttack" Check
 	UFUNCTION(BlueprintCallable, Category = "Combo")

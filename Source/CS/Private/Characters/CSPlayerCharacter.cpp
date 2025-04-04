@@ -173,18 +173,14 @@ void ACSPlayerCharacter::ServerSpawnProjectile_Implementation()
 
 void ACSPlayerCharacter::MultiSpawnProjectile_Implementation()
 {
-	/*
-	if (CastProjectile)
-	{
-		FActorSpawnParameters SpawnParams;
+	FActorSpawnParameters SpawnParams;
 
-		GetWorld()->SpawnActor<AActor>(
-			CastProjectile,
-			GetActorLocation(),
-			GetActorRotation(),
-			SpawnParams
-		);
-	}*/
+	GetWorld()->SpawnActor<AActor>(
+		CastProjectile,
+		GetActorLocation(),
+		GetActorRotation(),
+		SpawnParams
+	);
 }
 
 void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)

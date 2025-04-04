@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Characters/CSPlayerCharacter.h"
 #include "GameFramework/Actor.h"
 #include "CSProjectileBase.generated.h"
 
