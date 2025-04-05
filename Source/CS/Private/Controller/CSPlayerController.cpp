@@ -2,14 +2,202 @@
 
 
 #include "Controller/CSPlayerController.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameModes/CSLobbyGameMode.h"
+#include "PlayerStates/CSPlayerState.h"
+#include "GameStates/CSLobbyGameState.h"
+#include "GameInstance/CSGameInstance.h"
+#include "GameStates/CSGameStateBase.h"
+
+
+ACSPlayerController::ACSPlayerController()
+{
+}
 
 void ACSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	if (IsLocalController())
+	{
+		if (PlayerHUDWidgetClass)
+		{
+			PlayerHUDInstance = CreateWidget<UUserWidget>(this, PlayerHUDWidgetClass);
+			if (PlayerHUDInstance)
+			{
+				PlayerHUDInstance->AddToViewport();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("PlayerHUDWidgetClass is nullptr"));
+			}
+		}
+	}
 }
 
-ACSPlayerController::ACSPlayerController()
+void ACSPlayerController::Client_ShowLobbyUI_Implementation()
 {
+	if (IsLocalController())
+	{
+		if (LobbyWidgetInstance != nullptr && LobbyWidgetInstance->IsInViewport()) return;
+		LobbyWidgetInstance = CreateWidget<UUserWidget>(this, LobbyWidgetClass);
+
+		if (LobbyWidgetInstance != nullptr)
+		{
+			LobbyWidgetInstance->AddToViewport();
+
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetWidgetToFocus(LobbyWidgetInstance->TakeWidget());
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputModeData);
+			bShowMouseCursor = true;
+		}
+	}
+}
+
+bool ACSPlayerController::Server_RequestTeamChange_Validate()
+{
+	// Additional validation can be here if needed
+
+	return true;
+}
+
+void ACSPlayerController::Server_RequestTeamChange_Implementation()
+{
+	ACSLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSLobbyGameMode>();
+
+	if (LobbyGameMode)
+	{
+		LobbyGameMode->ChangeTeam(this);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Request Team() is not valid"));
+	}
+}
+
+bool ACSPlayerController::Server_SelectCharacter_Validate(FName CharacterID)
+{
+	return true;
+}
+
+void ACSPlayerController::Server_SelectCharacter_Implementation(FName CharacterID)
+{
+	ACSLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSLobbyGameMode>();
+
+	if (LobbyGameMode)
+	{
+		LobbyGameMode->SetPlayerSelection(this, CharacterID);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SelectCharacter is not valid"));
+	}
+}
+
+bool ACSPlayerController::Server_RequestReady_Validate(bool bReady)
+{
+	return true;
+}
+
+void ACSPlayerController::Server_RequestReady_Implementation(bool bReady)
+{
+	ACSPlayerState* CurrentPlayerState = GetPlayerState<ACSPlayerState>();
+
+	if (CurrentPlayerState)
+	{
+		CurrentPlayerState->SetIsReady(bReady);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Request Ready() is not valid"));
+	}
+}
+
+bool ACSPlayerController::Server_SelectMap_Validate(FName Map)
+{
+	return true;
+}
+
+void ACSPlayerController::Server_SelectMap_Implementation(FName Map)
+{
+	if (HasAuthority())
+	{
+		ACSLobbyGameState* LobbyGameState = GetWorld()->GetGameState<ACSLobbyGameState>();
+		
+		if (LobbyGameState)
+		{
+			LobbyGameState->SelectedMap = Map;
+			LobbyGameState->OnRep_SelectedMap();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SelectMap() is not valid"));
+	}
+}
+
+void ACSPlayerController::Client_OnSuddenDeath_Implementation()
+{
+	if (IsLocalController())
+	{
+		if (PlayerHUDInstance)
+		{
+			// PlayerHUDInstance->OnSuddenDeath();
+		}
+	}
+}
+
+void ACSPlayerController::UpdateReadyUI(bool bReady)
+{
+	if (IsLocalController() && LobbyWidgetInstance)
+	{
+		// LobbyWidgetInstance->UpdateReadyUI(bReady);
+	}
+}
+
+void ACSPlayerController::UpdateTeamUI(int32 TeamID)
+{
+	if (IsLocalController() && LobbyWidgetInstance)
+	{
+		// LobbyWidgetInstance->SetTeamState(TeamID);
+	}
+
+}
+
+void ACSPlayerController::UpdateCharacterUI(FName SelectedCharacterID)
+{
+	if (IsLocalController() && LobbyWidgetInstance)
+	{
+		// LobbyWidgetInstance->SetCharacterState(SelectedCharacterID);
+	}
+}
+
+void ACSPlayerController::UpdateSelectedMapUI(FName SelectedMap)
+{
+	if (IsLocalController() && LobbyWidgetInstance)
+	{
+		// LobbyWidgetInstance->SetMapState(SelectedMap);
+	}
+}
+
+void ACSPlayerController::UpdateMatchTimeUI(int32 Time)
+{
+	if (IsLocalController() && PlayerHUDInstance)
+	{
+		// PlayerHUDInstance->UpdateMatchTimeUI(Time);
+	}
+}
+
+void ACSPlayerController::OnMatchPhaseChanged(EMatchPhase MatchPhase)
+{
+	/*
+	EMatchPhase는 CSTypes / CSGameTypes.h에 정의
+	EMP_Playing에 "GameStart!" 메시지 업데이트하거나 EMP_Finished에 전투 승리 UI 업데이트
+	싱글, 대전, 협동 매치 타입에 따라 UI가 다를 것이기에 함수 내부에서 GameInstance의 MatchType 에 따른 분기도 나눠야될 것 같습니다.
+	GameInstance - MatchType 확인
+	GameStateBase - MatchPhase, MatchResult(Versus의 경우 VersusGameState의 WinningTeamID로 확인) 확인
+	*/
 }
 
 void ACSPlayerController::SetPlayerRole(int PlayerRole)
@@ -19,7 +207,7 @@ void ACSPlayerController::SetPlayerRole(int PlayerRole)
 
 void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
 {
-	// TODO:HUD 유효성 체크
+	// TODO :HUD validation check
 	if (IsLocalController())
 	{	
 		//TODO : PlayerHUD->UpdateHealth(Health, MaxHealth);

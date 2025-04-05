@@ -25,6 +25,9 @@ protected:
 	virtual bool CanAttack();
 	bool IsAlive();
 
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	virtual void ActivateSuddenDeath();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCSAttributeComponent* Attributes;
 

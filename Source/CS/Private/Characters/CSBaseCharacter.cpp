@@ -2,6 +2,8 @@
 
 
 #include "Characters/CSBaseCharacter.h"
+#include "GameModes/CSGameModeBase.h"
+#include "Components/CSAttributeComponent.h"
 
 ACSBaseCharacter::ACSBaseCharacter()
 {
@@ -20,14 +22,37 @@ void ACSBaseCharacter::Attack()
 
 void ACSBaseCharacter::Die()
 {
-}
+    if (HasAuthority())
+    {
+        AGameModeBase* GM = GetWorld()->GetAuthGameMode();
+        ACSGameModeBase* CurrentGameMode = Cast<ACSGameModeBase>(GM);
 
-bool ACSBaseCharacter::CanAttack()
-{
-	return false;
+        AController* PlayerController = GetController();
+
+        if (CurrentGameMode && PlayerController)
+        {
+            CurrentGameMode->HandlePlayerDeath(PlayerController);
+        }
+        
+        // Debug lines
+        // 
+        //if (!CurrentGameMode) UE_LOG(LogTemp, Error, TEXT("Die(): No Current GameMode!"));
+        //if (!PlayerController) UE_LOG(LogTemp, Error, TEXT("Die(): Character has no Controller!"));
+        
+    }
 }
 
 bool ACSBaseCharacter::IsAlive()
+{
+    return Attributes && Attributes->IsAlive();
+}
+
+void ACSBaseCharacter::ActivateSuddenDeath()
+{
+	// TODO: Damage Increase
+}
+
+bool ACSBaseCharacter::CanAttack()
 {
 	return false;
 }
