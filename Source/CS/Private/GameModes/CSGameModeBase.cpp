@@ -1,53 +1,70 @@
 #include "GameModes/CSGameModeBase.h"
 #include "GameStates/CSGameStateBase.h"
 #include "GameInstance/CSGameInstance.h"
+#include "PlayerStates/CSPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSGameModeBase::ACSGameModeBase()
 {
-	GameStateClass = ACSGameStateBase::StaticClass();
+	CSGameInstance = nullptr;
+	BaseGameState = nullptr;
+
+	MatchType = EMatchType::EMT_None;
+	MatchPhase = EMatchPhase::EMP_None;
+
+	LoggedInPlayerCount = 0;
+	ExpectedPlayerCount = 0;
 }
 
 void ACSGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
-	{
-		MatchType = GI->MatchType;
-	}
+	CSGameInstance = GetGameInstance<UCSGameInstance>();
+	BaseGameState = GetGameState<ACSGameStateBase>();
 
-	SetMatchPhase(EMatchPhase::EMP_Waiting);
+	if (CSGameInstance)
+	{
+		MatchType = CSGameInstance->MatchType;
+		ExpectedPlayerCount = CSGameInstance->ExpectedPlayerCount;
+	}
 }
 
 void ACSGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+
+	LoggedInPlayerCount++;
+
+	if (LoggedInPlayerCount == ExpectedPlayerCount)
+	{
+		InitGameLogic();
+	}
 }
 
 void ACSGameModeBase::HandleStartGame()
 {
 	SetMatchPhase(EMatchPhase::EMP_Playing);
+	SetAllPlayerInputEnabled(true);
 }
 
 void ACSGameModeBase::HandleEndGame()
 {
 	SetMatchPhase(EMatchPhase::EMP_Finished);
+	SetAllPlayerInputEnabled(false);
 }
 
-void ACSGameModeBase::InitMatchLogic()
+void ACSGameModeBase::SetAllPlayerInputEnabled(bool bEnabled)
 {
-	switch (MatchType)
+	for (APlayerState* PlayerState : BaseGameState->PlayerArray)
 	{
-	case EMatchType::EMT_Single:
-		InitSinglePlayLogic();
-		break;
-	case EMatchType::EMT_Coop:
-		InitCoopLogic();
-		break;
-	case EMatchType::EMT_Versus:
-		InitVersusLogic();
-		break;
+		if (APlayerController* PlayerController = Cast<APlayerController>(PlayerState->GetOwner()))
+		{
+			if (APawn* Pawn = PlayerController->GetPawn())
+			{
+				bEnabled ? Pawn->EnableInput(PlayerController) : Pawn->DisableInput(PlayerController);
+			}
+		}
 	}
 }
 
@@ -55,8 +72,8 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
 	MatchPhase = NewPhase;
 
-	if (ACSGameStateBase* GS = GetGameState<ACSGameStateBase>())
+	if (BaseGameState)
 	{
-		GS->MatchPhase = NewPhase;
+		BaseGameState->MatchPhase = NewPhase;
 	}
 }

@@ -14,7 +14,7 @@ void ACSGameStateBase::OnRep_MatchPhase()
 {
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(this, 0)))
 	{
-		/*CSPlayerController->OnMatchPhaseChanged(MatchPhase);*/
+		/*CSPlayerController->OnMatchPhaseChanged();*/
 	}
 }
 

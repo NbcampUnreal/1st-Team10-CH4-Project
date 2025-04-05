@@ -22,23 +22,39 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
-	virtual void HandleStartGame();
-	virtual void HandleEndGame();
-	virtual void HandlePlayerDeath(AController* DeadPlayer) {}
+	/** 매치 상태를 갱신하고 GameState에 전달 */
+	void SetMatchPhase(EMatchPhase NewPhase);
 
 protected:
+	/** 각 모드별 초기화 로직 */
+	virtual void InitGameLogic() PURE_VIRTUAL(ACSGameModeBase::InitGameLogic, );
+
+	/** 게임 시작 처리 (MatchPhase 전환 + 인풋 허용 등) */
+	virtual void HandleStartGame();
+
+	/** 게임 종료 처리 (MatchPhase 전환) */
+	virtual void HandleEndGame();
+
+	/** 플레이어 사망 처리 (각 MatchType별 정의 필요) */
+	virtual void HandlePlayerDeath(AController* DeadPlayer)  PURE_VIRTUAL(ACSGameModeBase::HandlePlayerDeath, );
+
+	/** 모든 플레이어 인풋 허용 설정 */
+	void SetAllPlayerInputEnabled(bool bEnabled);
+
 	UPROPERTY(BlueprintReadOnly)
 	EMatchType MatchType;
 
 	UPROPERTY(BlueprintReadOnly)
 	EMatchPhase MatchPhase;
 
-	virtual void InitMatchLogic();
+	UPROPERTY(BlueprintReadOnly)
+	int32 LoggedInPlayerCount;
 
-	virtual void InitSinglePlayLogic() {}
-	virtual void InitVersusLogic() {}
-	virtual void InitCoopLogic() {}
+	UPROPERTY(BlueprintReadOnly)
+	int32 ExpectedPlayerCount;
 
-	void SetMatchPhase(EMatchPhase NewPhase);
-	
+	UPROPERTY()
+	class UCSGameInstance* CSGameInstance;
+	UPROPERTY()
+	class ACSGameStateBase* BaseGameState;
 };

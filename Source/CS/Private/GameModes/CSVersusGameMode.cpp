@@ -9,16 +9,13 @@
 
 ACSVersusGameMode::ACSVersusGameMode()
 {
-    PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	MatchTimerHandle.Invalidate();
 	ReturnToLobbyHandle.Invalidate();
 
     MatchTimeLimit = 90.0f;
-
 	AlivePlayersPerTeam = { 0,0 };
-	LoggedInPlayerCount = 0;
-	ExpectedPlayerCount = 0;
 
     GameStateClass = ACSVersusGameState::StaticClass();
 }
@@ -27,40 +24,25 @@ void ACSVersusGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-	CSGameInstance = GetGameInstance<UCSGameInstance>();
-	CSGameState = GetGameState<ACSVersusGameState>();
-
-	if (CSGameInstance)
-	{
-		ExpectedPlayerCount = CSGameInstance->ExpectedPlayerCount;
-	}
+	VersusGameState = GetGameState<ACSVersusGameState>();
 }
 
 void ACSVersusGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 	
-	LoggedInPlayerCount++;
-
-	if (LoggedInPlayerCount == ExpectedPlayerCount)
-	{
-		InitVersusLogic();
-	}
 }
 
-void ACSVersusGameMode::Tick(float DeltaSeconds)
+void ACSVersusGameMode::InitGameLogic()
 {
-    Super::Tick(DeltaSeconds);
-
-}
-
-void ACSVersusGameMode::InitVersusLogic()
-{
-	int32 AlivePlayers = LoggedInPlayerCount / 2;
+	const int32 AlivePlayers = LoggedInPlayerCount / 2;
 	AlivePlayersPerTeam = { AlivePlayers,AlivePlayers };
 
-	CSGameState->bIsSuddenDeath = false;
-
+	if (VersusGameState)
+	{
+		VersusGameState->bIsSuddenDeath = false;
+	}
+	
     SpawnPlayerAtTeamSlots();
 	HandleStartGame();
 }
@@ -68,20 +50,6 @@ void ACSVersusGameMode::InitVersusLogic()
 void ACSVersusGameMode::HandleStartGame()
 {
 	Super::HandleStartGame();
-
-	for (APlayerState* PlayerState : GameState->PlayerArray)
-	{
-		ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState);
-		if (!CSPlayerState) return;
-
-		APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner());
-		if (!PlayerController) return;
-
-		APawn* Pawn = PlayerController->GetPawn();
-		if (!Pawn) return;
-
-		Pawn->EnableInput(PlayerController);
-	}
 
 	StartMatchTimeCountDown();
 }
@@ -100,20 +68,18 @@ void ACSVersusGameMode::SpawnPlayerAtTeamSlots()
 		}
 	}
 
-	TMap<int32, int32> TeamSlotIndex;
-	TeamSlotIndex.Add(0, 0); // Team 0 -> Slot0
-	TeamSlotIndex.Add(1, 0); // Team 1 -> Slot0
+	TMap<int32, int32> TeamSlotIndex{ {0, 0}, {1, 0} };
 
 	if (!CSGameInstance || !CSGameInstance->CharacterData) return;
 
-	for (APlayerState* PlayerState : GameState->PlayerArray)
+	for (APlayerState* PlayerState : VersusGameState->PlayerArray)
 	{
 		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
 		{
-			int32 TeamID = CSPlayerState->TeamID;
-			int32 SlotIndex = TeamSlotIndex[TeamID];
+			const int32 TeamID = CSPlayerState->TeamID;
+			const int32 SlotIndex = TeamSlotIndex[TeamID];
 
-			ESpawnSlotType SlotType = (TeamID == 0)
+			const ESpawnSlotType SlotType = (TeamID == 0)
 				? (SlotIndex == 0 ? ESpawnSlotType::Versus_Team0_Slot0 : ESpawnSlotType::Versus_Team0_Slot1)
 				: (SlotIndex == 0 ? ESpawnSlotType::Versus_Team1_Slot0 : ESpawnSlotType::Versus_Team1_Slot1);
 
@@ -121,16 +87,15 @@ void ACSVersusGameMode::SpawnPlayerAtTeamSlots()
 			{
 				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 				{
-					FString Context = TEXT("Spawning Character");
-					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, Context);
-
+					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, TEXT("Spawn"));
 					if (!Row || !Row->CharacterClass.IsValid()) continue;
+
 					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
 					
 					FVector SpawnLocation = SpawnPoint->GetActorLocation();
 					FRotator SpawnRotation = SpawnPoint->GetActorRotation();
-
 					APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnLocation, SpawnRotation);
+
 					if (SpawnedPawn)
 					{
 						PlayerController->Possess(SpawnedPawn);
@@ -146,9 +111,9 @@ void ACSVersusGameMode::SpawnPlayerAtTeamSlots()
 
 void ACSVersusGameMode::StartMatchTimeCountDown()
 {
-	if (CSGameState)
+	if (VersusGameState)
 	{
-		CSGameState->RemainingMatchTime = MatchTimeLimit;
+		VersusGameState->RemainingMatchTime = MatchTimeLimit;
 	}
 
 	GetWorldTimerManager().SetTimer(MatchTimerHandle, this, &ACSVersusGameMode::UpdateMatchTime, 1.0f, true);
@@ -156,13 +121,14 @@ void ACSVersusGameMode::StartMatchTimeCountDown()
 
 void ACSVersusGameMode::UpdateMatchTime()
 {
-	if (CSGameState)
+	if (VersusGameState)
 	{
-		CSGameState->RemainingMatchTime--;
+		VersusGameState->RemainingMatchTime--;
 
-		if (CSGameState->RemainingMatchTime <= 0)
+		if (VersusGameState->RemainingMatchTime <= 0)
 		{
 			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
+
 			TriggerSuddenDeath();
 		}
 	}
@@ -172,13 +138,10 @@ void ACSVersusGameMode::HandlePlayerDeath(AController* DeadPlayer)
 {
 	if (ACSPlayerState* CSPlayerState = DeadPlayer ? DeadPlayer->GetPlayerState<ACSPlayerState>() : nullptr)
 	{
-		// 1. 죽은 표시
 		CSPlayerState->bIsAlive = false;
 
-		// 2. 팀 생존자 수 갱신
 		UpdateAliveTeams(CSPlayerState);
 
-		// 3. 승리 조건 판별
 		CheckWinCondition();
 	}
 }
@@ -205,7 +168,9 @@ void ACSVersusGameMode::CheckWinCondition()
 
 void ACSVersusGameMode::TriggerSuddenDeath()
 {
-	CSGameState->bIsSuddenDeath = true;
+	if (!VersusGameState) return;
+
+	VersusGameState->bIsSuddenDeath = true;
 
 	for (APlayerState* PlayerState : GameState->PlayerArray)
 	{
@@ -229,6 +194,23 @@ void ACSVersusGameMode::TriggerSuddenDeath()
 
 void ACSVersusGameMode::FinishMatch(int32 WinningTeamID)
 {
+	if (VersusGameState)
+	{
+		VersusGameState->WinningTeamID = WinningTeamID;
+		VersusGameState->WinningPlayers.Empty();
+
+		for (APlayerState* PlayerState : VersusGameState->PlayerArray)
+		{
+			if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+			{
+				if (CSPlayerState->TeamID == WinningTeamID)
+				{
+					VersusGameState->WinningPlayers.Add(CSPlayerState);
+				}
+			}
+		}
+	}
+
 	HandleEndGame();
 
 	// 승리 연출 구현 필요(카메라 전환, 승리 팀 캐릭터 배치 등)
@@ -239,12 +221,17 @@ void ACSVersusGameMode::FinishMatch(int32 WinningTeamID)
 
 void ACSVersusGameMode::ReturnToLobby()
 {
+	if (GetWorld()->GetTimerManager().IsTimerActive(ReturnToLobbyHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ReturnToLobbyHandle);
+	}
+
 	if (CSGameInstance)
 	{
 		CSGameInstance->ResetLobbySettings();
 	}
 
-	for (APlayerState* PlayerState : CSGameState->PlayerArray)
+	for (APlayerState* PlayerState : VersusGameState->PlayerArray)
 	{
 		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
 		{

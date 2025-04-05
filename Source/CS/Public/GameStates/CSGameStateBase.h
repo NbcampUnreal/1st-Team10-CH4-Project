@@ -22,6 +22,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_OnSuddenDeath, BlueprintReadOnly)
 	bool bIsSuddenDeath;
 
+	UPROPERTY(Replicated)
+	EMatchResult MatchResult;
+
 	UFUNCTION()
 	void OnRep_MatchPhase();
 	UFUNCTION()

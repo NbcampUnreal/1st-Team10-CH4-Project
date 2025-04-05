@@ -15,10 +15,18 @@ enum class EMatchType : uint8
 UENUM(BlueprintType)
 enum class EMatchPhase : uint8
 {
-	EMP_None UMETA(DisplayName = "None"),
+    EMP_None       UMETA(DisplayName = "None"),
 	EMP_Waiting    UMETA(DisplayName = "Waiting"),
 	EMP_Playing    UMETA(DisplayName = "Playing"),
 	EMP_Finished   UMETA(DisplayName = "Finished")
+};
+
+UENUM(BlueprintType)
+enum class EMatchResult : uint8
+{
+    EMR_None UMETA(DisplayName = "None"),
+    EMR_Win UMETA(DisplayName = "Win"),
+    EMR_Lose UMETA(DisplayName = "Lose")
 };
 
 UENUM(BlueprintType)
