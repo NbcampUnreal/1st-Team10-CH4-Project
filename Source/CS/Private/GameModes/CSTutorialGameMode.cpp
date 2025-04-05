@@ -19,9 +19,8 @@ ACSTutorialGameMode::ACSTutorialGameMode()
 		// Fallback 설정 등...
 }
 
-void ACSTutorialGameMode::InitSinglePlayLogic()
+void ACSTutorialGameMode::InitGameLogic() // GameModeBase 리펙토링으로 인한 함수 이름 수정
 {
-	Super::InitSinglePlayLogic();
 	UE_LOG(LogTemp, Log, TEXT("[TutorialGM] 튜토리얼 모드 로직 초기화중."));
 
 	 // 주석 유지: ACSTutorialGameState에 실제 튜토리얼 목표 설정/관리 함수가 구현되어야 호출 가능함.

@@ -32,7 +32,7 @@ public:
 	void PlayerEnteredStageTransitionZone(APlayerController* Player);
 
 protected:
-	virtual void InitSinglePlayLogic() override;
+	virtual void InitGameLogic() override; // GameModeBase 리펙토링으로 인한 함수 이름 수정
 
 	// PostLogin은 특별히 변경할 내용 없으면 부모 클래스 것 사용.
 
