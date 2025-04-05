@@ -26,9 +26,8 @@ protected:
 	USceneComponent* SceneComp;
 	UPROPERTY(VisibleAnywhere, Category = "Projectile")
 	USphereComponent* SphereComp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Porjectile|Control")
-	float speed;
+	UPROPERTY(EditAnywhere)
+	class UProjectileMovementComponent* ProjectileComp;
 
 	FTimerHandle DestroyProjectile;
 

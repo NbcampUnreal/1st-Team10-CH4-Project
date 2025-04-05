@@ -3,6 +3,7 @@
 
 #include "Actor/CSProjectileBase.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
 ACSProjectileBase::ACSProjectileBase()
@@ -16,6 +17,11 @@ ACSProjectileBase::ACSProjectileBase()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphrerComponent"));
 	SphereComp->SetupAttachment(RootComponent);
 	SphereComp->OnComponentHit.AddDynamic(this, &ACSProjectileBase::OnHit);
+
+	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
+	ProjectileComp->InitialSpeed = 800;
+	ProjectileComp->MaxSpeed = 800;
+	ProjectileComp->ProjectileGravityScale = 0;
 }
 
 // Called when the game starts or when spawned
