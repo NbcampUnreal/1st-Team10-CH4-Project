@@ -4,6 +4,15 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
+void ACSLobbyGameState::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (HasAuthority())
+    {
+        SelectedMap = FName("Map_Default");
+    }
+}
 void ACSLobbyGameState::OnRep_SelectedMap()
 {
     // 맵 바뀔 때 클라에 UI 갱신
@@ -29,16 +38,6 @@ bool ACSLobbyGameState::AreAllPlayerReady() const
         }
     }
     return true;
-}
-
-void ACSLobbyGameState::BeginPlay()
-{
-    Super::BeginPlay();
-
-    if (HasAuthority())
-    {
-        SelectedMap = FName("Map_Default");
-    }
 }
 
 void ACSLobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

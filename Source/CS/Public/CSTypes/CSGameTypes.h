@@ -6,10 +6,10 @@
 UENUM(BlueprintType)
 enum class EMatchType : uint8
 {
-	EMT_None UMETA(DisplayName = "None"),
+	EMT_None   UMETA(DisplayName = "None"),
 	EMT_Single UMETA(DisplayName = "SinglePlay"),
 	EMT_Versus UMETA(DisplayName = "Versus"),
-	EMT_Coop UMETA(DisplayName = "Coop")
+	EMT_Coop   UMETA(DisplayName = "Coop")
 };
 
 UENUM(BlueprintType)
@@ -24,9 +24,9 @@ enum class EMatchPhase : uint8
 UENUM(BlueprintType)
 enum class EMatchResult : uint8
 {
-    EMR_None UMETA(DisplayName = "None"),
-    EMR_Win UMETA(DisplayName = "Win"),
-    EMR_Lose UMETA(DisplayName = "Lose")
+    EMR_None   UMETA(DisplayName = "None"),
+    EMR_Win    UMETA(DisplayName = "Win"),
+    EMR_Lose   UMETA(DisplayName = "Lose")
 };
 
 UENUM(BlueprintType)
@@ -43,9 +43,15 @@ enum class ESpawnSlotType : uint8
     Versus_Team1_Slot1      UMETA(DisplayName = "Versus - Team1 - Slot1"),
     Versus_Team1_Slot2      UMETA(DisplayName = "Versus - Team1 - Slot2"),
 
-    // 협동모드
-    Coop_Team_Slot0         UMETA(DisplayName = "Coop - Slot0"),
-    Coop_Team_Slot1         UMETA(DisplayName = "Coop - Slot1"),
-    Coop_Team_Slot2         UMETA(DisplayName = "Coop - Slot2"),
-    Coop_Team_Slot3         UMETA(DisplayName = "Coop - Slot3"),
+    // 협동모드 (Player)
+    Coop_Player_Slot0       UMETA(DisplayName = "Coop - Player - Slot0"),
+    Coop_Player_Slot1       UMETA(DisplayName = "Coop - Player - Slot1"),
+    Coop_Player_Slot2       UMETA(DisplayName = "Coop - Player - Slot2"),
+    Coop_Player_Slot3       UMETA(DisplayName = "Coop - Player - Slot3"),
+
+    // 협동모드 (AI)
+    Coop_AI_Slot0           UMETA(DisplayName = "Coop - AI - Slot0"),
+    Coop_AI_Slot1           UMETA(DisplayName = "Coop - AI - Slot1"),
+    Coop_AI_Slot2           UMETA(DisplayName = "Coop - AI - Slot2"),
+    Coop_AI_Slot3           UMETA(DisplayName = "Coop - AI - Slot3"),
 };

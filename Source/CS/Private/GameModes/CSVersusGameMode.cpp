@@ -27,12 +27,6 @@ void ACSVersusGameMode::BeginPlay()
 	VersusGameState = GetGameState<ACSVersusGameState>();
 }
 
-void ACSVersusGameMode::PostLogin(APlayerController* NewPlayer)
-{
-	Super::PostLogin(NewPlayer);
-	
-}
-
 void ACSVersusGameMode::InitGameLogic()
 {
 	const int32 AlivePlayers = LoggedInPlayerCount / 2;
@@ -43,94 +37,18 @@ void ACSVersusGameMode::InitGameLogic()
 		VersusGameState->bIsSuddenDeath = false;
 	}
 	
-    SpawnPlayerAtTeamSlots();
+	SpawnAllPlayers();
+
 	HandleStartGame();
 }
 
-void ACSVersusGameMode::HandleStartGame()
+void ACSVersusGameMode::UpdateMatchTimer()
 {
-	Super::HandleStartGame();
-
-	StartMatchTimeCountDown();
-}
-
-void ACSVersusGameMode::SpawnPlayerAtTeamSlots()
-{
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
-
-	TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap;
-	for (AActor* Actor : FoundActors)
+	Super::UpdateMatchTimer();
+	
+	if (BaseGameState && BaseGameState->RemainingMatchTime <= 0)
 	{
-		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
-		{
-			SlotMap.Add(SpawnManager->SlotType, SpawnManager);
-		}
-	}
-
-	TMap<int32, int32> TeamSlotIndex{ {0, 0}, {1, 0} };
-
-	if (!CSGameInstance || !CSGameInstance->CharacterData) return;
-
-	for (APlayerState* PlayerState : VersusGameState->PlayerArray)
-	{
-		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
-		{
-			const int32 TeamID = CSPlayerState->TeamID;
-			const int32 SlotIndex = TeamSlotIndex[TeamID];
-
-			const ESpawnSlotType SlotType = (TeamID == 0)
-				? (SlotIndex == 0 ? ESpawnSlotType::Versus_Team0_Slot0 : ESpawnSlotType::Versus_Team0_Slot1)
-				: (SlotIndex == 0 ? ESpawnSlotType::Versus_Team1_Slot0 : ESpawnSlotType::Versus_Team1_Slot1);
-
-			if (ACSSpawnManager* SpawnPoint = SlotMap.FindRef(SlotType))
-			{
-				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
-				{
-					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, TEXT("Spawn"));
-					if (!Row || !Row->CharacterClass.IsValid()) continue;
-
-					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
-					
-					FVector SpawnLocation = SpawnPoint->GetActorLocation();
-					FRotator SpawnRotation = SpawnPoint->GetActorRotation();
-					APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnLocation, SpawnRotation);
-
-					if (SpawnedPawn)
-					{
-						PlayerController->Possess(SpawnedPawn);
-						SpawnedPawn->DisableInput(PlayerController);
-					}
-				}
-			}
-
-			TeamSlotIndex[TeamID]++;
-		}
-	}
-}
-
-void ACSVersusGameMode::StartMatchTimeCountDown()
-{
-	if (VersusGameState)
-	{
-		VersusGameState->RemainingMatchTime = MatchTimeLimit;
-	}
-
-	GetWorldTimerManager().SetTimer(MatchTimerHandle, this, &ACSVersusGameMode::UpdateMatchTime, 1.0f, true);
-}
-
-void ACSVersusGameMode::UpdateMatchTime()
-{
-	if (VersusGameState)
-	{
-		VersusGameState->RemainingMatchTime--;
-
-		if (VersusGameState->RemainingMatchTime <= 0)
-		{
-			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
-
-			TriggerSuddenDeath();
-		}
+		TriggerSuddenDeath();
 	}
 }
 
@@ -219,27 +137,19 @@ void ACSVersusGameMode::FinishMatch(int32 WinningTeamID)
 	GetWorld()->GetTimerManager().SetTimer(ReturnToLobbyHandle, this, &ACSVersusGameMode::ReturnToLobby, 10.0f, false);
 }
 
-void ACSVersusGameMode::ReturnToLobby()
+ESpawnSlotType ACSVersusGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState) const
 {
-	if (GetWorld()->GetTimerManager().IsTimerActive(ReturnToLobbyHandle))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(ReturnToLobbyHandle);
-	}
+	if (!PlayerState) return ESpawnSlotType::None;
 
-	if (CSGameInstance)
-	{
-		CSGameInstance->ResetLobbySettings();
-	}
+	int32 TeamID = PlayerState->TeamID;
+	int32 Index = PlayerState->PlayerIndex;
 
-	for (APlayerState* PlayerState : VersusGameState->PlayerArray)
+	if (TeamID == 0)
 	{
-		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
-		{
-			CSPlayerState->ResetLobbySettings(); 
-		}
+		return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Versus_Team0_Slot0) + Index - 1);
 	}
-
-	bUseSeamlessTravel = true;
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen")); // 맵 정리되면 수정 필요
+	else
+	{
+		return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Versus_Team1_Slot0) + Index - 1);
+	}
 }
-

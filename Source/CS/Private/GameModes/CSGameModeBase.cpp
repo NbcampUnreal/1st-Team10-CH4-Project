@@ -2,6 +2,7 @@
 #include "GameStates/CSGameStateBase.h"
 #include "GameInstance/CSGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
+#include "Managers/CSSpawnManager.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSGameModeBase::ACSGameModeBase()
@@ -46,6 +47,7 @@ void ACSGameModeBase::HandleStartGame()
 {
 	SetMatchPhase(EMatchPhase::EMP_Playing);
 	SetAllPlayerInputEnabled(true);
+	StartMatchTimer();
 }
 
 void ACSGameModeBase::HandleEndGame()
@@ -76,4 +78,93 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 	{
 		BaseGameState->MatchPhase = NewPhase;
 	}
+}
+
+void ACSGameModeBase::SpawnAllPlayers()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
+
+	TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap;
+	for (AActor* Actor : FoundActors)
+	{
+		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
+		{
+			SlotMap.Add(SpawnManager->SlotType, SpawnManager);
+		}
+	}
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		{
+			ESpawnSlotType SlotType = GetSpawnSlotForPlayer(CSPlayerState);
+
+			if (ACSSpawnManager* SpawnPoint = SlotMap.FindRef(SlotType))
+			{
+				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
+				{
+					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, TEXT("SpawnPlayer"));
+
+					if (!Row || !Row->CharacterClass.IsValid()) continue;
+
+					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
+					APawn* Spawned = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
+
+					if (Spawned)
+					{
+						PlayerController->Possess(Spawned);
+						Spawned->DisableInput(PlayerController);
+					}
+				}
+			}
+		}
+	}
+}
+
+void ACSGameModeBase::StartMatchTimer()
+{
+	if (BaseGameState)
+	{
+		BaseGameState->RemainingMatchTime = MatchTimeLimit;
+	}
+
+	GetWorldTimerManager().SetTimer(MatchTimerHandle, this, &ACSGameModeBase::UpdateMatchTimer, 1.0f, true);
+}
+
+void ACSGameModeBase::UpdateMatchTimer()
+{
+	if (BaseGameState)
+	{
+		BaseGameState->RemainingMatchTime--;
+
+		if (BaseGameState->RemainingMatchTime <= 0)
+		{
+			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
+		}
+	}
+}
+
+void ACSGameModeBase::ReturnToLobby()
+{
+	if (GetWorldTimerManager().IsTimerActive(ReturnToLobbyHandle))
+	{
+		GetWorldTimerManager().ClearTimer(ReturnToLobbyHandle);
+	}
+
+	if (CSGameInstance)
+	{
+		CSGameInstance->ResetLobbySettings();
+	}
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		{
+			CSPlayerState->ResetLobbySettings();
+		}
+	}
+
+	bUseSeamlessTravel = true;
+	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen"));
 }
