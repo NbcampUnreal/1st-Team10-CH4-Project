@@ -25,7 +25,7 @@ void ACSGameModeBase::BeginPlay()
 
 	if (CSGameInstance)
 	{
-		MatchType = CSGameInstance->MatchType;
+		MatchType = CSGameInstance->GetMatchType();
 		ExpectedPlayerCount = CSGameInstance->ExpectedPlayerCount;
 	}
 }

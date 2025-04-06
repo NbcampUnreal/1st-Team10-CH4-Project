@@ -26,7 +26,7 @@ void ACSMainMenuGameMode::TryStartMatch()
 {
     if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
     {
-        switch (GI->MatchType)
+        switch (GI->GetMatchType())
         {
         case EMatchType::EMT_Single:
             UGameplayStatics::OpenLevel(this, FName("TutorialLevel"));

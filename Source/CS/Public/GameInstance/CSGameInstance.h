@@ -13,19 +13,21 @@ class CS_API UCSGameInstance : public UGameInstance
 public:
     UCSGameInstance() : MatchType(EMatchType::EMT_None), ExpectedPlayerCount(0) {}
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
-    UDataTable* CharacterData;
+    UFUNCTION(BlueprintCallable)
+    void SetMatchType(EMatchType NewType) { MatchType = NewType; }
 
-    UPROPERTY(BlueprintReadWrite, Category = "Match")
-    EMatchType MatchType;
-
-    UPROPERTY(BlueprintReadWrite, Category = "Match")
-    int32 ExpectedPlayerCount;
+    UFUNCTION(BlueprintCallable)
+    EMatchType GetMatchType() const { return MatchType; }
 
     UFUNCTION(BlueprintCallable)
     void ResetLobbySettings();
 
-    UFUNCTION(BlueprintCallable)
-    void SetMatchType(EMatchType NewType) { MatchType = NewType; }
+    UPROPERTY(BlueprintReadWrite, Category = "Match")
+    int32 ExpectedPlayerCount;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
+    UDataTable* CharacterData;
+private:
+    UPROPERTY()
+    EMatchType MatchType;
 };

@@ -20,7 +20,7 @@ void ACSLobbyGameMode::BeginPlay()
 	
 	if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
 	{
-		MatchType = CSGameInstance->MatchType;
+		MatchType = CSGameInstance->GetMatchType();
 	}
 }
 
