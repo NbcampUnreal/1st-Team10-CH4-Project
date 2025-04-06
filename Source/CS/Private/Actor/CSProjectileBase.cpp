@@ -16,7 +16,6 @@ ACSProjectileBase::ACSProjectileBase()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphrerComponent"));
 	SphereComp->SetupAttachment(RootComponent);
-	SphereComp->OnComponentHit.AddDynamic(this, &ACSProjectileBase::OnHit);
 
 	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileComp->InitialSpeed = 800;
@@ -29,17 +28,24 @@ void ACSProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ACSProjectileBase::OnOverlapBegin);
+
 	GetWorld()->GetTimerManager().SetTimer(
 		DestroyProjectile, this, &ACSProjectileBase::ServerDestroyProjectile, 5.0f, false
 	);
 }
 
-void ACSProjectileBase::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ACSProjectileBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Damage Event
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlap")));
 	AActor* SpawnActor = GetOwner();
 
-	ServerDestroyProjectile();
+	if (SpawnActor != OtherActor)
+	{
+		ServerDestroyProjectile();
+	}
 }
 
 void ACSProjectileBase::ServerDestroyProjectile_Implementation()
