@@ -25,6 +25,9 @@ public:
 	/** 매치 상태를 갱신하고 GameState에 전달 */
 	void SetMatchPhase(EMatchPhase NewPhase);
 
+	/** 플레이어 사망 처리 (각 MatchType별 정의 필요) */
+	virtual void HandlePlayerDeath(AController* DeadPlayer)  PURE_VIRTUAL(ACSGameModeBase::HandlePlayerDeath, );
+
 protected:
 	/** 각 모드별 초기화 로직 */
 	virtual void InitGameLogic() PURE_VIRTUAL(ACSGameModeBase::InitGameLogic, );
@@ -35,8 +38,7 @@ protected:
 	/** 게임 종료 처리 (MatchPhase 전환) */
 	virtual void HandleEndGame();
 
-	/** 플레이어 사망 처리 (각 MatchType별 정의 필요) */
-	virtual void HandlePlayerDeath(AController* DeadPlayer)  PURE_VIRTUAL(ACSGameModeBase::HandlePlayerDeath, );
+	
 
 	/** 모든 플레이어 인풋 허용 설정 */
 	void SetAllPlayerInputEnabled(bool bEnabled);
