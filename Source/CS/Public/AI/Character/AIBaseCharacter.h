@@ -8,15 +8,6 @@
 #include "Animation/AnimMontage.h"
 #include "AIBaseCharacter.generated.h"
 
-UENUM(BlueprintType)
-enum class EAttackType : uint8
-{
-	FirstAttack     UMETA(DisplayName = "1. Attack"),
-	SecondAttack     UMETA(DisplayName = "2. Attack"),
-	ThirdAttack     UMETA(DisplayName = "3. Attack"),
-	FourthAttack     UMETA(DisplayName = "4. Attack"),
-	FifthAttack     UMETA(DisplayName = "5. Attack"),
-};
 
 UCLASS()
 class CS_API AAIBaseCharacter : public ACSBaseCharacter, public ICombatInterface
@@ -44,4 +35,5 @@ private:
 	APatrolPath* PatrolPath;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat", meta=(AllowPrivateAccess=true))
 	TArray<UAnimMontage*> AttackMontages;
+	class UWidgetComponent* WidgetComponenet;
 };

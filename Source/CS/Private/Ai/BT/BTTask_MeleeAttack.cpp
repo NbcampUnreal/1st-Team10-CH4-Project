@@ -1,5 +1,6 @@
 #include "AI/BT/BTTask_MeleeAttack.h"
 #include "AI/Controller/AIBaseController.h"
+#include "AI/Interface/CombatInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_MeleeAttack::UBTTask_MeleeAttack()

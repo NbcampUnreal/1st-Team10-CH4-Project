@@ -1,7 +1,8 @@
 #include "AI/Character/AIBaseCharacter.h"
 
-AAIBaseCharacter::AAIBaseCharacter()
+AAIBaseCharacter::AAIBaseCharacter() : WidgetComponent{
 {
+
 }
 
 void AAIBaseCharacter::Tick(float DeltaTime)
