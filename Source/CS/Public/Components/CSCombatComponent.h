@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSCombatComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -14,6 +15,7 @@ class CS_API UCSCombatComponent : public UActorComponent
 public:
     UCSCombatComponent();
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool GetIsAttacking() const { return bIsAttacking; }
@@ -37,8 +39,6 @@ public:
     void ServerEndAttack();
     void ServerEndAttack_Implementation();
 
-    void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
     // Combo Function
     void Combo1CntIncrease();
     int32 GetCombo1Cnt();
@@ -48,6 +48,13 @@ public:
     bool GetCanCombo();
     UFUNCTION(BlueprintCallable, Category = "Combo")
     void ResetComboData();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+    void ClearHitActors();
+
+    UFUNCTION(Server, Reliable, BlueprintCallable)
+    void Server_PerformHitCheck();
+	void Server_PerformHitCheck_Implementation();
 
 protected:
     virtual void BeginPlay() override;
@@ -66,4 +73,7 @@ private:
 
     UFUNCTION()
     void OnRep_IsAttacking();
+
+    UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> HitActorsThisAttack;
 };

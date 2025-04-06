@@ -17,11 +17,11 @@ public:
 	ACSBaseCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void Die();
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
-	virtual void Die();
 	virtual bool CanAttack();
 	bool IsAlive();
 

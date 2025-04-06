@@ -207,6 +207,7 @@ void ACSPlayerController::SetPlayerRole(int PlayerRole)
 
 void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Client: %s - HealthUpdate Called. Health: %.1f, MaxHealth: %.1f"), *GetName(), Health, MaxHealth);
 	// TODO :HUD validation check
 	if (IsLocalController())
 	{	
