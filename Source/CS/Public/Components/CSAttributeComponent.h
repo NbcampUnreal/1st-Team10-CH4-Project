@@ -7,6 +7,8 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "CSAttributeComponent.generated.h"
 
+class ACSPlayerController;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CS_API UCSAttributeComponent : public UActorComponent
@@ -21,14 +23,14 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	bool IsAlive();
-	float GetHealthPercent();
-
-	FORCEINLINE float GetHealth() const { return Health; }
-	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	UFUNCTION()
+	void HandleDeath();
 
 private:
+
+	UPROPERTY()
+	TWeakObjectPtr<ACSPlayerController> OwningPlayerController;
+
 	UPROPERTY(EditAnywhere, Replicated, Category = "Actor Attributes")
 	float Health;
 
@@ -38,7 +40,14 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
-	UFUNCTION()
-	void OnRep_MaxHealth();
-	
+public:
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
+
+	bool IsAlive();
+
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetHealthPercent() const { return Health / MaxHealth; }
+
 };

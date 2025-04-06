@@ -1,6 +1,8 @@
 #include "Components/CSCombatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Characters/CSPlayerCharacter.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Components/CSAttributeComponent.h"
 
 UCSCombatComponent::UCSCombatComponent()
 {
@@ -11,6 +13,84 @@ UCSCombatComponent::UCSCombatComponent()
     iCombo_1_Cnt = 0;
     iCombo_2_Cnt = 0;
     bCanCombo = true;
+}
+
+void UCSCombatComponent::Server_PerformHitCheck_Implementation()
+{
+	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+    if (!Owner) return;
+
+    const FName FirstSocketName = FName("hand_r");
+    const FVector SocketStart = Owner->GetMesh()->GetSocketLocation(FirstSocketName);
+	const FName SecondSocketName = FName("hand_l");
+    const FVector TraceStart = SocketStart;
+	const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
+    const float TraceRadius = 30.0f;
+
+    // Sphere Trace for Objects
+    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+    TArray<AActor*> ActorsToIgnore;
+    ActorsToIgnore.Add(Owner);
+
+    FHitResult HitResult;
+
+    // Debug Lines
+    const bool bDrawDebug = true;
+    const FColor TraceColor = FColor::Red;
+    const FColor HitColor = FColor::Green;
+    const float DebugDrawDuration = 2.0f;
+
+    
+    bool bHit = UKismetSystemLibrary::SphereTraceSingleForObjects(
+        GetWorld(),
+        TraceStart,
+        TraceEnd,
+        TraceRadius,
+        ObjectTypes,
+        false,
+        ActorsToIgnore,
+        bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
+        HitResult,
+        true,
+        TraceColor,
+        HitColor,
+        DebugDrawDuration
+    );
+
+    if (bHit && HitResult.GetActor())
+    {
+		AActor* HitActor = HitResult.GetActor();
+        bool bAlreadyHit = HitActorsThisAttack.ContainsByPredicate([&](const TWeakObjectPtr<AActor>& WeakPtr)
+        {
+                return WeakPtr.Get() == HitActor;
+        });
+
+        if (!bAlreadyHit)
+        {
+            HitActorsThisAttack.AddUnique(HitActor);
+
+			// Damage Calculation
+            float DamageToApply = 10.0f;
+
+            AController* InstigatorController = Owner->GetController();
+            AActor* DamageCauser = Owner;
+
+            UCSAttributeComponent* VictimAttributes = HitActor->FindComponentByClass<UCSAttributeComponent>();
+
+            if (VictimAttributes)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Server: Applying %.1f damage to %s"), DamageToApply, *HitActor->GetName());
+                VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
+            }
+
+            ACSPlayerCharacter* VictimCharacter = Cast<ACSPlayerCharacter>(HitActor);
+            if (VictimCharacter)
+            {
+                VictimCharacter->PlayHitReactMontage();
+            }
+        }
+    }
 }
 
 void UCSCombatComponent::BeginPlay()
@@ -61,6 +141,11 @@ void UCSCombatComponent::ResetComboData()
     bCanCombo = true;
 }
 
+void UCSCombatComponent::ClearHitActors()
+{
+	HitActorsThisAttack.Empty();
+}
+
 void UCSCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -84,6 +169,21 @@ void UCSCombatComponent::MultiSetMontageData_Implementation(UAnimMontage* PlayMo
 {
     ServerPlayMontage = PlayMontage;
     ServerSection = Section;
+
+    ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(GetOwner());
+    if (!Character) return;
+
+    if (!Character->HasAuthority() && !Character->IsLocallyControlled())
+    {
+        UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+        if (AnimInstance && ServerPlayMontage)
+        {
+            AnimInstance->Montage_Play(ServerPlayMontage);
+            AnimInstance->Montage_JumpToSection(ServerSection);
+
+            Character->StopMovement();
+        }
+    }
 }
 
 void UCSCombatComponent::ServerSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
@@ -99,7 +199,6 @@ void UCSCombatComponent::OnRep_IsAttacking()
     {
         if (bIsAttacking)
         {
-            Character->PlayPlayerMontage(ServerPlayMontage, ServerSection);
             Character->StopMovement();
         }
     }
@@ -108,6 +207,22 @@ void UCSCombatComponent::OnRep_IsAttacking()
 void UCSCombatComponent::ServerStartAttack_Implementation()
 {
     SetIsAttacking(true);
+    ClearHitActors();
+
+    ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(GetOwner());
+
+    if (Character && Character->HasAuthority() && ServerPlayMontage)
+    {
+        UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+
+        if (AnimInstance)
+        {
+            AnimInstance->Montage_Play(ServerPlayMontage);
+            AnimInstance->Montage_JumpToSection(ServerSection);
+
+            Character->StopMovement();
+        }
+    }
 }
 
 void UCSCombatComponent::ServerEndAttack_Implementation()
