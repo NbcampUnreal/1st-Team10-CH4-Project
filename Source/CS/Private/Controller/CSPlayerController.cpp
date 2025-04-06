@@ -18,18 +18,19 @@ ACSPlayerController::ACSPlayerController()
 void ACSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
 	if (IsLocalController())
 	{
-		if (PlayerHUDWidgetClass)
+		if (MainMenuWidgetClass)
 		{
-			PlayerHUDInstance = CreateWidget<UUserWidget>(this, PlayerHUDWidgetClass);
-			if (PlayerHUDInstance)
+			MainWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
+			if (MainWidgetInstance)
 			{
-				PlayerHUDInstance->AddToViewport();
+				MainWidgetInstance->AddToViewport();
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("PlayerHUDWidgetClass is nullptr"));
+				UE_LOG(LogTemp, Warning, TEXT("MainWidgetInstance is nullptr"));
 			}
 		}
 	}
@@ -141,7 +142,7 @@ void ACSPlayerController::Client_OnSuddenDeath_Implementation()
 {
 	if (IsLocalController())
 	{
-		if (PlayerHUDInstance)
+		if (MainWidgetInstance)
 		{
 			// PlayerHUDInstance->OnSuddenDeath();
 		}
@@ -162,7 +163,6 @@ void ACSPlayerController::UpdateTeamUI(int32 TeamID)
 	{
 		// LobbyWidgetInstance->SetTeamState(TeamID);
 	}
-
 }
 
 void ACSPlayerController::UpdateCharacterUI(FName SelectedCharacterID)
@@ -183,7 +183,7 @@ void ACSPlayerController::UpdateSelectedMapUI(FName SelectedMap)
 
 void ACSPlayerController::UpdateMatchTimeUI(int32 Time)
 {
-	if (IsLocalController() && PlayerHUDInstance)
+	if (IsLocalController() && MainWidgetInstance)
 	{
 		// PlayerHUDInstance->UpdateMatchTimeUI(Time);
 	}

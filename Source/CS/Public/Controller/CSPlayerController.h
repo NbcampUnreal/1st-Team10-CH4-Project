@@ -74,13 +74,13 @@ protected:
 	TSubclassOf<UUserWidget> LobbyWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+	TSubclassOf<UUserWidget> MainMenuWidgetClass;
 
 	UPROPERTY()
 	UUserWidget* LobbyWidgetInstance;
 
 	UPROPERTY()
-	UUserWidget* PlayerHUDInstance;
+	UUserWidget* MainWidgetInstance;
 
 
 
