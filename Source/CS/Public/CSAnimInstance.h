@@ -7,6 +7,9 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "CSAnimInstance.generated.h"
 
+
+
+class ACSBaseCharacter;
 /**
  * 
  */
@@ -19,23 +22,29 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-private:
+protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	class ACSPlayerCharacter* PlayerCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float Speed;
+	float Speed = 0.f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	bool bIsInAir;
+	bool bIsInAir = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	bool bIsAccelerating;
+	bool bIsAccelerating = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	bool bIsCrouched;
+	bool bIsCrouched = false;
 
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	ECharacterTypes ActionState;
+	UPROPERTY(BlueprintReadOnly, Category = "Character State")
+	bool bIsAlive = true;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character State")
+	ECharacterTypes CurrentActionState = ECharacterTypes::ECT_Unoccupied;
+
+	UPROPERTY()
+	TWeakObjectPtr<ACSBaseCharacter> BaseCharacter;
 };

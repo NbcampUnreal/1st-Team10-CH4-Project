@@ -13,8 +13,6 @@
 #include "Components/CSAttributeComponent.h"
 #include "Components/CSCombatComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Perception/AIPerceptionStimuliSourceComponent.h"
-#include "Perception/AISense_Sight.h"
 
 ACSPlayerCharacter::ACSPlayerCharacter()
 {
@@ -63,22 +61,9 @@ void ACSPlayerCharacter::ComboCheck()
 	DuringAttack();
 }
 
-void ACSPlayerCharacter::OnRep_ActionState()
-{
-	if (ActionState == ECharacterTypes::ECT_Attacking)
-	{
-		StopMovement();
-	}
-	else if (ActionState == ECharacterTypes::ECT_Unoccupied)
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 600.f;
-	}
-}
-
 void ACSPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -98,7 +83,6 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void ACSPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ACSPlayerCharacter, ActionState);
 	DOREPLIFETIME(ACSPlayerCharacter, FacingDirection);
 }
 
@@ -126,7 +110,7 @@ void ACSPlayerCharacter::CrouchEnd(const FInputActionValue& Value)
 
 void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	if (ActionState != ECharacterTypes::ECT_Unoccupied) return;
+	if (ActionState == ECharacterTypes::ECT_Dead || ActionState != ECharacterTypes::ECT_Unoccupied) return;
 
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -148,18 +132,6 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 		SectionName = Section;
 		AnimInstance->Montage_JumpToSection(SectionName);
 		StartAttack(PlayMontage, Section);
-	}
-}
-
-void ACSPlayerCharacter::PlayHitReactMontage_Implementation()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	if (AnimInstance && HitReactMontage)
-	{
-		AnimInstance->Montage_Play(HitReactMontage);
-		FName SectionName = "HitReact1";
-		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
 
@@ -194,12 +166,15 @@ void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
 	{
 		if (HasAuthority())
 		{
+			CombatComponent->ClearHitActors();
+
 			ActionState = ECharacterTypes::ECT_Attacking;
 			OnRep_ActionState();
 			StopMovement();
 			CombatComponent->MultiSetMontageData(PlayMontage, Section);
 			CombatComponent->SetIsAttacking(true);
 		}
+
 		else
 		{
 			CombatComponent->ServerSetMontageData(PlayMontage, Section);
@@ -233,10 +208,6 @@ void ACSPlayerCharacter::EndAttack()
 		if (HasAuthority())
 		{
 			CombatComponent->SetIsAttacking(false);
-		}
-		else
-		{
-			CombatComponent->ServerEndAttack();
 		}
 	}
 	ActionState = ECharacterTypes::ECT_Unoccupied;
@@ -281,14 +252,4 @@ void ACSPlayerCharacter::UpdateRotation()
 void ACSPlayerCharacter::OnRep_FacingDirection()
 {
 	UpdateRotation();
-}
-
-void ACSPlayerCharacter::SetupStimulusSource()
-{
-	StimulusSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("Stimulus"));
-	if (StimulusSource)
-	{
-		StimulusSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
-		StimulusSource->RegisterWithPerceptionSystem();
-	}
 }

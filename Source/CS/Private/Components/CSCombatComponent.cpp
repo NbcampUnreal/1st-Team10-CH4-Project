@@ -143,6 +143,7 @@ void UCSCombatComponent::ResetComboData()
 
 void UCSCombatComponent::ClearHitActors()
 {
+    UE_LOG(LogTemp, Error, TEXT("!!!!!!!!!! ClearHitActors CALLED !!!!!!!!!!"));
 	HitActorsThisAttack.Empty();
 }
 
