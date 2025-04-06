@@ -11,7 +11,7 @@ class CS_API UCSGameInstance : public UGameInstance
 	GENERATED_BODY()
     
 public:
-    UCSGameInstance() : MatchType(EMatchType::EMT_None), ExpectedPlayerCount(0) {}
+    UCSGameInstance() : ExpectedPlayerCount(0), MatchType(EMatchType::EMT_None) {}
 
     UFUNCTION(BlueprintCallable)
     void SetMatchType(EMatchType NewType) { MatchType = NewType; }
@@ -27,6 +27,7 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
     UDataTable* CharacterData;
+
 private:
     UPROPERTY()
     EMatchType MatchType;
