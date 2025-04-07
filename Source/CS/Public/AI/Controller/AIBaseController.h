@@ -5,6 +5,8 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "AIBaseController.generated.h"
 
+class UBehaviorTreeComponent;
+
 UCLASS()
 class CS_API AAIBaseController : public AAIController
 {
@@ -12,6 +14,7 @@ class CS_API AAIBaseController : public AAIController
 
 public:
     explicit AAIBaseController(FObjectInitializer const& FObjectInitializer);
+    void StartLogicAI();
     
 protected:
     virtual void OnPossess(APawn* InPawn) override;
@@ -24,4 +27,7 @@ private:
 
     UFUNCTION()
     void OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus);
+
+    UPROPERTY(EditAnywhere)
+    UBehaviorTreeComponent* BehaviorTreeComponent;
 };

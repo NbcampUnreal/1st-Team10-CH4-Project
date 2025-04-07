@@ -20,18 +20,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override; // 추가
 	virtual void Die();
-	bool IsAlive();
+	
+	virtual void PlayHitReactMontage();
+	virtual void PlayHitReactMontage_Implementation();
 
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
-	void PlayHitReactMontage();
-	void PlayHitReactMontage_Implementation();
-
-	UFUNCTION(NetMulticast, Reliable)
-	virtual void Multicast_PlayDeathMontage();
-	virtual void Multicast_PlayDeathMontage_Implementation();
-
-	UFUNCTION(BlueprintCallable, Category = "Character")
-	virtual void ActivateSuddenDeath();
+	virtual void StopMovement();
+	virtual void StopMovement_Implementation();
 
 protected:
 	virtual void BeginPlay() override;

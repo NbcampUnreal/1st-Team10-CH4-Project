@@ -56,6 +56,9 @@ public:
     void Server_PerformHitCheck();
 	void Server_PerformHitCheck_Implementation();
 
+    UFUNCTION()
+    void PerformAttack(UAnimMontage* Montage, FName SectionName);
+
 protected:
     virtual void BeginPlay() override;
 
