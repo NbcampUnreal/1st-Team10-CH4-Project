@@ -61,7 +61,7 @@ protected:
 
 	/** 이동할 다음 스테이지 레벨 이름 */
 	UPROPERTY(EditDefaultsOnly, Category = "Game Flow")
-	FName StageLevelName = FName("Stage1Level");
+	FName StageLevelName = FName("StageLevel");
 
 	// InitSinglePlayLogic 함수는 제거됨.
 };
