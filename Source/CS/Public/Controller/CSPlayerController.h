@@ -7,7 +7,7 @@
 #include "CSTypes/CSGameTypes.h"
 #include "CSPlayerController.generated.h"
 
-class UUserWidget;
+class UCSUIBaseWidget;
 
 UCLASS()
 class CS_API ACSPlayerController : public APlayerController
@@ -68,43 +68,42 @@ public:
 	void Client_OnSuddenDeath();
 	virtual void Client_OnSuddenDeath_Implementation();
 
-
-	/*
-	*		UI
-	*/
-
-	UFUNCTION(BlueprintPure, Category = "UI")
-	UUserWidget* GetCurrentUI() const;
-
 protected:
 	virtual void BeginPlay() override;
 
 	// Reset main UI from game status
 	void InitMatchUI(); 
 
-	UPROPERTY(VisibleAnywhere, Category = "UI")
-	UUserWidget* CurrentActiveUI;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> LobbyWidgetClass;
+	TSubclassOf<UCSUIBaseWidget> LobbyWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> MainMenuWidgetClass;
+	TSubclassOf<UCSUIBaseWidget> MainMenuWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> TutorialWidgetClass;
+	TSubclassOf<UCSUIBaseWidget> TutorialWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UCSUIBaseWidget> CoopWidgetClass;
 
 	UPROPERTY()
-	UUserWidget* TutorialWidgetInstance;
+	UCSUIBaseWidget* CoopWidgetInstance;
 	UPROPERTY()
-	UUserWidget* LobbyWidgetInstance;
+	UCSUIBaseWidget* TutorialWidgetInstance;
 	UPROPERTY()
-	UUserWidget* MainWidgetInstance;
+	UCSUIBaseWidget* LobbyWidgetInstance;
+	UPROPERTY()
+	UCSUIBaseWidget* MainMenuWidgetInstance;
+
+
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	UCSUIBaseWidget* CurrentActiveUI;
 
 private:
 	int32 CharacterRole;
 
-	// Current UI Getter
+	FORCEINLINE UCSUIBaseWidget* GetCurrentUI() const { return CurrentActiveUI; }
 	
 	//UPROPERTY()
 	//class UHUDWidget* PlayerHUD;
