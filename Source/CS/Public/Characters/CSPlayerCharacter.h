@@ -30,11 +30,7 @@ public:
 	void CrouchStart(const FInputActionValue& Value);
 	void CrouchEnd(const FInputActionValue& Value);
  	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
-
- 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
-	virtual void PlayHitReactMontage() override;
-	virtual void PlayHitReactMontage_Implementation() override;
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
 
