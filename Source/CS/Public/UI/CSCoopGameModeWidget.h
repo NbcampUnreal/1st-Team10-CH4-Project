@@ -17,6 +17,5 @@ class CS_API UCSCoopGameModeWidget : public UCSUIBaseWidget
 public:
 	virtual void NativeConstruct() override;
 
-	virtual void UpdateUI() override;
 };
 

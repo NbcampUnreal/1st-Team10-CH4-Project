@@ -17,6 +17,4 @@ class CS_API UCSSingleGameModeWidget : public UCSUIBaseWidget
 public:
 	virtual void NativeConstruct() override;
 
-	// 솔로 모드 전용 UI 업데이트 (필요 시 오버라이드)
-	virtual void UpdateUI() override;
 };
