@@ -80,12 +80,21 @@ void ACSTutorialGameMode::HandleMatchHasStarted()
 
 void ACSTutorialGameMode::InitGameLogic()
 {
-	// 이 함수는 HandleMatchHasStarted 내부에서 호출됨.
+	Super::InitGameLogic(); // 혹시 베이스 클래스에 로직이 있다면 호출
+
 	UE_LOG(LogTemp, Log, TEXT("[TutorialGM] 튜토리얼 게임 로직 초기화 시작 (InitGameLogic)."));
 
-	// TODO: (GameState) 튜토리얼 목표 설정 등 초기화 로직 필요 시 구현.
-	// ACSTutorialGameState* TGS = Cast<ACSTutorialGameState>(BaseGameState);
-	// if (TGS) { /* TGS->SetupTutorialObjectives(); */ }
+	ACSTutorialGameState* TGS = GetGameState<ACSTutorialGameState>();
+	if (TGS)
+	{
+		// 예시: 첫 번째 목표 설정
+		TGS->SetCurrentObjectiveText(FText::FromString(TEXT("W, A, S, D 키를 사용하여 이동하세요.")));
+		UE_LOG(LogTemp, Log, TEXT("[TutorialGM] 초기 튜토리얼 목표 설정됨."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[TutorialGM] ACSTutorialGameState 가져오기 실패! 초기 목표 설정 불가."));
+	}
 }
 
 void ACSTutorialGameMode::HandlePlayerDeath(AController* DeadPlayer)

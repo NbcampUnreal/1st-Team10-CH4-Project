@@ -28,6 +28,9 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
     UDataTable* CharacterData;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
+    UDataTable* AIData;
+
 private:
     UPROPERTY()
     EMatchType MatchType;
