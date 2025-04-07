@@ -3,6 +3,7 @@
 #include "GameStates/CSCoopGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Managers/CSSpawnManager.h"
+#include "AI/Controller/AIBaseController.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSCoopGameMode::ACSCoopGameMode()
@@ -36,6 +37,13 @@ void ACSCoopGameMode::InitGameLogic()
 	HandleStartGame();
 }
 
+void ACSCoopGameMode::HandleStartGame()
+{
+	Super::HandleStartGame();
+
+	AllAIStartLogic();
+}
+
 void ACSCoopGameMode::SpawnAIEnemies()
 {
 	if (!EnemyAIPawnClass) return;
@@ -62,8 +70,28 @@ void ACSCoopGameMode::SpawnAIEnemies()
 			FRotator SpawnRotation = SpawnPoint->GetActorRotation();
 
 			APawn* SpawnedAI = GetWorld()->SpawnActor<APawn>(EnemyAIPawnClass, SpawnLocation, SpawnRotation);
+			if (SpawnedAI)
+			{
+				PendingAIPawns.Add(SpawnedAI);
+			}
 		}
 	}
+}
+
+void ACSCoopGameMode::AllAIStartLogic()
+{
+	for (TWeakObjectPtr<APawn> AIPawnPtr : PendingAIPawns)
+	{
+		if (APawn* AIPawn = AIPawnPtr.Get())
+		{
+			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
+			{
+				/*AIController->StartLogicAI();*/
+			}
+		}
+	}
+
+	PendingAIPawns.Empty();
 }
 
 void ACSCoopGameMode::HandlePlayerDeath(AController* DeadPlayer)
@@ -125,6 +153,8 @@ ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* Play
 	int32 Index = PlayerState->PlayerIndex;
 	return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Coop_Player_Slot0) + Index - 1);
 }
+
+
 
 ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForAI(int32 Index) const
 {
