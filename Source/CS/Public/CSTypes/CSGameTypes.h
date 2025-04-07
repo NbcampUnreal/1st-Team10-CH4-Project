@@ -6,10 +6,11 @@
 UENUM(BlueprintType)
 enum class EMatchType : uint8
 {
-	EMT_None   UMETA(DisplayName = "None"),
-	EMT_Single UMETA(DisplayName = "SinglePlay"),
-	EMT_Versus UMETA(DisplayName = "Versus"),
-	EMT_Coop   UMETA(DisplayName = "Coop")
+	EMT_None        UMETA(DisplayName = "None"),
+    EMT_MainMenu    UMETA(DisplayName = "MainMenu"),
+	EMT_Single      UMETA(DisplayName = "SinglePlay"),
+	EMT_Versus      UMETA(DisplayName = "Versus"),
+	EMT_Coop        UMETA(DisplayName = "Coop")
 };
 
 UENUM(BlueprintType)
