@@ -9,22 +9,28 @@
 AAIBaseController::AAIBaseController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
 {
 	SetupPerceptionSystem();
+	bStartAILogicOnPossess = false;
 }
 
 void AAIBaseController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	if (AAIBaseCharacter* const npc = Cast<AAIBaseCharacter>(InPawn))
+
+	if (AAIBaseCharacter* const NPC = Cast<AAIBaseCharacter>(InPawn))
 	{
-		if (UBehaviorTree* const Tree = npc->GetBehaviorTree())
+		if (UBehaviorTree* const Tree = NPC->GetBehaviorTree())
 		{
-			UBlackboardComponent* bbAI;
-			UseBlackboard(Tree->BlackboardAsset,bbAI);
-			Blackboard = bbAI;
-			RunBehaviorTree(Tree);
+			UBlackboardComponent* BB;
+			UseBlackboard(Tree->BlackboardAsset, BB);
+			Blackboard = BB;
+			
+			BehaviorTreeComponent = NewObject<UBehaviorTreeComponent>(this, TEXT("BTComponent"));
+			BehaviorTreeComponent->RegisterComponent();
+			
 		}
 	}
 }
+
 
 
 void AAIBaseController::SetupPerceptionSystem()
@@ -59,3 +65,12 @@ void AAIBaseController::OnTargetDetected(AActor* Actor, FAIStimulus const Stimul
 		GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed());
 	}
 }
+
+void AAIBaseController::StartLogicAI()
+{
+	if (BrainComponent)
+	{
+		BrainComponent->StartLogic(); 
+	}
+}
+

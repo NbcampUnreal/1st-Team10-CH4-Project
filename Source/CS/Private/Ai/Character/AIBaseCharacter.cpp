@@ -2,11 +2,13 @@
 #include "AIController.h"
 #include "AI/UI/Consts.h"
 #include "AI/UI/HealthBarWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/CSAttributeComponent.h"
 #include "Components/CSCombatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CSTypes/CSCharacterTypes.h"
+#include "GameModes/CSGameModeBase.h"
 #include "Net/UnrealNetwork.h"
 
 AAIBaseCharacter::AAIBaseCharacter()
@@ -28,6 +30,8 @@ AAIBaseCharacter::AAIBaseCharacter()
 
 	AttributeComponent = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void AAIBaseCharacter::BeginPlay()
@@ -105,4 +109,37 @@ void AAIBaseCharacter::ResumeMovement()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetWorldTimerManager().ClearTimer(HitReactTimerHandle);
+}
+
+void AAIBaseCharacter::Die()
+{
+	Super::Die();
+
+	StopMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	// Skeletal Mesh 충돌 활성화 + 물리 시뮬레이션 켜기
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
+
+	AAIBaseCharacter* DeadAI = Cast<AAIBaseCharacter>(this);
+	if (DeadAI)
+	{
+		if (ACSGameModeBase* GameMode = Cast<ACSGameModeBase>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->HandleAIDeath(DeadAI);
+		}
+	}
+	
+	// AI 제어 해제
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController)
+	{
+		AIController->StopMovement();
+		AIController->UnPossess();
+	}
+	
+	
+	// 죽은 뒤 몇 초 후 삭제
+	SetLifeSpan(5.0f);
 }
