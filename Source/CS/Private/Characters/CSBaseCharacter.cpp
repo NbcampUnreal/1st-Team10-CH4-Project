@@ -56,6 +56,7 @@ void ACSBaseCharacter::PlayHitReactMontage_Implementation()
 
 	if (AnimInstance && HitReactMontage)
 	{
+        StopAnimMontage();
 		AnimInstance->Montage_Play(HitReactMontage);
 		FName SectionName = "HitReact1";
 		AnimInstance->Montage_JumpToSection(SectionName);

@@ -147,7 +147,6 @@ void ACSPlayerCharacter::GuardStart()
 	{
 		ActionState = ECharacterTypes::ECT_Defending;
 	}
-	//ActionState = ECharacterTypes::ECT_Defending;
 }
 
 void ACSPlayerCharacter::GuardEnd()
