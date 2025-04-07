@@ -3,20 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/CSUIBase.h"
-#include "CSSoloUI.generated.h"
+#include "UI/CSUIBaseWidget.h"
+#include "CSSingleGameModeWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CS_API UCSSoloUI : public UCSUIBase
+class CS_API UCSSingleGameModeWidget : public UCSUIBaseWidget
 {
 	GENERATED_BODY()
 	
 public:
 	virtual void NativeConstruct() override;
 
-	// ¼Ö·Î ¸ğµå Àü¿ë UI ¾÷µ¥ÀÌÆ® (ÇÊ¿ä ½Ã ¿À¹ö¶óÀÌµå)
+	// ì†”ë¡œ ëª¨ë“œ ì „ìš© UI ì—…ë°ì´íŠ¸ (í•„ìš” ì‹œ ì˜¤ë²„ë¼ì´ë“œ)
 	virtual void UpdateUI() override;
 };
