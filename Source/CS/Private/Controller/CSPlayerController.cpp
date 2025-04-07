@@ -37,6 +37,47 @@ void ACSPlayerController::BeginPlay()
 	}
 }
 
+void ACSPlayerController::InitMatchUI()
+{
+	UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+	if (!GI) return;
+
+	//TSubclassOf<UCSGameUIBase> UIClass = nullptr; // UI 부모클래스
+
+	switch (GI->MatchType)
+	{
+	case EMatchType::EMT_MainMenu:
+		// 예: UIClass = UMainMenuUI::StaticClass();
+		break;
+
+	case EMatchType::EMT_Single:
+		// 예: UIClass = UCSSingleUI::StaticClass();
+		break;
+
+	case EMatchType::EMT_Versus:
+		
+		break;
+
+	case EMatchType::EMT_Coop:
+		
+		break;
+
+	default:
+		break;
+	}
+
+	if (UIClass)
+	{
+		CurrentUI = CreateWidget<UCSGameUIBase>(this, UIClass);
+		CurrentWidget = CurrentUI;
+
+		if (CurrentWidget)
+		{
+			CurrentWidget->AddToViewport();
+		}
+	}
+}
+
 void ACSPlayerController::Client_ShowLobbyUI_Implementation()
 {
 	if (IsLocalController())

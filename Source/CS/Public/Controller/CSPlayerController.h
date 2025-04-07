@@ -19,6 +19,19 @@ public:
 	void SetPlayerRole(int PlayerRole);
 	void HealthUpdate(float Health, float MaxHealth);
 
+	void UpdateCharacterUI(FName SelectedCharacterID);
+	void UpdateSelectedMapUI(FName SelectedMap);
+	void UpdateMatchTimeUI(int32 Time);
+	void OnMatchPhaseChanged(EMatchPhase MatchPhase);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void UpdateReadyUI(bool bReady);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void UpdateTeamUI(int32 TeamID);
+
+
+
 	/*
 	*		RPC
 	*/
@@ -61,21 +74,12 @@ public:
 	*		UI
 	*/
 
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void UpdateReadyUI(bool bReady);
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	void UpdateTeamUI(int32 TeamID);
-
-	void UpdateCharacterUI(FName SelectedCharacterID);
-	void UpdateSelectedMapUI(FName SelectedMap);
-	void UpdateMatchTimeUI(int32 Time);
-
-	void OnMatchPhaseChanged(EMatchPhase MatchPhase);
 
 
 protected:
 	virtual void BeginPlay() override;
+
+	void InitMatchUI();
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyWidgetClass;
