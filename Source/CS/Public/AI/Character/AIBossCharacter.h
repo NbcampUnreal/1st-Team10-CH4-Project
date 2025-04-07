@@ -4,15 +4,6 @@
 #include "AI/Character/AIBaseCharacter.h"
 #include "AIBossCharacter.generated.h"
 
-UENUM(BlueprintType)
-enum class EBossAIState : uint8
-{
-	Aggressive,
-	Defensive,
-	CounterAttack,
-	Evade,
-	Idle,
-};
 
 UCLASS()
 class CS_API AAIBossCharacter : public AAIBaseCharacter
@@ -22,13 +13,24 @@ class CS_API AAIBossCharacter : public AAIBaseCharacter
 public:
 	AAIBossCharacter();
 	
-	UPROPERTY(BlueprintReadWrite, Category="AI State")
-	EBossAIState CurrentState;
+	void JumpAction();
+	void EndJump();
+	void CrouchAction();
+	void EndCrouch();
+	void StartComboAttack();
+	
+	UFUNCTION()
+	virtual int Block_Implementation() override;
+	UFUNCTION()
+	virtual void StopBlock() override;
+	
+protected:
+	virtual void BeginPlay() override;
 
-	void OnHitReaction();
-	void EnterCounterAttack();
-
-	float DefenseTime = 1.0f;
 private:
-	FTimerHandle TimerHandle_CounterAttack;
+
+	FTimerHandle ComboResetTimerHandle;
+	int32 CurrentComboIndex = 0;
+
+	void ResetCombo();
 };

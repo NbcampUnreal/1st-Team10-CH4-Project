@@ -1,4 +1,4 @@
-#include "Ai/Controller/AIBossController.h"
+#include "AI/Controller/AIBossController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 AAIBossController::AAIBossController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)

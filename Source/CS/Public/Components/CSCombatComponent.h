@@ -77,6 +77,11 @@ private:
     UFUNCTION()
     void OnRep_IsAttacking();
 
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerSetIsAttacking(bool bAttacking);
+    void ServerSetIsAttacking_Implementation(bool bAttacking);
+    bool ServerSetIsAttacking_Validate(bool bAttacking);
+    
     UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> HitActorsThisAttack;
 };

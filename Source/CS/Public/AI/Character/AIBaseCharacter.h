@@ -9,6 +9,13 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "AIBaseCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class ECharacterStance : uint8
+{
+	Standing   UMETA(DisplayName = "Standing"),
+	Crouching  UMETA(DisplayName = "Crouching"),
+	Jumping    UMETA(DisplayName = "Jumping")
+};
 
 UCLASS()
 class CS_API AAIBaseCharacter : public ACSBaseCharacter, public ICombatInterface
@@ -20,28 +27,37 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* AIInputComponent) override;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stance")
+	ECharacterStance CurrentStance = ECharacterStance::Standing;
 
 	UBehaviorTree* GetBehaviorTree() const;
 	APatrolPath* GetPatrolPath() const;
-	FName GetMontage() const;
+	FName GetPunchMontage() const;
+	FName GetJumpMontage() const;
+	FName GetCrouchMontage() const;
 	UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
 	UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	UAnimMontage* GetBlockMontage() const { return BlockMontage; }
+	UAnimMontage* GetJumpAttackMontage() const { return JumpAttackMontage; }
+	UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
 	
-	UFUNCTION()
-	int MeleeAttack_Implementation() override;
-	
-	virtual void PlayHitReactMontage() override;
-	UFUNCTION()
+	virtual int MeleeAttack_Implementation() override;
 	void ResumeMovement();
-
-	UFUNCTION()
+	
+	virtual void StopBlock();
 	virtual void StopMovement() override;
+	
 	virtual void Die() override;
+	virtual void PlayHitReactMontage() override;
+
+
+	float LastDamageTime = -100.f;
+	void UpdateLastDamageTime();
+	bool WasRecentlyDamaged(float DamageTimeout) const;
 protected:
 	virtual void BeginPlay() override;
-
-private:
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = true))
 	UBehaviorTree* Tree;
 
@@ -50,7 +66,12 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
-	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* BlockMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* JumpAttackMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* CrouchAttackMontage;
 	
 	UPROPERTY()
 	class UWidgetComponent* WidgetComponenet;
@@ -63,6 +84,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StunTime", meta = (AllowPrivateAccess = true))
 	float HitStunDuration = 0.5f;
-
+	float LastHitTime = 0.f;
+	
 	FTimerHandle HitReactTimerHandle;
+	FTimerHandle BlockTimerHandle;
 };

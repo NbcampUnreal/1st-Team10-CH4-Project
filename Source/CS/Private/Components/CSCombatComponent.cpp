@@ -1,6 +1,8 @@
 #include "Components/CSCombatComponent.h"
 
 #include "AI/Character/AIBaseCharacter.h"
+#include "AI/Controller/AIBaseController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Characters/CSPlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -72,23 +74,39 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
         {
             HitActorsThisAttack.AddUnique(HitActor);
 
-			// Damage Calculation
+            ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
+            if (VictimCharacter->IsBlocking())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("%s is blocking! No damage."), *HitActor->GetName());
+                return;
+            }
+    
+            // Damage Calculation
             float DamageToApply = 10.0f;
-
             AController* InstigatorController = Owner->GetController();
             AActor* DamageCauser = Owner;
 
             UCSAttributeComponent* VictimAttributes = HitActor->FindComponentByClass<UCSAttributeComponent>();
-
             if (VictimAttributes)
             {
                 UE_LOG(LogTemp, Warning, TEXT("Server: Applying %.1f damage to %s"), DamageToApply, *HitActor->GetName());
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
             }
 
-            ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
             if (VictimCharacter)
             {
+                //  여기 추가
+                AAIBaseController* AIController = Cast<AAIBaseController>(VictimCharacter->GetController());
+                if (AIController)
+                {
+                    UBlackboardComponent* BB = AIController->GetBlackboardComponent();
+                    if (BB)
+                    {
+                        BB->SetValueAsBool("ShouldBlock", true);
+                        UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldBlock set to TRUE!"), *VictimCharacter->GetName());
+                    }
+                }
+
                 VictimCharacter->PlayHitReactMontage();
             }
         }
@@ -156,15 +174,21 @@ void UCSCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void UCSCombatComponent::SetIsAttacking(bool bAttacking)
 {
-    if (GetOwner()->HasAuthority())
+    if (GetOwnerRole() == ROLE_Authority)
     {
         bool bOldValue = bIsAttacking;
         bIsAttacking = bAttacking;
 
         if (bOldValue != bIsAttacking)
-        {    
+        {
             OnRep_IsAttacking();
+            
         }
+    }
+    else
+    {
+        // 클라일 경우 서버에 알림
+        ServerSetIsAttacking(bAttacking);
     }
 }
 
@@ -239,4 +263,14 @@ void UCSCombatComponent::PerformAttack(UAnimMontage* Montage, FName SectionName)
     if (!Montage) return;
     
     ServerSetMontageData(Montage, SectionName);
+}
+
+void UCSCombatComponent::ServerSetIsAttacking_Implementation(bool bAttacking)
+{
+    SetIsAttacking(bAttacking);
+}
+
+bool UCSCombatComponent::ServerSetIsAttacking_Validate(bool bAttacking)
+{
+    return true;
 }

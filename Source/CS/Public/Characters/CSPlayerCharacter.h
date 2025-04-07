@@ -52,6 +52,8 @@ public:
 	void MultiSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
 	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
 
+
+	
 	/*
 	* Callback function for input
 	*/
@@ -110,5 +112,4 @@ private:
 	USpringArmComponent* CameraBoom;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* SceneComp;
-
 };

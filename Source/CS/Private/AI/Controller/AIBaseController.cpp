@@ -9,7 +9,8 @@
 AAIBaseController::AAIBaseController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
 {
 	SetupPerceptionSystem();
-	bStartAILogicOnPossess = false;
+	/*bStartAILogicOnPossess = false;*/
+	bStartAILogicOnPossess = true;
 }
 
 void AAIBaseController::OnPossess(APawn* InPawn)
@@ -23,9 +24,9 @@ void AAIBaseController::OnPossess(APawn* InPawn)
 			UBlackboardComponent* BB;
 			UseBlackboard(Tree->BlackboardAsset, BB);
 			Blackboard = BB;
-			
-			BehaviorTreeComponent = NewObject<UBehaviorTreeComponent>(this, TEXT("BTComponent"));
-			BehaviorTreeComponent->RegisterComponent();
+			RunBehaviorTree(Tree);
+			/*BehaviorTreeComponent = NewObject<UBehaviorTreeComponent>(this, TEXT("BTComponent"));
+			BehaviorTreeComponent->RegisterComponent();*/
 			
 		}
 	}
@@ -68,9 +69,9 @@ void AAIBaseController::OnTargetDetected(AActor* Actor, FAIStimulus const Stimul
 
 void AAIBaseController::StartLogicAI()
 {
-	if (BrainComponent)
+	/*if (BrainComponent)
 	{
 		BrainComponent->StartLogic(); 
-	}
+	}*/
 }
 

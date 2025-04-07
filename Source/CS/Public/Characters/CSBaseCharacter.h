@@ -33,6 +33,9 @@ public:
 	
 	virtual void ActivateSuddenDeath();
 	virtual bool IsAlive();
+	virtual bool IsBlocking();
+	virtual bool IsInHitReact();
+	bool bIsBlocking = false;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();

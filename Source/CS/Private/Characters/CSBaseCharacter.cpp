@@ -152,3 +152,18 @@ void ACSBaseCharacter::SetupStimulusSource()
     }
 }
 
+bool ACSBaseCharacter::IsBlocking()
+{
+    return bIsBlocking;
+}
+
+bool ACSBaseCharacter::IsInHitReact()
+{
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance) return false;
+
+    bool bPlaying = AnimInstance->Montage_IsPlaying(HitReactMontage);
+    UE_LOG(LogTemp, Warning, TEXT("IsInHitReact called. Montage playing: %s"), bPlaying ? TEXT("true") : TEXT("false"));
+
+    return bPlaying;
+}
