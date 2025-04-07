@@ -37,7 +37,7 @@ public:
 
 	UFUNCTION()
 	virtual void StopMovement() override;
-
+	virtual void Die() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -53,7 +53,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* HitReactMontage;
-
+	
+	
 	UPROPERTY()
 	class UWidgetComponent* WidgetComponenet;
 

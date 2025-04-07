@@ -230,6 +230,7 @@ void UCSCombatComponent::ServerStartAttack_Implementation()
 void UCSCombatComponent::ServerEndAttack_Implementation()
 {
     SetIsAttacking(false);
+    ClearHitActors();
 }
 
 void UCSCombatComponent::PerformAttack(UAnimMontage* Montage, FName SectionName)
