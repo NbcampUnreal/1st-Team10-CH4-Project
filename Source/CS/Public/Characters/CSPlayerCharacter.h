@@ -108,5 +108,7 @@ private:
 	UCameraComponent* ViewCamera;
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* SceneComp;
 
 };

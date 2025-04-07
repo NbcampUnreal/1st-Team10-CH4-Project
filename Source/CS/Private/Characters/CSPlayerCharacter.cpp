@@ -35,6 +35,9 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 
+	SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
+	SceneComp->SetupAttachment(RootComponent);
+
 	AttributeComponent = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 
@@ -154,8 +157,8 @@ void ACSPlayerCharacter::MultiSpawnProjectile_Implementation(ACSPlayerCharacter*
 
 	GetWorld()->SpawnActor<AActor>(
 		CastProjectile,
-		GetActorLocation(),
-		GetActorRotation(),
+		SceneComp->GetComponentLocation(),
+		SceneComp->GetComponentRotation(),
 		SpawnParams
 	);
 }
