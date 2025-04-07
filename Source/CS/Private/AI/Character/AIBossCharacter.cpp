@@ -74,10 +74,8 @@ void AAIBossCharacter::ResetCombo()
 int AAIBossCharacter::Block_Implementation()
 {
 	if (!CombatComponent) return 0;
-	// 막기 중인지 여부 설정
 	if (bIsBlocking == true) return 0;
 	bIsBlocking = true;
-	// 애니메이션 재생
 	if (!BlockMontage) return 0;
 	if (BlockMontage)
 	{

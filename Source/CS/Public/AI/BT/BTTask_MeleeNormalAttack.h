@@ -23,10 +23,8 @@ protected:
 private:
 	FTimerHandle AttackCooldownTimerHandle;
 
-	// 공격 애니메이션 종료 감지 후 Task 종료
-	void FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp);
 
-	// 애니메이션 끝났는지 확인
+	void FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp);
 	bool MontageHasfinished(class AAIBaseCharacter* const AI);
 };
 

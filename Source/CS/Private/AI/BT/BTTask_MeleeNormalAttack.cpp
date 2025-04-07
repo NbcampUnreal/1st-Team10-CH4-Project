@@ -59,7 +59,6 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 			
 			if (MontageHasfinished(NPC))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("MeleeAttack 애니메이션 종료. Task 완료."));
 				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 			}
 			else

@@ -28,12 +28,12 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 			{
 				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
 
-				// 공격 애니메이션이 끝났는지 확인
+			
 				if (MontageHasfinished(NPC))
 				{
 					Combat->Execute_MeleeAttack(NPC);
 
-					// 1초 후 애니메이션 종료 여부 확인 → 끝났으면 태스크 종료
+					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::FinishLatentTaskEarly, &OwnerComp),
@@ -60,7 +60,6 @@ void UBTTask_MeleeAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerCom
 			
 			if (MontageHasfinished(NPC))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("MeleeAttack 애니메이션 종료. Task 완료."));
 				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 			}
 			else
