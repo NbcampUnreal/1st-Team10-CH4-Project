@@ -147,3 +147,11 @@ void ACSBaseCharacter::SetupStimulusSource()
         StimulusSource->RegisterWithPerceptionSystem();
     }
 }
+void ACSBaseCharacter::StopMovement()
+{
+}
+
+void ACSBaseCharacter::StopMovement_Implementation()
+{
+}
+
