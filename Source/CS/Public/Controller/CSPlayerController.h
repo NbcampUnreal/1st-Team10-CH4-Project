@@ -18,7 +18,7 @@ public:
 	ACSPlayerController();
 	void SetPlayerRole(int PlayerRole);
 	void HealthUpdate(float Health, float MaxHealth);
-
+	void UpdateTutorialObjectiveUI(const FText& ObjectiveText);
 	void UpdateCharacterUI(FName SelectedCharacterID);
 	void UpdateSelectedMapUI(FName SelectedMap);
 	void UpdateMatchTimeUI(int32 Time);
@@ -29,7 +29,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void UpdateTeamUI(int32 TeamID);
-
 
 
 	/*
@@ -87,17 +86,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> TutorialWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* TutorialWidgetInstance;
 	UPROPERTY()
 	UUserWidget* LobbyWidgetInstance;
-
 	UPROPERTY()
 	UUserWidget* MainWidgetInstance;
-
-
 
 private:
 	int32 CharacterRole;
 
+	// Current UI Getter
+	
 	//UPROPERTY()
 	//class UHUDWidget* PlayerHUD;
 	

@@ -22,6 +22,7 @@ void ACSPlayerController::BeginPlay()
 
 	if (IsLocalController())
 	{
+		// Temporary code to show the main menu UI
 		if (MainMenuWidgetClass)
 		{
 			MainWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
@@ -42,20 +43,17 @@ void ACSPlayerController::InitMatchUI()
 	UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
 	if (!GI) return;
 
-	//TSubclassOf<UCSGameUIBase> UIClass = nullptr; // UI 부모클래스
+	// TSubclassOf<UCSGameUIBase> UIClass = nullptr; // UI 부모클래스
 
-	switch (GI->MatchType)
+	switch (GI->GetMatchType())
 	{
 	case EMatchType::EMT_MainMenu:
-		// 예: UIClass = UMainMenuUI::StaticClass();
 		break;
 
 	case EMatchType::EMT_Single:
-		// 예: UIClass = UCSSingleUI::StaticClass();
 		break;
 
 	case EMatchType::EMT_Versus:
-		
 		break;
 
 	case EMatchType::EMT_Coop:
@@ -66,7 +64,7 @@ void ACSPlayerController::InitMatchUI()
 		break;
 	}
 
-	if (UIClass)
+	/*if (UIClass)
 	{
 		CurrentUI = CreateWidget<UCSGameUIBase>(this, UIClass);
 		CurrentWidget = CurrentUI;
@@ -75,7 +73,7 @@ void ACSPlayerController::InitMatchUI()
 		{
 			CurrentWidget->AddToViewport();
 		}
-	}
+	}*/
 }
 
 void ACSPlayerController::Client_ShowLobbyUI_Implementation()
@@ -269,6 +267,14 @@ void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
 	if (IsLocalController())
 	{	
 		//TODO : PlayerHUD->UpdateHealth(Health, MaxHealth);
+	}
+}
+
+void ACSPlayerController::UpdateTutorialObjectiveUI(const FText& ObjectiveText)
+{
+	if (IsLocalController() && TutorialWidgetInstance)
+	{
+		// TutorialWidgetInstance->UpdateObjectiveText(ObjectiveText);
 	}
 }
 
