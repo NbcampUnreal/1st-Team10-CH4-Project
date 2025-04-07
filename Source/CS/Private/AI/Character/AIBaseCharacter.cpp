@@ -124,28 +124,26 @@ void AAIBaseCharacter::StopMovement()
 
 void AAIBaseCharacter::PlayHitReactMontage()
 {
-	// 1. 애님 인스턴스 가져오기
+	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	// 2. 히트리액트 몽타주가 설정되어 있고 애님 인스턴스가 있다면
+	
 	if (AnimInstance && HitReactMontage)
 	{
-		// 3. 몽타주 재생 후, 특정 섹션으로 점프
+		
 		AnimInstance->Montage_Play(HitReactMontage);
 		FName SectionName = "HitReact1";
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+	
+	UpdateLastDamageTime(); 
 
-	// 4. 마지막 데미지 시간 갱신 (→ 방어 조건이나 상태 판단에 사용될 수 있음)
-	UpdateLastDamageTime(); // 꼭 필요!
 
-	// 5. 디버그 출력 (언제 HitReact가 호출됐는지 확인용)
 	UE_LOG(LogTemp, Warning, TEXT("HitReact called. Damage time updated: %.2f"), GetWorld()->TimeSeconds);
 
-	// 6. 이동 정지 (히트스턴 중 움직이지 않도록)
-	StopMovement();
 
-	// 7. 일정 시간 후에 이동 재개 (HitStunDuration이 끝나면 ResumeMovement 호출)
+	StopMovement();
+	
 	GetWorldTimerManager().SetTimer(HitReactTimerHandle, this, &AAIBaseCharacter::ResumeMovement, HitStunDuration, false);
 }
 

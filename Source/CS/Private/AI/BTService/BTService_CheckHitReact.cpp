@@ -22,15 +22,14 @@ void UBTService_CheckHitReact::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 
-	// 이미 BlockTask 중이면 감지하지 않도록 예외 처리
+
 	bool bIsBlockingNow = BB->GetValueAsBool(ShouldBlockKey.SelectedKeyName);
 	if (bIsBlockingNow) return;
 
-	// HitReact 중일 때만 true로 전환
+
 	bool bShouldBlock = AICharacter->IsInHitReact();
 	if (bShouldBlock)
 	{
 		BB->SetValueAsBool(ShouldBlockKey.SelectedKeyName, true);
-		UE_LOG(LogTemp, Warning, TEXT("BTService: Set ShouldBlock = true"));
 	}
 }
