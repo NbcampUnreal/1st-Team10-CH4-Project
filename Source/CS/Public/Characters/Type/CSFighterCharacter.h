@@ -31,8 +31,6 @@ public:
 	UInputAction* P_Casting;
 	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
 	UInputAction* K_Casting;
-	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
-	UInputAction* Guard;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* P_AttackMontage;
