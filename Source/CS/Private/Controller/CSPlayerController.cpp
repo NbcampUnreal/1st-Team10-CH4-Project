@@ -9,6 +9,7 @@
 #include "GameStates/CSLobbyGameState.h"
 #include "GameInstance/CSGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
+#include "GameModes/CSSingleLobbyGameMode.h"
 
 
 ACSPlayerController::ACSPlayerController()
@@ -135,6 +136,21 @@ void ACSPlayerController::Server_SelectMap_Implementation(FName Map)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SelectMap() is not valid"));
+	}
+}
+
+bool ACSPlayerController::Server_RequestReturnToMainMenu_Validate()
+{
+	return true;
+}
+
+void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
+{
+	ACSSingleLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSSingleLobbyGameMode>();
+
+	if (LobbyGameMode)
+	{
+		//LobbyGameMode->ReturnToMainMenu(this);
 	}
 }
 
