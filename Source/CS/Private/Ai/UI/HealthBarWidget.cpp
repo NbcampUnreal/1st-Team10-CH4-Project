@@ -8,5 +8,5 @@ void UHealthBarWidget::NativeConstruct()
 
 void UHealthBarWidget::SetBarValuePercent(float const value)
 {
-	HealthBar -> SetPercent(value);
+	HealthProgressBar -> SetPercent(value);
 }

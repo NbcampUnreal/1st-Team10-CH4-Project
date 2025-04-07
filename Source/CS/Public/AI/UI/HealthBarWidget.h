@@ -13,7 +13,8 @@ class CS_API UHealthBarWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 	void SetBarValuePercent(float const value);
-protected:
-	UPROPERTY(BlueprintReadOnly, meta = (BlueprintWidget))
-	UProgressBar* HealthBar = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
+	UProgressBar* HealthProgressBar = nullptr;
+
 };

@@ -1,4 +1,6 @@
 #include "Components/CSCombatComponent.h"
+
+#include "AI/Character/AIBaseCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Characters/CSPlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -84,7 +86,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
             }
 
-            ACSPlayerCharacter* VictimCharacter = Cast<ACSPlayerCharacter>(HitActor);
+            ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
             if (VictimCharacter)
             {
                 VictimCharacter->PlayHitReactMontage();
@@ -171,7 +173,7 @@ void UCSCombatComponent::MultiSetMontageData_Implementation(UAnimMontage* PlayMo
     ServerPlayMontage = PlayMontage;
     ServerSection = Section;
 
-    ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(GetOwner());
+    ACSBaseCharacter* Character = Cast<ACSBaseCharacter>(GetOwner());
     if (!Character) return;
 
     if (!Character->HasAuthority() && !Character->IsLocallyControlled())
@@ -195,7 +197,7 @@ void UCSCombatComponent::ServerSetMontageData_Implementation(UAnimMontage* PlayM
 
 void UCSCombatComponent::OnRep_IsAttacking()
 {
-    ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(GetOwner());
+    ACSBaseCharacter* Character = Cast<ACSBaseCharacter>(GetOwner());
     if (Character)
     {
         if (bIsAttacking)
@@ -210,7 +212,7 @@ void UCSCombatComponent::ServerStartAttack_Implementation()
     SetIsAttacking(true);
     ClearHitActors();
 
-    ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(GetOwner());
+    ACSBaseCharacter* Character = Cast<ACSBaseCharacter>(GetOwner());
 
     if (Character && Character->HasAuthority() && ServerPlayMontage)
     {
@@ -229,4 +231,11 @@ void UCSCombatComponent::ServerStartAttack_Implementation()
 void UCSCombatComponent::ServerEndAttack_Implementation()
 {
     SetIsAttacking(false);
+}
+
+void UCSCombatComponent::PerformAttack(UAnimMontage* Montage, FName SectionName)
+{
+    if (!Montage) return;
+    
+    ServerSetMontageData(Montage, SectionName);
 }
