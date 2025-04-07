@@ -10,11 +10,13 @@
 #include "GameInstance/CSGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
 #include "GameModes/CSSingleLobbyGameMode.h"
+#include "UI/CSUIBaseWidget.h"
 
 
 ACSPlayerController::ACSPlayerController()
 {
 }
+
 
 void ACSPlayerController::BeginPlay()
 {
@@ -22,18 +24,71 @@ void ACSPlayerController::BeginPlay()
 
 	if (IsLocalController())
 	{
-		if (MainMenuWidgetClass)
+		//// Temporary code to show the main menu UI
+		// 
+		//if (MainMenuWidgetClass)
+		//{
+		//	MainWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
+		//	if (MainWidgetInstance)
+		//	{
+		//		MainWidgetInstance->AddToViewport();
+		//	}
+		//	else
+		//	{
+		//		UE_LOG(LogTemp, Warning, TEXT("MainWidgetInstance is nullptr"));
+		//	}
+		//}
+
+		InitMatchUI(); // PostLogin 에서 호출 예정
+	}
+}
+
+void ACSPlayerController::InitMatchUI()
+{
+	if (CurrentActiveUI)
+	{
+		CurrentActiveUI->RemoveFromParent();
+		CurrentActiveUI = nullptr;
+	}
+
+	UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+	if (!GI) return;
+
+	TSubclassOf<UCSUIBaseWidget> UIClassToCreate = nullptr;
+	EMatchType CurrentMatchType = GI->GetMatchType();
+
+	switch (CurrentMatchType)
+	{
+		case EMatchType::EMT_MainMenu:
+			UIClassToCreate = MainMenuWidgetClass;
+			break;
+		case EMatchType::EMT_Single:
+		case EMatchType::EMT_Versus:
+		case EMatchType::EMT_Coop:
+		//	case EMT_Tutorial:
+			break;
+
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("Invalid MatchType: %d"), static_cast<int32>(CurrentMatchType));
+			break;
+	}
+
+	if (UIClassToCreate)
+	{
+		CurrentActiveUI = CreateWidget<UCSUIBaseWidget>(this, UIClassToCreate);
+		
+		if (CurrentActiveUI)
 		{
-			MainWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
-			if (MainWidgetInstance)
-			{
-				MainWidgetInstance->AddToViewport();
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("MainWidgetInstance is nullptr"));
-			}
+			CurrentActiveUI->AddToViewport();
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CurrentActiveUI is nullptr"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UIClassToCreate is nullptr"));
 	}
 }
 
@@ -41,18 +96,25 @@ void ACSPlayerController::Client_ShowLobbyUI_Implementation()
 {
 	if (IsLocalController())
 	{
-		if (LobbyWidgetInstance != nullptr && LobbyWidgetInstance->IsInViewport()) return;
-		LobbyWidgetInstance = CreateWidget<UUserWidget>(this, LobbyWidgetClass);
-
-		if (LobbyWidgetInstance != nullptr)
+		if (CurrentActiveUI)
 		{
-			LobbyWidgetInstance->AddToViewport();
+			CurrentActiveUI->RemoveFromParent();
+			CurrentActiveUI = nullptr;
 
-			FInputModeUIOnly InputModeData;
-			InputModeData.SetWidgetToFocus(LobbyWidgetInstance->TakeWidget());
-			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			SetInputMode(InputModeData);
-			bShowMouseCursor = true;
+			if (LobbyWidgetInstance != nullptr && LobbyWidgetInstance->IsInViewport()) return;
+
+			LobbyWidgetInstance = CreateWidget<UCSUIBaseWidget>(this, LobbyWidgetClass);
+
+			if (LobbyWidgetInstance != nullptr)
+			{
+				LobbyWidgetInstance->AddToViewport();
+
+				FInputModeUIOnly InputModeData;
+				InputModeData.SetWidgetToFocus(LobbyWidgetInstance->TakeWidget());
+				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+				SetInputMode(InputModeData);
+				bShowMouseCursor = true;
+			}
 		}
 	}
 }
@@ -110,10 +172,6 @@ void ACSPlayerController::Server_RequestReady_Implementation(bool bReady)
 	{
 		CurrentPlayerState->SetIsReady(bReady);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Request Ready() is not valid"));
-	}
 }
 
 bool ACSPlayerController::Server_SelectMap_Validate(FName Map)
@@ -133,9 +191,13 @@ void ACSPlayerController::Server_SelectMap_Implementation(FName Map)
 			LobbyGameState->OnRep_SelectedMap();
 		}
 	}
-	else
+}
+
+void ACSPlayerController::UpdateTutorialObjectiveUI(const FText& ObjectiveText)
+{
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SelectMap() is not valid"));
+		//CurrentActiveUI->SetObjectiveText(ObjectiveText);
 	}
 }
 
@@ -150,70 +212,94 @@ void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
 
 	if (LobbyGameMode)
 	{
-		//LobbyGameMode->ReturnToMainMenu(this);
+		LobbyGameMode->ReturnToMainMenu(this);
 	}
 }
 
 void ACSPlayerController::Client_OnSuddenDeath_Implementation()
 {
-	if (IsLocalController())
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		if (MainWidgetInstance)
-		{
-			// PlayerHUDInstance->OnSuddenDeath();
-		}
+		CurrentActiveUI->OnSuddenDeathUI();
 	}
 }
 
 void ACSPlayerController::UpdateReadyUI(bool bReady)
 {
-	if (IsLocalController() && LobbyWidgetInstance)
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		// LobbyWidgetInstance->UpdateReadyUI(bReady);
+		CurrentActiveUI->UpdateReadyUI(bReady);
 	}
 }
 
 void ACSPlayerController::UpdateTeamUI(int32 TeamID)
 {
-	if (IsLocalController() && LobbyWidgetInstance)
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		// LobbyWidgetInstance->SetTeamState(TeamID);
+		CurrentActiveUI->UpdateTeamUI(TeamID);
 	}
 }
 
 void ACSPlayerController::UpdateCharacterUI(FName SelectedCharacterID)
 {
-	if (IsLocalController() && LobbyWidgetInstance)
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		// LobbyWidgetInstance->SetCharacterState(SelectedCharacterID);
+		CurrentActiveUI->UpdateCharacterUI(SelectedCharacterID);
 	}
 }
 
 void ACSPlayerController::UpdateSelectedMapUI(FName SelectedMap)
 {
-	if (IsLocalController() && LobbyWidgetInstance)
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		// LobbyWidgetInstance->SetMapState(SelectedMap);
+		CurrentActiveUI->UpdateSelectedMapUI(SelectedMap);
 	}
 }
 
 void ACSPlayerController::UpdateMatchTimeUI(int32 Time)
 {
-	if (IsLocalController() && MainWidgetInstance)
+	if (IsLocalController() && CurrentActiveUI)
 	{
-		// PlayerHUDInstance->UpdateMatchTimeUI(Time);
+		CurrentActiveUI->UpdateMatchTimeUI(Time);
 	}
 }
 
 void ACSPlayerController::OnMatchPhaseChanged(EMatchPhase MatchPhase)
 {
-	/*
-	EMatchPhase는 CSTypes / CSGameTypes.h에 정의
-	EMP_Playing에 "GameStart!" 메시지 업데이트하거나 EMP_Finished에 전투 승리 UI 업데이트
-	싱글, 대전, 협동 매치 타입에 따라 UI가 다를 것이기에 함수 내부에서 GameInstance의 MatchType 에 따른 분기도 나눠야될 것 같습니다.
-	GameInstance - MatchType 확인
-	GameStateBase - MatchPhase, MatchResult(Versus의 경우 VersusGameState의 WinningTeamID로 확인) 확인
-	*/
+	if (IsLocalController())
+	{
+		if (CurrentActiveUI)
+		{
+			UCSGameInstance* Gl = GetGameInstance<UCSGameInstance>();
+			ACSGameStateBase* CSGameState = GetWorld()->GetGameState<ACSGameStateBase>();
+			
+			if (Gl && CSGameState)
+			{
+				EMatchType CurrentMatchType = Gl->GetMatchType();
+
+				switch (MatchPhase)
+				{
+				case EMatchPhase::EMP_None:
+					UE_LOG(LogTemp, Warning, TEXT("MatchPhase is None"));
+					break;
+				case EMatchPhase::EMP_Waiting:
+					UE_LOG(LogTemp, Warning, TEXT("MatchPhase is Waiting"));
+					break;
+				case EMatchPhase::EMP_Playing:
+					UE_LOG(LogTemp, Warning, TEXT("MatchPhase is Playing"));
+					break;
+				case EMatchPhase::EMP_Finished:
+					UE_LOG(LogTemp, Warning, TEXT("MatchPhase is Finished"));
+					break;
+				default:
+					UE_LOG(LogTemp, Warning, TEXT("MatchPhase is Invalid"));
+					break;
+
+					//TODO: CurrentActiveUI->Show Each Match PhaseUI(MatchPhase);
+				}
+			}
+		}
+	}
 }
 
 void ACSPlayerController::SetPlayerRole(int PlayerRole)
@@ -224,10 +310,9 @@ void ACSPlayerController::SetPlayerRole(int PlayerRole)
 void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Client: %s - HealthUpdate Called. Health: %.1f, MaxHealth: %.1f"), *GetName(), Health, MaxHealth);
-	// TODO :HUD validation check
+
 	if (IsLocalController())
 	{	
 		//TODO : PlayerHUD->UpdateHealth(Health, MaxHealth);
 	}
 }
-

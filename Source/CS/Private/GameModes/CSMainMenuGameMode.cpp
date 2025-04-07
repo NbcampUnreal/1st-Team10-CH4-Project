@@ -29,7 +29,7 @@ void ACSMainMenuGameMode::TryStartMatch()
         switch (GI->GetMatchType())
         {
         case EMatchType::EMT_Single:
-            UGameplayStatics::OpenLevel(this, FName("TutorialLevel"));
+            UGameplayStatics::OpenLevel(this, FName("SingleLobbyLevel"));
             break;
         case EMatchType::EMT_Versus:
         case EMatchType::EMT_Coop:

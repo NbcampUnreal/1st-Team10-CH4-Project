@@ -11,11 +11,3 @@ void UCSCoopGameModeWidget::NativeConstruct()
     UE_LOG(LogTemp, Log, TEXT("CSCoopUI: NativeConstruct ȣ�� - ���� ��� �ʱ�ȭ"));
 
 }
-
-void UCSCoopGameModeWidget::UpdateUI()
-{
-    Super::UpdateUI();
-
-    UE_LOG(LogTemp, Log, TEXT("CSCoopUI: UpdateUI ȣ�� - ���� ��� UI ������Ʈ"));
-
-}

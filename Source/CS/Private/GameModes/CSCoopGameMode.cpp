@@ -3,6 +3,8 @@
 #include "GameStates/CSCoopGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Managers/CSSpawnManager.h"
+#include "AI/Controller/AIBaseController.h"
+#include "Data/CSAIRow.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSCoopGameMode::ACSCoopGameMode()
@@ -12,8 +14,6 @@ ACSCoopGameMode::ACSCoopGameMode()
 	MatchTimeLimit = 90;
 	AlivePlayerCount = -1;
 	RemainingEnemyCount = -1;
-
-	EnemyAIPawnClass = nullptr;
 
 	GameStateClass = ACSCoopGameState::StaticClass();
 }
@@ -36,21 +36,22 @@ void ACSCoopGameMode::InitGameLogic()
 	HandleStartGame();
 }
 
+void ACSCoopGameMode::HandleStartGame()
+{
+	Super::HandleStartGame();
+
+	AllAIStartLogic();
+}
+
 void ACSCoopGameMode::SpawnAIEnemies()
 {
-	if (!EnemyAIPawnClass) return;
-
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
 
-	TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap;
-	for (AActor* Actor : FoundActors)
-	{
-		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
-		{
-			SlotMap.Add(SpawnManager->SlotType, SpawnManager);
-		}
-	}
+	if (FoundActors.IsEmpty()) return;
+
+	TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap = FindAllSpawnManager();
+	if (SlotMap.IsEmpty()) return;
 
 	for (int32 i = 0; i < RemainingEnemyCount; ++i)
 	{
@@ -61,9 +62,49 @@ void ACSCoopGameMode::SpawnAIEnemies()
 			FVector SpawnLocation = SpawnPoint->GetActorLocation();
 			FRotator SpawnRotation = SpawnPoint->GetActorRotation();
 
-			APawn* SpawnedAI = GetWorld()->SpawnActor<APawn>(EnemyAIPawnClass, SpawnLocation, SpawnRotation);
+			TSubclassOf<APawn> RandomAIClass = SelectRandomAIClass();
+
+			if (RandomAIClass)
+			{
+				APawn* SpawnedAI = GetWorld()->SpawnActor<APawn>(RandomAIClass, SpawnLocation, SpawnRotation);
+				if (SpawnedAI)
+				{
+					PendingAIPawns.Add(SpawnedAI);
+				}
+			}
 		}
 	}
+}
+
+TSubclassOf<APawn> ACSCoopGameMode::SelectRandomAIClass()
+{
+	if (!CSGameInstance || !CSGameInstance->AIData) return nullptr;
+
+	const TArray<FName> RowNames = CSGameInstance->AIData->GetRowNames();
+	if (RowNames.IsEmpty()) return nullptr;
+
+	const FName SelectedRow = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
+	const FAIRow* Row = CSGameInstance->AIData->FindRow<FAIRow>(SelectedRow, TEXT("SelectRandomAIClass"));
+
+	if (!Row || !Row->AICharacterClass.IsValid()) return nullptr;
+
+	return Row->AICharacterClass.LoadSynchronous();
+}
+
+void ACSCoopGameMode::AllAIStartLogic()
+{
+	for (TWeakObjectPtr<APawn> AIPawnPtr : PendingAIPawns)
+	{
+		if (APawn* AIPawn = AIPawnPtr.Get())
+		{
+			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
+			{
+				/*AIController->StartLogicAI();*/
+			}
+		}
+	}
+
+	PendingAIPawns.Empty();
 }
 
 void ACSCoopGameMode::HandlePlayerDeath(AController* DeadPlayer)
@@ -125,6 +166,8 @@ ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* Play
 	int32 Index = PlayerState->PlayerIndex;
 	return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Coop_Player_Slot0) + Index - 1);
 }
+
+
 
 ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForAI(int32 Index) const
 {

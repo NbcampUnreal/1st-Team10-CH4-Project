@@ -17,6 +17,4 @@ class CS_API UCSVersusGameModeWidget : public UCSUIBaseWidget
 public:
 	virtual void NativeConstruct() override;
 
-	// 온라인 대결 모드 전용 UI 업데이트 함수 오버라이드
-	virtual void UpdateUI() override;
 };
