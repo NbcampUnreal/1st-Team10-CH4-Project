@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "CSBaseCharacter.h"
 #include "InputActionValue.h"
-#include "CSTypes/CSCharacterTypes.h"
 #include "CSPlayerCharacter.generated.h"
 
 class UInputMappingContext;
@@ -31,10 +30,6 @@ public:
 	void CrouchStart(const FInputActionValue& Value);
 	void CrouchEnd(const FInputActionValue& Value);
  	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
-
- 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
- 	void PlayHitReactMontage();
-	void PlayHitReactMontage_Implementation();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
@@ -77,9 +72,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* HitReactMontage;
-
 
 protected:
 	virtual void BeginPlay() override;
@@ -101,9 +93,6 @@ private:
 	void UpdateFacingDirection(float XInput);
 	void UpdateRotation();
 
-	UPROPERTY(ReplicatedUsing = OnRep_ActionState)
-	ECharacterTypes ActionState = ECharacterTypes::ECT_Unoccupied; // 기본 상태
-
 	UPROPERTY(ReplicatedUsing = OnRep_FacingDirection)
 	EFacingDirection FacingDirection = EFacingDirection::EFD_FacingRight;
 
@@ -113,9 +102,6 @@ private:
 	UFUNCTION()
 	void OnRep_FacingDirection();
 
-	UFUNCTION()
-	void OnRep_ActionState();
-
 	/* Character Components */
 
 	UPROPERTY(VisibleAnywhere)
@@ -123,7 +109,4 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
 
-	UPROPERTY()
-	class UAIPerceptionStimuliSourceComponent* StimulusSource;
-	void SetupStimulusSource();
 };

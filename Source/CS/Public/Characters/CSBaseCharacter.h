@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSBaseCharacter.generated.h"
 
 class UCSAttributeComponent;
@@ -17,18 +18,47 @@ public:
 	ACSBaseCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override; // 추가
 	virtual void Die();
+	bool IsAlive();
+
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
+	void PlayHitReactMontage();
+	void PlayHitReactMontage_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void Multicast_PlayDeathMontage();
+	virtual void Multicast_PlayDeathMontage_Implementation();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	virtual void ActivateSuddenDeath();
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
 	virtual bool CanAttack();
-	bool IsAlive();
 
-	UFUNCTION(BlueprintCallable, Category = "Character")
-	virtual void ActivateSuddenDeath();
+	UPROPERTY(ReplicatedUsing = OnRep_ActionState, BlueprintReadOnly, Category = "Character State")
+	ECharacterTypes ActionState = ECharacterTypes::ECT_Unoccupied; // 기본 상태
+	
+	UFUNCTION()
+	virtual void OnRep_ActionState();
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* DeathMontage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCSAttributeComponent* Attributes;
 
+	UPROPERTY()
+	class UAIPerceptionStimuliSourceComponent* StimulusSource;
+	void SetupStimulusSource();
+
+public:
+	UFUNCTION(BlueprintPure, Category = "Character State")
+	FORCEINLINE ECharacterTypes GetActionState() const { return ActionState; }
 };

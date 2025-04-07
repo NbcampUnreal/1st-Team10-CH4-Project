@@ -2,35 +2,52 @@
 
 
 #include "CSAnimInstance.h"
-#include "Characters/CSPlayerCharacter.h"
+#include "Characters/CSBaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UCSAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	PlayerCharacter = Cast<ACSPlayerCharacter>(TryGetPawnOwner());
+	APawn* Pawn = TryGetPawnOwner();
+	if (Pawn)
+	{
+		BaseCharacter = Cast<ACSBaseCharacter>(Pawn);
+	}
 }
 
 void UCSAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 	
-	if (PlayerCharacter == nullptr)
+	if (BaseCharacter == nullptr)
 	{
-		PlayerCharacter = Cast<ACSPlayerCharacter>(TryGetPawnOwner());
+		TryGetPawnOwner();
+		if (!BaseCharacter.IsValid()) return;
 	}
 
-	if (PlayerCharacter == nullptr) return;
+    ACSBaseCharacter* Character = BaseCharacter.Get();
 
-	FVector Velocity = PlayerCharacter->GetVelocity();
-	Velocity.Z = 0;
-	Speed = Velocity.Size();
+    CurrentActionState = Character->GetActionState();
+    bIsAlive = Character->IsAlive();
 
-	bIsInAir = PlayerCharacter->GetCharacterMovement()->IsFalling();
-	bIsAccelerating = PlayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
-	bIsCrouched = PlayerCharacter->bIsCrouched;
-	//ActionState = PlayerCharacter->ActionState;
+    FVector Velocity = Character->GetVelocity();
+    Velocity.Z = 0;
+    Speed = Velocity.Size();
+
+    UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement();
+    if (MovementComponent)
+    {
+        bIsInAir = MovementComponent->IsFalling();
+        bIsAccelerating = MovementComponent->GetCurrentAcceleration().Size() > 0.f;
+    }
+    else
+    {
+        bIsInAir = false;
+        bIsAccelerating = false;
+    }
+
+    bIsCrouched = Character->bIsCrouched;
 }
 
 

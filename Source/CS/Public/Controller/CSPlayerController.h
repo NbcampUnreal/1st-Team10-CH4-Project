@@ -47,9 +47,16 @@ public:
 	virtual bool Server_SelectMap_Validate(FName Map);
 	virtual void Server_SelectMap_Implementation(FName Map);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_RequestReturnToMainMenu();
+	virtual bool Server_RequestReturnToMainMenu_Validate();
+	virtual void Server_RequestReturnToMainMenu_Implementation();
+	
 	UFUNCTION(Client, Reliable)
 	void Client_OnSuddenDeath();
 	virtual void Client_OnSuddenDeath_Implementation();
+
+
 	/*
 	*		UI
 	*/
