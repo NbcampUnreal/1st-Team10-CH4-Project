@@ -43,6 +43,9 @@ protected:
 	/** AI 스폰 처리 */
 	void SpawnAIEnemies();
 
+	/** 랜덤 AI Row 반환 */
+	TSubclassOf<APawn> SelectRandomAIClass();
+
 	/** 매치 승리 조건 확인 */
 	void CheckWinCondition();
 
@@ -50,9 +53,6 @@ protected:
 	void FinishMatch(bool bPlayersWin);
 
 private:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class APawn> EnemyAIPawnClass;
-
 	UPROPERTY()
 	TArray<APawn*> PendingAIPawns;
 
