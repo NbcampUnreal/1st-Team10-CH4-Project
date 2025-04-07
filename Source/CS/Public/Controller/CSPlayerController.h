@@ -73,12 +73,17 @@ public:
 	*		UI
 	*/
 
-
+	UFUNCTION(BlueprintPure, Category = "UI")
+	UUserWidget* GetCurrentUI() const;
 
 protected:
 	virtual void BeginPlay() override;
 
-	void InitMatchUI();
+	// Reset main UI from game status
+	void InitMatchUI(); 
+
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	UUserWidget* CurrentActiveUI;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> LobbyWidgetClass;

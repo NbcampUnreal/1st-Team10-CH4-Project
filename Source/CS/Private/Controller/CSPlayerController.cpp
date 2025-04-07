@@ -10,11 +10,13 @@
 #include "GameInstance/CSGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
 #include "GameModes/CSSingleLobbyGameMode.h"
+#include "UI/CSUIBaseWidget.h"
 
 
 ACSPlayerController::ACSPlayerController()
 {
 }
+
 
 void ACSPlayerController::BeginPlay()
 {
@@ -22,58 +24,63 @@ void ACSPlayerController::BeginPlay()
 
 	if (IsLocalController())
 	{
-		// Temporary code to show the main menu UI
-		if (MainMenuWidgetClass)
-		{
-			MainWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
-			if (MainWidgetInstance)
-			{
-				MainWidgetInstance->AddToViewport();
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("MainWidgetInstance is nullptr"));
-			}
-		}
+		//// Temporary code to show the main menu UI
+		// 
+		//if (MainMenuWidgetClass)
+		//{
+		//	MainWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
+		//	if (MainWidgetInstance)
+		//	{
+		//		MainWidgetInstance->AddToViewport();
+		//	}
+		//	else
+		//	{
+		//		UE_LOG(LogTemp, Warning, TEXT("MainWidgetInstance is nullptr"));
+		//	}
+		//}
+
+		InitMatchUI(); // PostLogin 에서 호출 예정
 	}
+}
+
+UUserWidget* ACSPlayerController::GetCurrentUI() const
+{
+	return CurrentActiveUI;
 }
 
 void ACSPlayerController::InitMatchUI()
 {
+	if (CurrentActiveUI)
+	{
+		CurrentActiveUI->RemoveFromParent();
+		CurrentActiveUI = nullptr;
+	}
+
 	UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
 	if (!GI) return;
 
-	// TSubclassOf<UCSGameUIBase> UIClass = nullptr; // UI 부모클래스
+	TSubclassOf<UUserWidget> WidgetClass = nullptr;
+	EMatchType CurrentMatchType = GI->GetMatchType();
 
-	switch (GI->GetMatchType())
+	switch (CurrentMatchType)
 	{
 	case EMatchType::EMT_MainMenu:
-		break;
-
 	case EMatchType::EMT_Single:
-		break;
-
 	case EMatchType::EMT_Versus:
-		break;
-
 	case EMatchType::EMT_Coop:
-		
-		break;
-
-	default:
+		//	case EMT_Tutorial:
+		WidgetClass = MainMenuWidgetClass;
 		break;
 	}
 
-	/*if (UIClass)
+	if (WidgetClass)
 	{
-		CurrentUI = CreateWidget<UCSGameUIBase>(this, UIClass);
-		CurrentWidget = CurrentUI;
-
-		if (CurrentWidget)
+		CurrentActiveUI = CreateWidget<UUserWidget>(this, WidgetClass);
+		if (CurrentActiveUI)
 		{
-			CurrentWidget->AddToViewport();
+			CurrentActiveUI->AddToViewport();
 		}
-	}*/
+	}
 }
 
 void ACSPlayerController::Client_ShowLobbyUI_Implementation()
