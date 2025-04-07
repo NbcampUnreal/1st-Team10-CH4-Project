@@ -62,6 +62,15 @@ void ACSBaseCharacter::PlayHitReactMontage_Implementation()
 	}
 }
 
+void ACSBaseCharacter::Multicast_PlayDeathMontage()
+{
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (AnimInstance && DeathMontage)
+    {
+        AnimInstance->Montage_Play(DeathMontage);
+    }
+}
+
 void ACSBaseCharacter::Multicast_PlayDeathMontage_Implementation()
 {
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -71,6 +80,7 @@ void ACSBaseCharacter::Multicast_PlayDeathMontage_Implementation()
         AnimInstance->Montage_Play(DeathMontage);
     }
 }
+
 
 bool ACSBaseCharacter::IsAlive()
 {
@@ -97,13 +107,7 @@ void ACSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
-void ACSBaseCharacter::PlayHitReactMontage()
-{
-}
 
-void ACSBaseCharacter::PlayHitReactMontage_Implementation()
-{
-}
 
 void ACSBaseCharacter::StopMovement()
 {
@@ -146,12 +150,5 @@ void ACSBaseCharacter::SetupStimulusSource()
         StimulusSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
         StimulusSource->RegisterWithPerceptionSystem();
     }
-}
-void ACSBaseCharacter::StopMovement()
-{
-}
-
-void ACSBaseCharacter::StopMovement_Implementation()
-{
 }
 

@@ -30,7 +30,7 @@ public:
 	
 	UFUNCTION()
 	int MeleeAttack_Implementation() override;
-	UFUNCTION()
+	
 	virtual void PlayHitReactMontage() override;
 	UFUNCTION()
 	void ResumeMovement();
@@ -50,9 +50,6 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
-
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* HitReactMontage;
 	
 	
 	UPROPERTY()
