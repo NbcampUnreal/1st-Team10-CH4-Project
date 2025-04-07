@@ -3,42 +3,45 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/CSUIBase.h"
+#include "UI/CSUIBaseWidget.h"
 #include "Components/Button.h"
 #include "CSMainMenuWidget.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class CS_API UCSMainMenuWidget : public UCSUIBase
+class CS_API UCSMainMenuWidget : public UCSUIBaseWidget
 {
 	GENERATED_BODY()
 	
 public:
-    virtual void NativeConstruct() override;
+	virtual void NativeConstruct() override;
 
 protected:
+    // UMG에서 디자인한 버튼들을 BindWidget으로 연결
     UPROPERTY(meta = (BindWidget))
-    UButton* SoloModeButton;
+    UButton* SingleModeButton;
 
     UPROPERTY(meta = (BindWidget))
-    UButton* OnlineDuelModeButton;
+    UButton* VersusModeButton;
 
     UPROPERTY(meta = (BindWidget))
-    UButton* OnlineCoopModeButton;
+    UButton* CoopModeButton;
 
     UPROPERTY(meta = (BindWidget))
     UButton* OptionsButton;
 
-    // ��ư Ŭ�� �̺�Ʈ �ڵ鷯
+    // 버튼 클릭 이벤트 핸들러
     UFUNCTION()
-    void HandleSoloModeClicked();
+    void SingleModeClicked();
 
     UFUNCTION()
-    void HandleOnlineDuelClicked();
+    void VersusModeClicked();
 
     UFUNCTION()
-    void HandleOnlineCoopClicked();
+    void CoopModeClicked();
 
     UFUNCTION()
-    void HandleOptionsClicked();
+    void OptionsClicked();
 };

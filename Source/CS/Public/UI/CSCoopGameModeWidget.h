@@ -3,20 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/CSUIBase.h"
-#include "CSCoopUI.generated.h"
+#include "UI/CSUIBaseWidget.h"
+#include "CSCoopGameModeWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CS_API UCSCoopUI : public UCSUIBase
+class CS_API UCSCoopGameModeWidget : public UCSUIBaseWidget
 {
 	GENERATED_BODY()
 	
 public:
 	virtual void NativeConstruct() override;
 
-	// 협동 모드 전용 UI 업데이트 (필요 시 오버라이드)
 	virtual void UpdateUI() override;
 };
+

@@ -4,49 +4,50 @@
 #include "UI/CSMainMenuWidget.h"
 #include "Components/Button.h"
 
+
 void UCSMainMenuWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    // °¢ ¹öÆ°ÀÌ Á¦´ë·Î ¹ÙÀÎµùµÇ¾ú´ÂÁö È®ÀÎ
-    if (SoloModeButton)
+    // ê° ë²„íŠ¼ì´ ì œëŒ€ë¡œ ë°”ì¸ë”©ë˜ì—ˆëŠ”ì§€ í™•ì¸ í›„ í´ë¦­ ì´ë²¤íŠ¸ ì—°ê²°
+    if (SingleModeButton)
     {
-        SoloModeButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::HandleSoloModeClicked);
+        SingleModeButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::SingleModeClicked);
     }
-    if (OnlineDuelModeButton)
+    if (VersusModeButton)
     {
-        OnlineDuelModeButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::HandleOnlineDuelClicked);
+        VersusModeButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::VersusModeClicked);
     }
-    if (OnlineCoopModeButton)
+    if (CoopModeButton)
     {
-        OnlineCoopModeButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::HandleOnlineCoopClicked);
+        CoopModeButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::CoopModeClicked);
     }
     if (OptionsButton)
     {
-        OptionsButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::HandleOptionsClicked);
+        OptionsButton->OnClicked.AddDynamic(this, &UCSMainMenuWidget::OptionsClicked);
     }
-
 }
 
-void UCSMainMenuWidget::HandleSoloModeClicked()
+void UCSMainMenuWidget::SingleModeClicked()
 {
-    //UE_LOG(LogTemp, Log, TEXT("¼Ö·Î ¸ğµå ¹öÆ° Å¬¸¯µÊ"));
+    UE_LOG(LogTemp, Log, TEXT("ì†”ë¡œ ëª¨ë“œ ë²„íŠ¼ í´ë¦­ë¨"));
+    // ì†”ë¡œ ëª¨ë“œ ê´€ë ¨ ë¡œì§ ì‹¤í–‰
 }
 
-void UCSMainMenuWidget::HandleOnlineDuelClicked()
+void UCSMainMenuWidget::VersusModeClicked()
 {
-//    UE_LOG(LogTemp, Log, TEXT("¿Â¶óÀÎ ´ë°á ¸ğµå ¹öÆ° Å¬¸¯µÊ"));
-     //¿Â¶óÀÎ ´ë°á ¸ğµå ¼±ÅÃ
+    UE_LOG(LogTemp, Log, TEXT("ì˜¨ë¼ì¸ ëŒ€ê²° ëª¨ë“œ ë²„íŠ¼ í´ë¦­ë¨"));
+    // ì˜¨ë¼ì¸ ëŒ€ê²° ëª¨ë“œ ê´€ë ¨ ë¡œì§ ì‹¤í–‰
 }
 
-void UCSMainMenuWidget::HandleOnlineCoopClicked()
+void UCSMainMenuWidget::CoopModeClicked()
 {
-    //UE_LOG(LogTemp, Log, TEXT("¿Â¶óÀÎ Çùµ¿ ¸ğµå ¹öÆ° Å¬¸¯µÊ"));
-    //¿Â¶óÀÎ Çùµ¿ ¸ğµå ¼±ÅÃ
+    UE_LOG(LogTemp, Log, TEXT("ì˜¨ë¼ì¸ í˜‘ë™ ëª¨ë“œ ë²„íŠ¼ í´ë¦­ë¨"));
+    // ì˜¨ë¼ì¸ í˜‘ë™ ëª¨ë“œ ê´€ë ¨ ë¡œì§ ì‹¤í–‰
 }
 
-void UCSMainMenuWidget::HandleOptionsClicked()
+void UCSMainMenuWidget::OptionsClicked()
 {
-    //UE_LOG(LogTemp, Log, TEXT("¿É¼ÇÃ¢ ¹öÆ° Å¬¸¯µÊ"));
-    //¿É¼ÇÃ¢ ¿­±â °ü·Ã ·ÎÁ÷
+    UE_LOG(LogTemp, Log, TEXT("ì˜µì…˜ ë²„íŠ¼ í´ë¦­ë¨"));
+    // ì˜µì…˜ì°½ ê´€ë ¨ ë¡œì§ ì‹¤í–‰
 }
