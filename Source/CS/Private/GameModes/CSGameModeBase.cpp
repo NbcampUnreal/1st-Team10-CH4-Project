@@ -7,6 +7,8 @@
 
 ACSGameModeBase::ACSGameModeBase()
 {
+	DefaultPawnClass = nullptr;
+
 	CSGameInstance = nullptr;
 	BaseGameState = nullptr;
 
