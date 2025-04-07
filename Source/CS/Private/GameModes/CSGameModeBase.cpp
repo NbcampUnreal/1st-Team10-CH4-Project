@@ -24,6 +24,8 @@ void ACSGameModeBase::BeginPlay()
 	CSGameInstance = GetGameInstance<UCSGameInstance>();
 	BaseGameState = GetGameState<ACSGameStateBase>();
 
+	SetMatchPhase(EMatchPhase::EMP_Waiting);
+
 	if (CSGameInstance)
 	{
 		MatchType = CSGameInstance->GetMatchType();
