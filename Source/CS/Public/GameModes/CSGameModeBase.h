@@ -34,8 +34,7 @@ protected:
 	virtual void InitGameLogic() PURE_VIRTUAL(ACSGameModeBase::InitGameLogic, );
 
 	/** 플레이어별 스폰 슬롯 타입 반환 (게임모드별 오버라이딩 필요) */
-	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) 
-		const PURE_VIRTUAL(ACSGameModeBase::GetSpawnSlotForPlayer, return ESpawnSlotType::None;);
+	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) const { return ESpawnSlotType::None; }
 
 	/** 게임 시작 처리 (MatchPhase 전환 + 인풋 허용) */
 	virtual void HandleStartGame();
@@ -51,6 +50,9 @@ protected:
 
 	/** 플레이어 스폰 처리 */
 	void SpawnAllPlayers();
+
+	/** 월드의 모든 스폰매니저를 타입별로 Map에 저장 */
+	TMap<ESpawnSlotType, class ACSSpawnManager*> FindAllSpawnManager() const;
 
 	/** 모든 플레이어 인풋 허용 설정 */
 	void SetAllPlayerInputEnabled(bool bEnabled);

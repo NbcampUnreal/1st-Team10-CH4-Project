@@ -82,17 +82,8 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 
 void ACSGameModeBase::SpawnAllPlayers()
 {
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
-
-	TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap;
-	for (AActor* Actor : FoundActors)
-	{
-		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
-		{
-			SlotMap.Add(SpawnManager->SlotType, SpawnManager);
-		}
-	}
+	const TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap = FindAllSpawnManager();
+	if (SlotMap.IsEmpty()) return;
 
 	for (APlayerState* PlayerState : GameState->PlayerArray)
 	{
@@ -120,6 +111,24 @@ void ACSGameModeBase::SpawnAllPlayers()
 			}
 		}
 	}
+}
+
+TMap<ESpawnSlotType, ACSSpawnManager*> ACSGameModeBase::FindAllSpawnManager() const
+{
+	TMap<ESpawnSlotType, ACSSpawnManager*> Result;
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
+
+	for (AActor* Actor : FoundActors)
+	{
+		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
+		{
+			Result.Add(SpawnManager->SlotType, SpawnManager);
+		}
+	}
+
+	return Result;
 }
 
 void ACSGameModeBase::StartMatchTimer()
@@ -168,3 +177,4 @@ void ACSGameModeBase::ReturnToLobby()
 	bUseSeamlessTravel = true;
 	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen"));
 }
+
