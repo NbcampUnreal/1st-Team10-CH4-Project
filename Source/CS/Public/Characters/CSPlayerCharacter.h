@@ -24,7 +24,7 @@ public:
 	ACSPlayerCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void Jump() override;
 
@@ -33,8 +33,8 @@ public:
  	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
 
  	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "Combat")
- 	void PlayHitReactMontage();
-	void PlayHitReactMontage_Implementation();
+	virtual void PlayHitReactMontage() override;
+	virtual void PlayHitReactMontage_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
@@ -46,8 +46,8 @@ public:
 	void EndAttack();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void StopMovement();
-	void StopMovement_Implementation();
+	virtual void StopMovement() override;
+	virtual void StopMovement_Implementation() override;
 
 	UFUNCTION(Server, Reliable)
 	void ServerSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);

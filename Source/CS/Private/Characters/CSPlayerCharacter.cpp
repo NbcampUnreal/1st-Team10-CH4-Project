@@ -16,6 +16,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 
+
 ACSPlayerCharacter::ACSPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;

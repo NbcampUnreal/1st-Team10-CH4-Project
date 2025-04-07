@@ -28,7 +28,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 			npc->GetWorldTimerManager().SetTimer(
 				AttackCooldownTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::ResetCanAttack, &OwnerComp),
-				1.0f, false
+				3.0f, false
 			);
 			
 			return EBTNodeResult::InProgress;
@@ -48,5 +48,5 @@ void UBTTask_MeleeAttack::ResetCanAttack(UBehaviorTreeComponent* OwnerComp)
 
 bool UBTTask_MeleeAttack::MontageHasfinished(AAIBaseCharacter * const AI)
 {
-	return AI->GetMesh()->GetAnimInstance()->Montage_GetIsStopped(AI->GetMontage());
+	return AI->GetMesh()->GetAnimInstance()->Montage_GetIsStopped(AI->GetAttackMontage());
 }

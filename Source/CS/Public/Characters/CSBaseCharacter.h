@@ -18,6 +18,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Die();
+	
+	virtual void PlayHitReactMontage();
+	virtual void PlayHitReactMontage_Implementation();
+
+	virtual void StopMovement();
+	virtual void StopMovement_Implementation();
 
 protected:
 	virtual void BeginPlay() override;

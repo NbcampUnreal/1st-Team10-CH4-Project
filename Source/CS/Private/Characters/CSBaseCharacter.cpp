@@ -67,4 +67,19 @@ void ACSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+void ACSBaseCharacter::PlayHitReactMontage()
+{
+}
+
+void ACSBaseCharacter::PlayHitReactMontage_Implementation()
+{
+}
+
+void ACSBaseCharacter::StopMovement()
+{
+}
+
+void ACSBaseCharacter::StopMovement_Implementation()
+{
+}
 
