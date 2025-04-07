@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AIBaseCharacter.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "AIBossCharacter.generated.h"
 
 UCLASS()

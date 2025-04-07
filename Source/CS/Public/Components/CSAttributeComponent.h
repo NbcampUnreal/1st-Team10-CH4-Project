@@ -49,5 +49,6 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetHealthPercent() const { return Health / MaxHealth; }
+	
 
 };
