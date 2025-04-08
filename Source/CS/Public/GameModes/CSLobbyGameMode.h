@@ -29,9 +29,27 @@ public:
 	void SetPlayerSelection(APlayerController* Player, FName CharacterID);
 
 protected:
+	/** 현재 매치 타입 (Versus / Coop) */
 	EMatchType MatchType;
 
-	void PositionLobbyCharacters();
-	bool IsTeamBalanced();
+	/** 초기 카메라 세팅 */
 	void SetViewLobbyCam(APlayerController* NewPlayer);
+
+	/** 팀 균형 확인 */
+	bool IsTeamBalanced();
+
+	/** 전체 로비 캐릭터 배치 */
+	void PositionLobbyCharacters();
+
+	/** Versus 모드 로직 */
+	void PositionVersusCharacters();
+
+	/** Coop 모드 로직 */
+	void PositionCoopCharacters();
+
+	/** 공통 유틸 */
+	TMap<int32, TArray<ESpawnSlotType>> GetSlotPriorityForMatchType() const;
+	void GetAllSpawnManagers(TArray<class ACSSpawnManager*>& OutManagers);
+	void AssignPlayerToSlot(class ACSPlayerState* PlayerState, ESpawnSlotType SlotType, const TArray<class ACSSpawnManager*>& Managers);
 };
+
