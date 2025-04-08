@@ -118,6 +118,14 @@ void ACSPlayerController::Client_ShowLobbyUI_Implementation()
 	}
 }
 
+void ACSPlayerController::Client_ShowNoSessionPopup_Implementation()
+{
+	if (IsLocalController() && CurrentActiveUI)
+	{
+		//CurrentActiveUI->ShowNoSessionPopup();
+	}
+}
+
 bool ACSPlayerController::Server_RequestTeamChange_Validate()
 {
 	// Additional validation can be here if needed
@@ -139,18 +147,18 @@ void ACSPlayerController::Server_RequestTeamChange_Implementation()
 	}
 }
 
-bool ACSPlayerController::Server_SelectCharacter_Validate(FName CharacterID)
+bool ACSPlayerController::Server_SelectCharacter_Validate(EJobTypes SelectedJob)
 {
 	return true;
 }
 
-void ACSPlayerController::Server_SelectCharacter_Implementation(FName CharacterID)
+void ACSPlayerController::Server_SelectCharacter_Implementation(EJobTypes SelectedJob)
 {
 	ACSLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSLobbyGameMode>();
 
 	if (LobbyGameMode)
 	{
-		LobbyGameMode->SetPlayerSelection(this, CharacterID);
+		//LobbyGameMode->SetPlayerSelection(this, SelectedJob); // 해당 게임모드 시그니처 변경 필요
 	}
 	else
 	{

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "CSTypes/CSGameTypes.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSPlayerController.generated.h"
 
 class UCSUIBaseWidget;
@@ -39,15 +40,19 @@ public:
 	void Client_ShowLobbyUI();
 	virtual void Client_ShowLobbyUI_Implementation();
 
+	UFUNCTION(Client, Reliable)
+	void Client_ShowNoSessionPopup();
+	virtual void Client_ShowNoSessionPopup_Implementation();
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_RequestTeamChange();
 	virtual bool Server_RequestTeamChange_Validate();
 	virtual void Server_RequestTeamChange_Implementation();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SelectCharacter(FName CharacterID);
-	virtual bool Server_SelectCharacter_Validate(FName CharacterID);
-	virtual void Server_SelectCharacter_Implementation(FName CharacterID);
+	void Server_SelectCharacter(EJobTypes SelectedJob);
+	virtual bool Server_SelectCharacter_Validate(EJobTypes SelectedJob);
+	virtual void Server_SelectCharacter_Implementation(EJobTypes SelectedJob);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_RequestReady(bool bReady);
