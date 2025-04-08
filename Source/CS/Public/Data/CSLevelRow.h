@@ -15,7 +15,8 @@ struct FLevelRow : public FTableRowBase
 	FName LevelName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UWorld> MapAsset;
+	FString MapPath;
+
 	// 게임 내 UI나 설명에 사용할 표시 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText DisplayName;
