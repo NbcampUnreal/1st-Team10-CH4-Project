@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "CSTypes/CSGameTypes.h"
+#include "CSTypes/CSCharacterTypes.h"
+#include "Data/CSCharacterRow.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "CSGameInstance.generated.h"
 
@@ -43,6 +45,9 @@ public:
 
     UFUNCTION(BlueprintCallable)
     void ResetLobbySettings();
+
+    /** 헬퍼 함수 */
+    const FCharacterRow* FindCharacterRowByJob(EJobTypes Job) const;
 
 private:
     void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);

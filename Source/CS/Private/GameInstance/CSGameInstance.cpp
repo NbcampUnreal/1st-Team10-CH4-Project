@@ -144,3 +144,16 @@ void UCSGameInstance::ResetLobbySettings()
 {
 	ExpectedPlayerCount = 0;
 }
+
+const FCharacterRow* UCSGameInstance::FindCharacterRowByJob(EJobTypes Job) const
+{
+	if (!CharacterData) return nullptr;
+
+	const UEnum* EnumPtr = StaticEnum<EJobTypes>();
+	if (!EnumPtr) return nullptr;
+
+	FString RowNameString = EnumPtr->GetNameStringByValue((int64)Job);
+	FName RowName(*RowNameString);
+
+	return CharacterData->FindRow<FCharacterRow>(RowName, TEXT("FindCharacterRowByJob"));
+}
