@@ -1,20 +1,17 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "AI/BT/BTTask_LowComboAttack.h"
+#include "AI/BT/Attack/BTTask_MeleeNormalAttack.h"
 #include "AI/Character/AIBaseCharacter.h"
 #include "AI/Controller/AIBaseController.h"
 #include "AI/Interface/CombatInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
-UBTTask_LowComboAttack::UBTTask_LowComboAttack(FObjectInitializer const& ObjectInitializer) :
+UBTTask_MeleeNormalAttack::UBTTask_MeleeNormalAttack(FObjectInitializer const& ObjectInitializer) :
 UBTTask_BlackboardBase{ObjectInitializer}
 {
-	NodeName = TEXT("Low Combo Attack");
+	NodeName = TEXT("Melee Attack");
 }
 
-EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	const bool bOutOfRange = !OwnerComp.GetBlackboardComponent()->GetValueAsBool(GetSelectedBlackboardKey());
 	if (bOutOfRange)
@@ -31,16 +28,15 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 			{
 				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
 
-			
+				// 공격 애니메이션이 끝났는지 확인
 				if (MontageHasfinished(NPC))
 				{
-					Combat->Execute_LowComboAttack(NPC);
-
+					Combat->Execute_MeleeAttack(NPC);
 					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
-						FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, &OwnerComp),
-						1.5f, false
+						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishLatentTaskEarly, &OwnerComp),
+						2.0f, false
 					);
 
 					return EBTNodeResult::InProgress;
@@ -52,7 +48,7 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 	return EBTNodeResult::Failed;
 }
 
-void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
 {
 	if (!OwnerComp) return;
 
@@ -70,7 +66,7 @@ void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Owner
 				
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
-					FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, OwnerComp),
+					FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishLatentTaskEarly, OwnerComp),
 					0.2f, false
 				);
 			}
@@ -78,10 +74,10 @@ void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Owner
 	}
 }
 
-bool UBTTask_LowComboAttack::MontageHasfinished(AAIBaseCharacter* const AI)
+bool UBTTask_MeleeNormalAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {
-	if (!AI || !AI->GetMesh() || !AI->GetLowComboAttackMontage()) return true;
+	if (!AI || !AI->GetMesh() || !AI->GetPunchMontage()) return true;
 
 	auto* AnimInstance = AI->GetMesh()->GetAnimInstance();
-	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetLowComboAttackMontage());
+	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetPunchMontage());
 }

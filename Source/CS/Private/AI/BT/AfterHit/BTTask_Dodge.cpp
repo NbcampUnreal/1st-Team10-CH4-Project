@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/BT/BTTask_Dodge.h"
+#include "AI/BT/AfterHit/BTTask_Dodge.h"
 
 #include "AIController.h"
 #include "AI/Character/AIBaseCharacter.h"
