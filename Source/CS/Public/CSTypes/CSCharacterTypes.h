@@ -38,6 +38,7 @@ enum class EFacingDirection : uint8
 UENUM(BlueprintType)
 enum class EJobTypes : uint8
 {
+	EJT_None UMETA(DisplayName = "None"),
 	EJT_Fighter UMETA(DisplayName = "Fighter"),
 	EJT_SwordMan UMETA(DisplayName = "SwordMan")
 };
