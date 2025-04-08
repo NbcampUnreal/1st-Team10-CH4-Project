@@ -9,6 +9,7 @@
 
 ACSSwordManCharacter::ACSSwordManCharacter()
 {
+
 }
 
 void ACSSwordManCharacter::BeginPlay()

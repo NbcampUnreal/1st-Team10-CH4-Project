@@ -36,6 +36,7 @@ public:
 	virtual bool IsBlocking();
 	virtual bool IsInHitReact();
 	bool bIsBlocking = false;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
@@ -43,10 +44,12 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_ActionState, BlueprintReadOnly, Category = "Character State")
 	ECharacterTypes ActionState = ECharacterTypes::ECT_Unoccupied; // 기본 상태
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Job")
+	EJobTypes JobState;
+
 	UFUNCTION()
 	virtual void OnRep_ActionState();
-
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* HitReactMontage;
@@ -64,4 +67,6 @@ protected:
 public:
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE ECharacterTypes GetActionState() const { return ActionState; }
+	UFUNCTION(BlueprintPure, Category = "Character State")
+	FORCEINLINE EJobTypes GetJobType() const { return JobState; }
 };

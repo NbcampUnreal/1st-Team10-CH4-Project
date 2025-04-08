@@ -10,6 +10,7 @@
 
 ACSFighterCharacter::ACSFighterCharacter()
 {
+
 }
 
 void ACSFighterCharacter::BeginPlay()
