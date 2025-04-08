@@ -218,13 +218,15 @@ void ACSPlayerCharacter::DuringAttack()
 
 void ACSPlayerCharacter::EndAttack()
 {
+	if (!AttributeComponent->IsAlive()) return;
+
 	if (CombatComponent)
 	{
 		CombatComponent->ResetComboData();
-
 		if (HasAuthority())
 		{
 			CombatComponent->SetIsAttacking(false);
+			ActionState = ECharacterTypes::ECT_Unoccupied;
 		}
 	}
 	ActionState = ECharacterTypes::ECT_Unoccupied;

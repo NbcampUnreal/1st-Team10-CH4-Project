@@ -77,7 +77,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
             if (VictimCharacter->IsBlocking())
             {
-                UE_LOG(LogTemp, Warning, TEXT("%s is blocking! No damage."), *HitActor->GetName());
                 return;
             }
     
@@ -89,7 +88,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             UCSAttributeComponent* VictimAttributes = HitActor->FindComponentByClass<UCSAttributeComponent>();
             if (VictimAttributes)
             {
-                UE_LOG(LogTemp, Warning, TEXT("Server: Applying %.1f damage to %s"), DamageToApply, *HitActor->GetName());
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
             }
 
@@ -103,7 +101,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
                     if (BB)
                     {
                         BB->SetValueAsBool("ShouldBlock", true);
-                        UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldBlock set to TRUE!"), *VictimCharacter->GetName());
                     }
                 }
 

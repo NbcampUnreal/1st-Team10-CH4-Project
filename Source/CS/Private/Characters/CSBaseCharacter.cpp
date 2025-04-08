@@ -33,7 +33,9 @@ void ACSBaseCharacter::Die()
 
         GetCharacterMovement()->StopMovementImmediately();
         GetCharacterMovement()->DisableMovement();
+
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Multicast_PlayDeathMontage();
 
         AGameModeBase* GM = GetWorld()->GetAuthGameMode();
@@ -131,6 +133,7 @@ void ACSBaseCharacter::OnRep_ActionState()
     {
     case ECharacterTypes::ECT_Dead:
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         GetCharacterMovement()->DisableMovement();
         break;
     case ECharacterTypes::ECT_Unoccupied:
