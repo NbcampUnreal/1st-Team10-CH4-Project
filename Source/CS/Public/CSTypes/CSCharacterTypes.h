@@ -16,3 +16,10 @@ enum class EFacingDirection : uint8
 	EFD_FacingRight UMETA(DisplayName = "FacingRight"),
 	EFD_FacingLeft UMETA(DisplayName = "FacingLeft")
 };
+
+UENUM(BlueprintType)
+enum class EJobTypes : uint8
+{
+	EJT_Fighter UMETA(DisplayName = "Fighter"),
+	EJT_SwordMan UMETA(DisplayName = "SwordMan")
+};

@@ -10,6 +10,7 @@
 
 ACSFighterCharacter::ACSFighterCharacter()
 {
+
 }
 
 void ACSFighterCharacter::BeginPlay()
@@ -46,59 +47,33 @@ void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 }
 
 /* Combo 1 */
-void ACSFighterCharacter::PlayPCombo1Montage()
+void ACSFighterCharacter::PlayPComboMontage()
 {
+	int32 iCnt = CombatComponent->GetCombo1Cnt();
+	PlayPlayerMontage(PunchMontage[iCnt].AttackMontage, PunchMontage[iCnt].Section);
 	CombatComponent->Combo1CntIncrease();
-	PlayPlayerMontage(P_AttackMontage, "Punch1");
-}
-
-void ACSFighterCharacter::PlayPCombo2Montage()
-{
-	CombatComponent->Combo1CntIncrease();
-	PlayPlayerMontage(P_AttackMontage, "Punch2");
-}
-
-void ACSFighterCharacter::PlayPCombo3Montage()
-{
-	PlayPlayerMontage(P_AttackMontage, "Punch3");
 }
 
 void ACSFighterCharacter::PlayPComboAnim()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"), CombatComponent->GetCanCombo()));
-
 	if (!CombatComponent->GetCanCombo()) return;
 
-	if (CombatComponent->GetCombo1Cnt() == 0) PlayPCombo1Montage();
-	else if (CombatComponent->GetCombo1Cnt() == 1) PlayPCombo2Montage();
-	else if (CombatComponent->GetCombo1Cnt() == 2) PlayPCombo3Montage();
+	PlayPComboMontage();
 }
 
 /* Combo 2 */
-void ACSFighterCharacter::PlayKCombo1Montage()
+void ACSFighterCharacter::PlayKComboMontage()
 {
+	int32 iCnt = CombatComponent->GetCombo2Cnt();
+	PlayPlayerMontage(KickMontage[iCnt].AttackMontage, KickMontage[iCnt].Section);
 	CombatComponent->Combo2CntIncrease();
-	PlayPlayerMontage(K_AttackMontage, "Kick1");
-}
-
-void ACSFighterCharacter::PlayKCombo2Montage()
-{
-	CombatComponent->Combo2CntIncrease();
-	PlayPlayerMontage(K_AttackMontage, "Kick2");
-}
-
-void ACSFighterCharacter::PlayKCombo3Montage()
-{
-	PlayPlayerMontage(K_AttackMontage, "Kick3");
 }
 
 void ACSFighterCharacter::PlayKComboAnim()
 {
 	if (!CombatComponent->GetCanCombo()) return;
-
-	if (CombatComponent->GetCombo2Cnt() == 0) PlayKCombo1Montage();
-	else if (CombatComponent->GetCombo2Cnt() == 1) PlayKCombo2Montage();
-	else if (CombatComponent->GetCombo2Cnt() == 2) PlayKCombo3Montage();
+	
+	PlayKComboMontage();
 }
 
 /* Casting */
@@ -106,13 +81,13 @@ void ACSFighterCharacter::PlayPCastingAnim()
 {
 	if (!CombatComponent->GetCanCombo()) return;
 
-	PlayPlayerMontage(P_CastingMontage, "Default");
+	PlayPlayerMontage(PunchCastMontage[0].AttackMontage, PunchCastMontage[0].Section);
 }
 
 void ACSFighterCharacter::PlayKCastingAnim()
 {
 	if (!CombatComponent->GetCanCombo()) return;
 
-	PlayPlayerMontage(K_CastingMontage, "Default");
+	PlayPlayerMontage(KickCastMontage[0].AttackMontage, KickCastMontage[0].Section);
 }
 
