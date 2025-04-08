@@ -28,6 +28,12 @@ public:
     UFUNCTION(BlueprintCallable)
     void StartingSinglePlay();
 
+    UFUNCTION(BlueprintCallable)
+    void ServerTravelToLevel(FName LevelID);
+
+    UFUNCTION(BlueprintCallable)
+    void OpenLevelByID(FName LevelID);
+
     /** MatchType 관리 함수 */
     UFUNCTION(BlueprintCallable)
     void SetMatchType(EMatchType NewType) { MatchType = NewType; }

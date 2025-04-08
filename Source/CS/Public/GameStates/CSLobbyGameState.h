@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "CSTypes/CSGameTypes.h"
 #include "CSLobbyGameState.generated.h"
 
 UCLASS()
@@ -22,4 +23,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY()
+	EMatchType MatchType;
 };

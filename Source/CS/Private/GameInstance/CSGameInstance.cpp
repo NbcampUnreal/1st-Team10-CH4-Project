@@ -2,6 +2,7 @@
 #include "Controller/CSPlayerController.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
 
 void UCSGameInstance::Init()
@@ -38,12 +39,12 @@ void UCSGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 {
 	if (bWasSuccessful)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Session %s 생성 성공"), *SessionName.ToString());
-		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+		ServerTravelToLevel(FName("LobbyLevel"));
 	}
+
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to create session: %s"), *SessionName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 세션 생성 실패: %s"), *SessionName.ToString());
 	}
 }
 
@@ -86,13 +87,6 @@ void UCSGameInstance::JoinFoundSession(const FOnlineSessionSearchResult& SearchR
 	SessionInterface->JoinSession(0, NAME_GameSession, SearchResult);
 }
 
-void UCSGameInstance::StartingSinglePlay()
-{
-	if (!GetWorld()) return;
-
-	UGameplayStatics::OpenLevel(GetWorld(), FName("Single_Level"));
-}
-
 void UCSGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
 	FString ConnectString;
@@ -110,9 +104,43 @@ void UCSGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 	}
 }
 
+void UCSGameInstance::StartingSinglePlay()
+{
+	if (!GetWorld()) return;
+
+	OpenLevelByID(FName("SingleModeLevel"));
+}
+
+void UCSGameInstance::ServerTravelToLevel(FName LevelID)
+{
+	if (!LevelData) return;
+
+	const FString ContextStr = TEXT("ServerTravelToLevel");
+	if (const FLevelRow* Row = LevelData->FindRow<FLevelRow>(LevelID, ContextStr))
+	{
+		if (!Row->MapPath.IsEmpty())
+		{
+			FString TravelURL = Row->MapPath + TEXT("?listen");
+			GetWorld()->ServerTravel(TravelURL);
+		}
+	}
+}
+
+void UCSGameInstance::OpenLevelByID(FName LevelID)
+{
+	if (!LevelData) return;
+
+	const FString ContextStr = TEXT("OpenLevelByID");
+	if (const FLevelRow* Row = LevelData->FindRow<FLevelRow>(LevelID, ContextStr))
+	{
+		if (!Row->MapPath.IsEmpty())
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*Row->MapPath));
+		}
+	}
+}
+
 void UCSGameInstance::ResetLobbySettings()
 {
 	ExpectedPlayerCount = 0;
 }
-
-

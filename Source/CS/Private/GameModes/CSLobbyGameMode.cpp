@@ -5,6 +5,7 @@
 #include "Controller/CSPlayerController.h"
 #include "Managers/CSSpawnManager.h"
 #include "Camera/CameraActor.h"
+#include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSLobbyGameMode::ACSLobbyGameMode()
@@ -83,15 +84,22 @@ void ACSLobbyGameMode::StartMatchIfReady()
 
 void ACSLobbyGameMode::TryStartMatch()
 {
-	if (const ACSLobbyGameState* LobbyGameState = GetGameState<ACSLobbyGameState>())
-	{
-		if (LobbyGameState->SelectedMap != NAME_None)
-		{
-			FString MapPath = LobbyGameState->SelectedMap.ToString();
-			FString TravelURL = MapPath + TEXT("?listen");
+	const ACSLobbyGameState* LobbyGameState = GetGameState<ACSLobbyGameState>();
+	if (!LobbyGameState || LobbyGameState->SelectedMap == NAME_None) return;
 
-			bUseSeamlessTravel = true;
-			GetWorld()->ServerTravel(TravelURL);
+	if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+	{
+		if (CSGameInstance->LevelData)
+		{
+			const FString ContextStr = TEXT("TryStartMatch");
+			const FLevelRow* LevelRow = CSGameInstance->LevelData->FindRow<FLevelRow>(LobbyGameState->SelectedMap, ContextStr);
+			if (LevelRow && !LevelRow->MapPath.IsEmpty())
+			{
+				const FString TravelURL = LevelRow->MapPath + TEXT("?listen");
+
+				bUseSeamlessTravel = true;
+				GetWorld()->ServerTravel(TravelURL);
+			}
 		}
 	}
 }
