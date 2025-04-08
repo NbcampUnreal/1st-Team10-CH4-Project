@@ -76,8 +76,8 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 
 bool UBTTask_MeleeNormalAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {
-	if (!AI || !AI->GetMesh() || !AI->GetAttackMontage()) return true;
+	if (!AI || !AI->GetMesh() || !AI->GetPunchMontage()) return true;
 
 	auto* AnimInstance = AI->GetMesh()->GetAnimInstance();
-	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetAttackMontage());
+	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetPunchMontage());
 }

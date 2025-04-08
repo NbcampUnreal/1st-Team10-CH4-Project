@@ -21,14 +21,14 @@ UCSCombatComponent::UCSCombatComponent()
 
 void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName)
 {
-	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+    ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;
 
     const FName FirstSocketName = TraceStartName;
     const FVector SocketStart = Owner->GetMesh()->GetSocketLocation(FirstSocketName);
 	const FName SecondSocketName = TraceEndName;
     const FVector TraceStart = SocketStart;
-	const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
+    const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
     const float TraceRadius = 30.0f;
 
     // Sphere Trace for Objects
@@ -45,7 +45,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
     const FColor HitColor = FColor::Green;
     const float DebugDrawDuration = 2.0f;
 
-    
     bool bHit = UKismetSystemLibrary::SphereTraceSingleForObjects(
         GetWorld(),
         TraceStart,
@@ -64,10 +63,10 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
 
     if (bHit && HitResult.GetActor())
     {
-		AActor* HitActor = HitResult.GetActor();
+        AActor* HitActor = HitResult.GetActor();
         bool bAlreadyHit = HitActorsThisAttack.ContainsByPredicate([&](const TWeakObjectPtr<AActor>& WeakPtr)
         {
-                return WeakPtr.Get() == HitActor;
+            return WeakPtr.Get() == HitActor;
         });
 
         if (!bAlreadyHit)
@@ -75,7 +74,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             HitActorsThisAttack.AddUnique(HitActor);
 
             ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
-            if (VictimCharacter->IsBlocking())
+            if (VictimCharacter && VictimCharacter->IsBlocking())
             {
                 return;
             }
@@ -93,7 +92,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
 
             if (VictimCharacter)
             {
-                //  여기 추가
                 AAIBaseController* AIController = Cast<AAIBaseController>(VictimCharacter->GetController());
                 if (AIController)
                 {
@@ -109,6 +107,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
         }
     }
 }
+
 
 void UCSCombatComponent::BeginPlay()
 {
