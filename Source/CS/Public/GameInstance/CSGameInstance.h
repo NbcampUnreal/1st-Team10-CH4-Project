@@ -59,4 +59,7 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
     UDataTable* AIData;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
+    UDataTable* LevelData;
 };
