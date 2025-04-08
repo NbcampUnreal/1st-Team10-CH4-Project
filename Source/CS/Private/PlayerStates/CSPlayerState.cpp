@@ -55,12 +55,16 @@ void ACSPlayerState::OnRep_IsReady()
 
 void ACSPlayerState::OnRep_TeamID()
 {
-	// 클라이언트 UI 갱신(Team 이름 및 색상)
-	if (!ISLocalPlayerState()) return;
-	
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		/*CSPlayerController->UpdateTeamUI(TeamID);*/
+		// UI 갱신 (자기 화면만)
+		if (ISLocalPlayerState())
+		{
+			CSPlayerController->UpdateCharacterUI(SelectedCharacterID);
+		}
+
+		// 캐릭터 메시 갱신 (서버 + 모든 클라이언트 모두 변경 필요)
+		// RepNotify는 클라의 PlayerState에서만 호출됨.
 	}
 }
 
