@@ -13,7 +13,7 @@ void UCSUIBaseWidget::UpdateTeamUI_Implementation(int32 TeamID)
     // 부모에서는 아무런 로직도 구현하지 않음.
 }
 
-void UCSUIBaseWidget::UpdateCharacterUI_Implementation(FName SelectedCharacterID)
+void UCSUIBaseWidget::UpdateCharacterUI_Implementation(EJobTypes NewJob)
 {
     // 부모에서는 아무런 로직도 구현하지 않음.
 }

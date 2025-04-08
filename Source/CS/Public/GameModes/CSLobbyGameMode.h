@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "CSTypes/CSGameTypes.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSLobbyGameMode.generated.h"
 
 UCLASS()
@@ -26,7 +27,7 @@ public:
 	void ChangeTeam(APlayerController* Player);
 
 	UFUNCTION(BlueprintCallable)
-	void SetPlayerSelection(APlayerController* Player, FName CharacterID);
+	void SetPlayerSelection(APlayerController* Player, EJobTypes NewJob);
 
 protected:
 	/** 현재 매치 타입 (Versus / Coop) */

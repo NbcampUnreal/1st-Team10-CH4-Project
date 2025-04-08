@@ -20,7 +20,7 @@ public:
 	void SetPlayerRole(int PlayerRole);
 	void HealthUpdate(float Health, float MaxHealth);
 	void UpdateTutorialObjectiveUI(const FText& ObjectiveText);
-	void UpdateCharacterUI(FName SelectedCharacterID);
+	void UpdateCharacterUI(EJobTypes NewJob);
 	void UpdateSelectedMapUI(FName SelectedMap);
 	void UpdateMatchTimeUI(int32 Time);
 	void OnMatchPhaseChanged(EMatchPhase MatchPhase);

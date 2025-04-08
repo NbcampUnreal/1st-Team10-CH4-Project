@@ -100,8 +100,7 @@ void ACSGameModeBase::SpawnAllPlayers()
 			{
 				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 				{
-					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, TEXT("SpawnPlayer"));
-
+					const FCharacterRow* Row = CSGameInstance->FindCharacterRowByJob(CSPlayerState->SelectedJob);
 					if (!Row || !Row->CharacterClass.IsValid()) continue;
 
 					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();

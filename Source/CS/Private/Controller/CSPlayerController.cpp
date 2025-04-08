@@ -247,11 +247,11 @@ void ACSPlayerController::UpdateTeamUI(int32 TeamID)
 	}
 }
 
-void ACSPlayerController::UpdateCharacterUI(FName SelectedCharacterID)
+void ACSPlayerController::UpdateCharacterUI(EJobTypes NewJob)
 {
 	if (IsLocalController() && CurrentActiveUI)
 	{
-		CurrentActiveUI->UpdateCharacterUI(SelectedCharacterID);
+		CurrentActiveUI->UpdateCharacterUI(NewJob);
 	}
 }
 

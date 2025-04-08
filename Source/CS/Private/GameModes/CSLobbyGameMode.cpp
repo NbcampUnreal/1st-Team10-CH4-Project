@@ -48,7 +48,7 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		}
 	}
 
-	SetPlayerSelection(NewPlayer, FName("Fingter"));
+	SetPlayerSelection(NewPlayer, EJobTypes::EJT_Fighter);
 
 	FTimerHandle DelayTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, this, &ACSLobbyGameMode::PositionLobbyCharacters, 0.2f, false);
@@ -245,11 +245,11 @@ void ACSLobbyGameMode::AssignPlayerToSlot(ACSPlayerState* PlayerState, ESpawnSlo
 	}
 }
 
-void ACSLobbyGameMode::SetPlayerSelection(APlayerController* Player, FName CharacterID)
+void ACSLobbyGameMode::SetPlayerSelection(APlayerController* Player, EJobTypes NewJob)
 {
 	if (ACSPlayerState* CSPlayerState = Player->GetPlayerState<ACSPlayerState>())
 	{
-		CSPlayerState->SelectedCharacterID = CharacterID;
+		CSPlayerState->SelectedJob = NewJob;
 	}
 }
 

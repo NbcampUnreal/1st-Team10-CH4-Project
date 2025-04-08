@@ -13,7 +13,7 @@ ACSPlayerState::ACSPlayerState()
 	bIsAlive = true;
 	TeamID = -1;
 	PlayerIndex = -1;
-	SelectedCharacterID = NAME_None;
+	SelectedJob = EJobTypes::EJT_None;
 }
 
 void ACSPlayerState::BeginPlay()
@@ -38,7 +38,7 @@ void ACSPlayerState::SetIsReady(bool bNewReady)
 void ACSPlayerState::ResetLobbySettings()
 {
 	bIsReady = false;
-	SelectedCharacterID = NAME_None;
+	SelectedJob = EJobTypes::EJT_None;
 	bIsAlive = true;
 }
 
@@ -60,7 +60,7 @@ void ACSPlayerState::OnRep_TeamID()
 		// UI 갱신 (자기 화면만)
 		if (ISLocalPlayerState())
 		{
-			CSPlayerController->UpdateCharacterUI(SelectedCharacterID);
+			CSPlayerController->UpdateTeamUI(TeamID);
 		}
 
 		// 캐릭터 메시 갱신 (서버 + 모든 클라이언트 모두 변경 필요)
@@ -68,14 +68,14 @@ void ACSPlayerState::OnRep_TeamID()
 	}
 }
 
-void ACSPlayerState::OnRep_CharacterID()
+void ACSPlayerState::OnRep_SelectedJob()
 {
 	// 클라이언트 UI 갱신(Character Mesh 등)
 	if (!ISLocalPlayerState()) return;
 
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(GetOwner()))
 	{
-		/*CSPlayerController->UpdateCharacterUI(SelectedCharacterID);*/
+		CSPlayerController->UpdateCharacterUI(SelectedJob);
 	}
 }
 
@@ -86,7 +86,7 @@ void ACSPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACSPlayerState, bIsReady);
 	DOREPLIFETIME(ACSPlayerState, PlayerIndex);
 	DOREPLIFETIME(ACSPlayerState, TeamID);
-	DOREPLIFETIME(ACSPlayerState, SelectedCharacterID);
+	DOREPLIFETIME(ACSPlayerState, SelectedJob);
 	DOREPLIFETIME(ACSPlayerState, bIsAlive);
 }
 
