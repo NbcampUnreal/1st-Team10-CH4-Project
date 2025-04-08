@@ -16,6 +16,7 @@ EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeCompone
 	if (auto* const Player = UGameplayStatics::GetPlayerCharacter(GetWorld(),0))
 	{
 		auto const PlayerLocation = Player->GetActorLocation();
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("TargetActor"), Player);
 		if (SearchRandom)
 		{
 			FNavLocation Loc;

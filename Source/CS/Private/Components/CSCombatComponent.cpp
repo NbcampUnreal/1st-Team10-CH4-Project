@@ -21,14 +21,14 @@ UCSCombatComponent::UCSCombatComponent()
 
 void UCSCombatComponent::Server_PerformHitCheck_Implementation()
 {
-	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+    ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;
 
     const FName FirstSocketName = FName("hand_r");
     const FVector SocketStart = Owner->GetMesh()->GetSocketLocation(FirstSocketName);
-	const FName SecondSocketName = FName("hand_l");
+    const FName SecondSocketName = FName("hand_l");
     const FVector TraceStart = SocketStart;
-	const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
+    const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
     const float TraceRadius = 30.0f;
 
     // Sphere Trace for Objects
@@ -45,7 +45,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
     const FColor HitColor = FColor::Green;
     const float DebugDrawDuration = 2.0f;
 
-    
     bool bHit = UKismetSystemLibrary::SphereTraceSingleForObjects(
         GetWorld(),
         TraceStart,
@@ -64,10 +63,10 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
 
     if (bHit && HitResult.GetActor())
     {
-		AActor* HitActor = HitResult.GetActor();
+        AActor* HitActor = HitResult.GetActor();
         bool bAlreadyHit = HitActorsThisAttack.ContainsByPredicate([&](const TWeakObjectPtr<AActor>& WeakPtr)
         {
-                return WeakPtr.Get() == HitActor;
+            return WeakPtr.Get() == HitActor;
         });
 
         if (!bAlreadyHit)
@@ -75,12 +74,12 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
             HitActorsThisAttack.AddUnique(HitActor);
 
             ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
-            if (VictimCharacter->IsBlocking())
+            if (VictimCharacter && VictimCharacter->IsBlocking())
             {
                 UE_LOG(LogTemp, Warning, TEXT("%s is blocking! No damage."), *HitActor->GetName());
                 return;
             }
-    
+
             // Damage Calculation
             float DamageToApply = 10.0f;
             AController* InstigatorController = Owner->GetController();
@@ -95,15 +94,25 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
 
             if (VictimCharacter)
             {
-                //  여기 추가
                 AAIBaseController* AIController = Cast<AAIBaseController>(VictimCharacter->GetController());
                 if (AIController)
                 {
                     UBlackboardComponent* BB = AIController->GetBlackboardComponent();
                     if (BB)
                     {
-                        BB->SetValueAsBool("ShouldBlock", true);
-                        UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldBlock set to TRUE!"), *VictimCharacter->GetName());
+                        float RandomValue = FMath::FRand(); // 0.0 ~ 1.0
+                        if (RandomValue < 0.5f)
+                        {
+                            BB->SetValueAsBool("ShouldBlock", true);
+                            BB->SetValueAsBool("ShouldDodge", false);
+                            UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldBlock set to TRUE!"), *VictimCharacter->GetName());
+                        }
+                        else
+                        {
+                            BB->SetValueAsBool("ShouldBlock", false);
+                            BB->SetValueAsBool("ShouldDodge", true);
+                            UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldDodge set to TRUE!"), *VictimCharacter->GetName());
+                        }
                     }
                 }
 
@@ -112,6 +121,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
         }
     }
 }
+
 
 void UCSCombatComponent::BeginPlay()
 {

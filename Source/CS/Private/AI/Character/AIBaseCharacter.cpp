@@ -61,7 +61,7 @@ void AAIBaseCharacter::SetupPlayerInputComponent(class UInputComponent* AIInputC
 UBehaviorTree* AAIBaseCharacter::GetBehaviorTree() const { return Tree; }
 APatrolPath* AAIBaseCharacter::GetPatrolPath() const { return PatrolPath; }
 
-FName AAIBaseCharacter::GetPunchMontage() const
+FName AAIBaseCharacter::GetPunchName() const
 {
 	TArray<FName> Sections = {
 		FName("Punch1"),
@@ -72,45 +72,58 @@ FName AAIBaseCharacter::GetPunchMontage() const
 	int32 Index = FMath::RandRange(0, Sections.Num() - 1);
 	return Sections[Index];
 }
-FName AAIBaseCharacter::GetJumpMontage() const
+FName AAIBaseCharacter::GetKickName() const
+{
+	TArray<FName> Sections = {
+		FName("Kick1"),
+		FName("Kick2"),
+		FName("Kick3")
+	};
+
+	int32 Index = FMath::RandRange(0, Sections.Num() - 1);
+	return Sections[Index];
+}
+FName AAIBaseCharacter::GetLowComboAttackName() const
 {
 	return FName("Default");
 }
-FName AAIBaseCharacter::GetCrouchMontage() const
+FName AAIBaseCharacter::GetRangeComboAttackName() const
+{
+	return FName("Default");
+}
+FName AAIBaseCharacter::GetJumpName() const
+{
+	return FName("Default");
+}
+FName AAIBaseCharacter::GetCrouchName() const
 {
 	return FName("Default");
 }
 
 int AAIBaseCharacter::MeleeAttack_Implementation()
 {
-	if (!CombatComponent) return 0;
+	AI_Attack(GetPunchMontage(), GetPunchName());
+	return 1;
+}
+int AAIBaseCharacter::KickAttack_Implementation()
+{
+	AI_Attack(GetKickMontage(), GetKickName());
+	return 1;
+}
+int AAIBaseCharacter::LowComboAttack_Implementation()
+{
+	AI_Attack(GetLowComboAttackMontage(), GetLowComboAttackName());
+	return 1;
+}
+int AAIBaseCharacter::RangeComboAttack_Implementation()
+{
+	AI_Attack(GetRangeComboAttackMontage(), GetRangeComboAttackName());
+	return 1;
+}
 
-	UAnimMontage* SelectedMontage = nullptr;
-	FName SectionName = NAME_None;
 
-	switch (CurrentStance)
-	{
-	case ECharacterStance::Standing:
-		SelectedMontage = GetAttackMontage();
-		SectionName = GetPunchMontage();
-		break;
-
-	case ECharacterStance::Jumping:
-		SelectedMontage = GetJumpAttackMontage();
-		SectionName = GetJumpMontage();
-		break;
-
-	case ECharacterStance::Crouching:
-		SelectedMontage = GetCrouchAttackMontage();
-		SectionName = GetCrouchMontage();
-		break;
-
-	default:
-		return 0;
-	}
-
-	if (!SelectedMontage) return 0;
-
+int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, FName SectionName)
+{
 	CombatComponent->PerformAttack(SelectedMontage, SectionName);
 	return 1;
 }
@@ -130,9 +143,14 @@ void AAIBaseCharacter::PlayHitReactMontage()
 	
 	if (AnimInstance && HitReactMontage)
 	{
-		
 		AnimInstance->Montage_Play(HitReactMontage);
-		FName SectionName = "HitReact1";
+		TArray<FName> Sections = {
+			FName("HitReact1"),
+			FName("HitReact2"),
+		};
+
+		int32 Index = FMath::RandRange(0, Sections.Num() - 1);
+		FName SectionName = Sections[Index];
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 	

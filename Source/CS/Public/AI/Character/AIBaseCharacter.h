@@ -33,16 +33,29 @@ public:
 
 	UBehaviorTree* GetBehaviorTree() const;
 	APatrolPath* GetPatrolPath() const;
-	FName GetPunchMontage() const;
-	FName GetJumpMontage() const;
-	FName GetCrouchMontage() const;
+	
+	FName GetPunchName() const;
+	FName GetKickName() const;
+	FName GetLowComboAttackName() const;
+	FName GetRangeComboAttackName() const;
+	FName GetJumpName() const;
+	FName GetCrouchName() const;
+	
 	UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
-	UAnimMontage* GetAttackMontage() const { return AttackMontage; }
+	UAnimMontage* GetPunchMontage() const { return PunchMontage; }
+	UAnimMontage* GetKickMontage() const { return KickMontage; }
+	UAnimMontage* GetLowComboAttackMontage() const { return LowComboAttackMontage; }
+	UAnimMontage* GetRangeComboAttackMontage() const { return RangeComboAttackMontage; }
 	UAnimMontage* GetBlockMontage() const { return BlockMontage; }
 	UAnimMontage* GetJumpAttackMontage() const { return JumpAttackMontage; }
 	UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
 	
 	virtual int MeleeAttack_Implementation() override;
+	virtual int KickAttack_Implementation() override;
+	virtual int LowComboAttack_Implementation() override;
+	virtual int RangeComboAttack_Implementation() override;
+
+	virtual int AI_Attack(UAnimMontage* SelectedMontage, FName SectionName);
 	void ResumeMovement();
 	
 	virtual void StopBlock();
@@ -66,12 +79,21 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* PunchMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* KickMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* BlockMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* JumpAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* CrouchAttackMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* LowComboAttackMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* RangeComboAttackMontage;
 	
 	UPROPERTY()
 	class UWidgetComponent* WidgetComponenet;

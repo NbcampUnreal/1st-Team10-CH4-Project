@@ -21,7 +21,19 @@ class CS_API ICombatInterface
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	int MeleeAttack();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	int KickAttack();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	int LowComboAttack();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	int RangeComboAttack();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	int Block();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 Dodge(AActor* Attacker);
 };

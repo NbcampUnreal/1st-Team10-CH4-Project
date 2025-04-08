@@ -19,8 +19,11 @@ public:
 	void EndCrouch();
 	void StartComboAttack();
 	
-	UFUNCTION()
 	virtual int Block_Implementation() override;
+	virtual int32 Dodge_Implementation(AActor* Attacker) override;
+	void Dodge_StartDash(AActor* Attacker);
+	void Dodge_MoveToSafeZone(AActor* Attacker);
+
 	UFUNCTION()
 	virtual void StopBlock() override;
 	
