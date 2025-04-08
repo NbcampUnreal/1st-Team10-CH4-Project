@@ -14,7 +14,7 @@ void UBTService_DecideAttackType::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
 	const int32 Rand = FMath::RandRange(0, 99);
-	int32 ChosenAttack = 0; /
+	int32 ChosenAttack = 0;
 
 	if (Rand < 10)
 	{
