@@ -9,7 +9,6 @@
 #include "GameStates/CSLobbyGameState.h"
 #include "GameInstance/CSGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
-#include "GameModes/CSSingleLobbyGameMode.h"
 #include "UI/CSUIBaseWidget.h"
 
 
@@ -208,12 +207,12 @@ bool ACSPlayerController::Server_RequestReturnToMainMenu_Validate()
 
 void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
 {
-	ACSSingleLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSSingleLobbyGameMode>();
+	/*ACSSingleLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSSingleLobbyGameMode>();
 
 	if (LobbyGameMode)
 	{
 		LobbyGameMode->ReturnToMainMenu(this);
-	}
+	}*/
 }
 
 void ACSPlayerController::Client_OnSuddenDeath_Implementation()
