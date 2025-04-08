@@ -53,8 +53,8 @@ public:
     void ClearHitActors();
 
     UFUNCTION(Server, Reliable, BlueprintCallable)
-    void Server_PerformHitCheck();
-	void Server_PerformHitCheck_Implementation();
+    void Server_PerformHitCheck(FName TraceStartName, FName TraceEndName);
+	void Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName);
 
     UFUNCTION()
     void PerformAttack(UAnimMontage* Montage, FName SectionName);

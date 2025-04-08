@@ -19,14 +19,14 @@ UCSCombatComponent::UCSCombatComponent()
     bCanCombo = true;
 }
 
-void UCSCombatComponent::Server_PerformHitCheck_Implementation()
+void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName)
 {
 	ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;
 
-    const FName FirstSocketName = FName("hand_r");
+    const FName FirstSocketName = TraceStartName;
     const FVector SocketStart = Owner->GetMesh()->GetSocketLocation(FirstSocketName);
-	const FName SecondSocketName = FName("hand_l");
+	const FName SecondSocketName = TraceEndName;
     const FVector TraceStart = SocketStart;
 	const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
     const float TraceRadius = 30.0f;

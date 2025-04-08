@@ -81,7 +81,8 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
-		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::PlayAttackMontage);
+		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::GuardStart);
+		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::GuardEnd);
 	}
 }
 
@@ -138,6 +139,19 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 		AnimInstance->Montage_JumpToSection(SectionName);
 		StartAttack(PlayMontage, Section);
 	}
+}
+
+void ACSPlayerCharacter::GuardStart()
+{
+	if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	{
+		ActionState = ECharacterTypes::ECT_Defending;
+	}
+}
+
+void ACSPlayerCharacter::GuardEnd()
+{
+	ActionState = ECharacterTypes::ECT_Unoccupied;
 }
 
 void ACSPlayerCharacter::StopMovement_Implementation()
@@ -204,8 +218,6 @@ void ACSPlayerCharacter::DuringAttack()
 
 void ACSPlayerCharacter::EndAttack()
 {
-	//ComboReset();
-
 	if (CombatComponent)
 	{
 		CombatComponent->ResetComboData();
