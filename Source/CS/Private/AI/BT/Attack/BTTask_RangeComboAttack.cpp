@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/BT/BTTask_RangeComboAttack.h"
+#include "AI/BT/Attack/BTTask_RangeComboAttack.h"
 #include "AI/Character/AIBaseCharacter.h"
 #include "AI/Controller/AIBaseController.h"
 #include "AI/Interface/CombatInterface.h"
