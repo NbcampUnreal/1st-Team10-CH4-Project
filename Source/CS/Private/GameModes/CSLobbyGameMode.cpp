@@ -92,6 +92,9 @@ void ACSLobbyGameMode::TryStartMatch()
 
 	if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
 	{
+		const int32 PlayerCount = GameState->PlayerArray.Num();
+		CSGameInstance->ExpectedPlayerCount = PlayerCount;
+
 		if (CSGameInstance->LevelData)
 		{
 			const FString ContextStr = TEXT("TryStartMatch");
