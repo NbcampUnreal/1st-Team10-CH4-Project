@@ -1,17 +1,18 @@
-#include "AI/BT/BTTask_MeleeNormalAttack.h"
+
+#include "AI/BT/Attack/BTTask_KickAttack.h"
 #include "AI/Character/AIBaseCharacter.h"
 #include "AI/Controller/AIBaseController.h"
 #include "AI/Interface/CombatInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
-UBTTask_MeleeNormalAttack::UBTTask_MeleeNormalAttack(FObjectInitializer const& ObjectInitializer) :
+UBTTask_KickAttack::UBTTask_KickAttack(FObjectInitializer const& ObjectInitializer) :
 UBTTask_BlackboardBase{ObjectInitializer}
 {
-	NodeName = TEXT("Melee Attack");
+	NodeName = TEXT("Kick Attack");
 }
 
-EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	const bool bOutOfRange = !OwnerComp.GetBlackboardComponent()->GetValueAsBool(GetSelectedBlackboardKey());
 	if (bOutOfRange)
@@ -19,6 +20,13 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
+	
+	
 	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
@@ -28,15 +36,18 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 			{
 				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
 
-				// 공격 애니메이션이 끝났는지 확인
+			
 				if (MontageHasfinished(NPC))
 				{
-					Combat->Execute_MeleeAttack(NPC);
+					BB->SetValueAsBool(FName("IsBusy"), true);
+
+					Combat->Execute_KickAttack(NPC);
+
 					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
-						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishLatentTaskEarly, &OwnerComp),
-						2.0f, false
+						FTimerDelegate::CreateUObject(this, &UBTTask_KickAttack::FinishLatentTaskEarly, &OwnerComp),
+						0.4f, false
 					);
 
 					return EBTNodeResult::InProgress;
@@ -48,7 +59,7 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 	return EBTNodeResult::Failed;
 }
 
-void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_KickAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
 {
 	if (!OwnerComp) return;
 
@@ -56,7 +67,11 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 	{
 		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
 		{
-			
+			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
+			{
+				BBComp->SetValueAsBool(FName("IsBusy"), false);
+				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+			}
 			if (MontageHasfinished(NPC))
 			{
 				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
@@ -66,7 +81,7 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 				
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
-					FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishLatentTaskEarly, OwnerComp),
+					FTimerDelegate::CreateUObject(this, &UBTTask_KickAttack::FinishLatentTaskEarly, OwnerComp),
 					0.2f, false
 				);
 			}
@@ -74,10 +89,10 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 	}
 }
 
-bool UBTTask_MeleeNormalAttack::MontageHasfinished(AAIBaseCharacter* const AI)
+bool UBTTask_KickAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {
-	if (!AI || !AI->GetMesh() || !AI->GetAttackMontage()) return true;
+	if (!AI || !AI->GetMesh() || !AI->GetKickMontage()) return true;
 
 	auto* AnimInstance = AI->GetMesh()->GetAnimInstance();
-	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetAttackMontage());
+	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetKickMontage());
 }

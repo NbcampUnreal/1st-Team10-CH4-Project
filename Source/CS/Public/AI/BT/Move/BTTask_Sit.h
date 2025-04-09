@@ -4,19 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "BTTask_PerformStanceAction.generated.h"
+#include "BTTask_Sit.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CS_API UBTTask_PerformStanceAction : public UBTTask_BlackboardBase
+class CS_API UBTTask_Sit : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
+
 public:
-	explicit UBTTask_PerformStanceAction(FObjectInitializer const& ObjectInitializer);
+	UBTTask_Sit();
+
+protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	
-	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector StanceKey;
+	void FinishSit(UBehaviorTreeComponent* OwnerComp);
+private:
+	FTimerHandle SitFinishHandle;
 };

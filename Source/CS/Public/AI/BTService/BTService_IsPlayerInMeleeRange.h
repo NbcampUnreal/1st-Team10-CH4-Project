@@ -12,8 +12,9 @@ class CS_API UBTService_IsPlayerInMeleeRange : public UBTService_BlackboardBase
 	GENERATED_BODY()
 public:
 	UBTService_IsPlayerInMeleeRange();
-	void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+
 private:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess=true))
-	float MeleeRange = 2.5f;
+	float MeleeRange = 80.0f;
 };
