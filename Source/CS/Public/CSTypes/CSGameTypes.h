@@ -34,6 +34,10 @@ UENUM(BlueprintType)
 enum class ESpawnSlotType : uint8
 {
     None                    UMETA(DisplayName = "None"),
+
+    // 싱글 모드
+    Single_Player_Slot0     UMETA(DisplayName = "Single - Player"),
+
     // 대전모드 팀 0 (왼쪽)
     Versus_Team0_Slot0      UMETA(DisplayName = "Versus - Team0 - Slot0"),
     Versus_Team0_Slot1      UMETA(DisplayName = "Versus - Team0 - Slot1"),
