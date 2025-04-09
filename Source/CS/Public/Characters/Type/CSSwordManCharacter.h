@@ -27,7 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
 	UInputAction* Light_ComboAction;
 	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
-	UInputAction* Heavy_AttackAction;
+	UInputAction* Heavy_ComboAction;
+	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
+	UInputAction* Combination_Action;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TArray<FAttackMontageStruct> LightMontage;
@@ -36,11 +38,17 @@ public:
 	TArray<FAttackMontageStruct> HeavyMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TArray<FAttackMontageStruct> CombinationMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<UAnimMontage> CounterMontage;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float CounterHoldThreshold = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float CounterAttackDamage = 10.f;
 
 private:
 	void HandleLightAttackPress();
@@ -48,10 +56,12 @@ private:
 	void CheckForCounterAttack();
 	void PlayLightComboMontage();
 	void PlayHeavyAttackAnim();
+	void PlayCombinationAnim();
 
 	FTimerHandle LightAttackHoldTimer;
 
 	bool bIsLightAttackPressed = false;
 	bool bPerformedCounter = false;
+
 
 };

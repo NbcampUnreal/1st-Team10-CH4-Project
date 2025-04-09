@@ -17,6 +17,12 @@ void ACSSwordManCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Initialize the CombatComponent if not already set
+	if (!CombatComponent)
+	{
+		CombatComponent = FindComponentByClass<UCSCombatComponent>();
+	}
+
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 	{
@@ -40,15 +46,17 @@ void ACSSwordManCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	{
 		EnhancedInputComponent->BindAction(Light_ComboAction, ETriggerEvent::Started, this, &ACSSwordManCharacter::HandleLightAttackPress);
 		EnhancedInputComponent->BindAction(Light_ComboAction, ETriggerEvent::Completed, this, &ACSSwordManCharacter::HandleLightAttackRelease);
-		EnhancedInputComponent->BindAction(Heavy_AttackAction, ETriggerEvent::Started, this, &ACSSwordManCharacter::PlayHeavyAttackAnim);
+		EnhancedInputComponent->BindAction(Heavy_ComboAction, ETriggerEvent::Started, this, &ACSSwordManCharacter::PlayHeavyAttackAnim);
+		EnhancedInputComponent->BindAction(Combination_Action, ETriggerEvent::Started, this, &ACSSwordManCharacter::PlayCombinationAnim);
 	}
 }
 
 void ACSSwordManCharacter::HandleLightAttackPress()
 {
-	if (CombatComponent || CombatComponent->GetCanCombo())
+	UE_LOG(LogTemp, Warning, TEXT("HandleLightAttackPress"));
+	if (CombatComponent && CombatComponent->GetCanCombo())
 	{
-
+		UE_LOG(LogTemp, Warning, TEXT("HandleLightAttackPress 2"));
 		bIsLightAttackPressed = true;
 		bPerformedCounter = false;
 
@@ -69,7 +77,6 @@ void ACSSwordManCharacter::HandleLightAttackRelease()
 
 	if (!bPerformedCounter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Light Attack Released AND Play Anim"));
 		PlayLightComboMontage();
 	}
 }
@@ -90,16 +97,17 @@ void ACSSwordManCharacter::CheckForCounterAttack()
 
 void ACSSwordManCharacter::PlayLightComboMontage()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Play Light Combo Montage"));
-
 	if (!CombatComponent || !CombatComponent->GetCanCombo() || LightMontage.Num() <= 0) return;
 
+	UE_LOG(LogTemp, Warning, TEXT("PlayLightComboMontage"));
 	int32 iCnt = CombatComponent->GetCombo1Cnt();
 
 	if (LightMontage.IsValidIndex(iCnt))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayLightComboMontage %d"), iCnt);
 		if (LightMontage[iCnt].AttackMontage)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayLightComboMontage %s"), *LightMontage[iCnt].AttackMontage->GetName());
 			PlayPlayerMontage(LightMontage[iCnt].AttackMontage, LightMontage[iCnt].Section);
 			CombatComponent->Combo1CntIncrease();
 		}
@@ -125,6 +133,30 @@ void ACSSwordManCharacter::PlayHeavyAttackAnim()
 		if (HeavyMontage[iCnt].AttackMontage)
 		{
 			PlayPlayerMontage(HeavyMontage[iCnt].AttackMontage, HeavyMontage[iCnt].Section);
+			CombatComponent->Combo1CntIncrease();
+		}
+		else
+		{
+			CombatComponent->ResetComboData();
+		}
+	}
+	else
+	{
+		CombatComponent->ResetComboData();
+	}
+}
+
+void ACSSwordManCharacter::PlayCombinationAnim()
+{
+	if (!CombatComponent || !CombatComponent->GetCanCombo() || CombinationMontage.Num() <= 0) return;
+
+	int32 iCnt = CombatComponent->GetCombo1Cnt();
+
+	if (CombinationMontage.IsValidIndex(iCnt))
+	{
+		if (CombinationMontage[iCnt].AttackMontage)
+		{
+			PlayPlayerMontage(CombinationMontage[iCnt].AttackMontage, CombinationMontage[iCnt].Section);
 			CombatComponent->Combo1CntIncrease();
 		}
 		else

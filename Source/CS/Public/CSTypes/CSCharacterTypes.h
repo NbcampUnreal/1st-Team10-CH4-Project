@@ -17,7 +17,6 @@ public:
 	TSubclassOf<UAnimInstance> LobbyAnimClass = nullptr;
 };
 
-
 UENUM(BlueprintType)
 enum class ECharacterTypes : uint8
 {
