@@ -22,6 +22,13 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	BB->SetValueAsBool(FName("IsBusy"), true);
+
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
 	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
@@ -30,19 +37,17 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
 				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
-
+				NPC->StopMovement();
 			
 				if (MontageHasfinished(NPC))
 				{
 					Combat->Execute_LowComboAttack(NPC);
-
 					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, &OwnerComp),
-						1.5f, false
+						2.0f, false
 					);
-
 					return EBTNodeResult::InProgress;
 				}
 			}
@@ -60,14 +65,20 @@ void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Owner
 	{
 		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
 		{
-			
+			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
+			{
+				BBComp->SetValueAsBool(FName("IsBusy"), false);
+				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+				BBComp->SetValueAsInt(FName("AttackType"), 1);
+			}
+
 			if (MontageHasfinished(NPC))
 			{
+				NPC->ResumeMovement();
 				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 			}
 			else
 			{
-				
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
 					FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, OwnerComp),
@@ -77,6 +88,7 @@ void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Owner
 		}
 	}
 }
+
 
 bool UBTTask_LowComboAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {

@@ -13,14 +13,10 @@ class CS_API AAIBossCharacter : public AAIBaseCharacter
 public:
 	AAIBossCharacter();
 	
-	void JumpAction();
-	void EndJump();
-	void CrouchAction();
-	void EndCrouch();
-	void StartComboAttack();
-	
 	virtual int Block_Implementation() override;
-	virtual int32 Dodge_Implementation(AActor* Attacker) override;
+	virtual int Dodge_Implementation(AActor* Attacker) override;
+	virtual int RunAway_Implementation(AActor* Attacker) override;
+	
 	void Dodge_StartDash(AActor* Attacker);
 	void Dodge_MoveToSafeZone(AActor* Attacker);
 
@@ -34,6 +30,5 @@ private:
 
 	FTimerHandle ComboResetTimerHandle;
 	int32 CurrentComboIndex = 0;
-
-	void ResetCombo();
+	
 };

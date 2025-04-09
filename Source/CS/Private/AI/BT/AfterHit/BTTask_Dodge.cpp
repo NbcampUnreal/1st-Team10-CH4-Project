@@ -19,8 +19,7 @@ EBTNodeResult::Type UBTTask_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	AAIController* AIController = OwnerComp.GetAIOwner();
 	AAIBaseCharacter* NPC = Cast<AAIBaseCharacter>(AIController->GetPawn());
 	if (!NPC) return EBTNodeResult::Failed;
-
-
+	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	AActor* Attacker = Cast<AActor>(BB->GetValueAsObject(TargetActorKey.SelectedKeyName));
 	if (!Attacker) return EBTNodeResult::Failed;
@@ -31,19 +30,14 @@ EBTNodeResult::Type UBTTask_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 		if (Result > 0)
 		{
-			UE_LOG(LogTemp, Log, TEXT("회피 행동 시작"));
-
+			
 			NPC->GetWorldTimerManager().SetTimer(
 				DodgeTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_Dodge::FinishDodge, &OwnerComp),
-				1.5f, false
+				1.0f, false
 			);
 
 			return EBTNodeResult::InProgress;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("회피 행동 실패"));
 		}
 	}
 
@@ -52,7 +46,26 @@ EBTNodeResult::Type UBTTask_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 void UBTTask_Dodge::FinishDodge(UBehaviorTreeComponent* OwnerComp)
 {
-	UE_LOG(LogTemp, Log, TEXT("회피 종료 및 태스크 완료"));
+	UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent();
+	if (BB)
+	{
+		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+		BB->SetValueAsBool(ShouldDodgeKey.SelectedKeyName, false);
+		AAIController* AICon = OwnerComp->GetAIOwner();
+		AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon ? AICon->GetPawn() : nullptr);
+		AActor* TargetActor = Cast<AActor>(BB->GetValueAsObject(FName("TargetActor")));
+
+		if (AIPawn && TargetActor)
+		{
+			FVector MyLoc = AIPawn->GetActorLocation();
+			FVector TargetLoc = TargetActor->GetActorLocation();
+			float DirectionY = MyLoc.Y < TargetLoc.Y ? 1.f : -1.f;
+			FRotator NewRot = FRotator(0.f, DirectionY > 0.f ? 90.f : -90.f, 0.f);
+			AIPawn->SetActorRotation(NewRot);
+			AICon->SetControlRotation(NewRot);
+		}
+	}
 
 	FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
+
 }

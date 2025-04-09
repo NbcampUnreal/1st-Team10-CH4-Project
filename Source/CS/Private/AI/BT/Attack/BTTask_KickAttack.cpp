@@ -20,6 +20,13 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	BB->SetValueAsBool(FName("IsBusy"), true);
+	
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
 	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
@@ -58,7 +65,11 @@ void UBTTask_KickAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp
 	{
 		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
 		{
-			
+			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
+			{
+				BBComp->SetValueAsBool(FName("IsBusy"), false);
+				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+			}
 			if (MontageHasfinished(NPC))
 			{
 				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);

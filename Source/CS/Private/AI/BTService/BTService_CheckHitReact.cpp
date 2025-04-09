@@ -22,13 +22,12 @@ void UBTService_CheckHitReact::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 
-
 	bool bIsBlockingNow = BB->GetValueAsBool(ShouldBlockKey.SelectedKeyName);
 	if (bIsBlockingNow) return;
-
-
+	
 	bool bShouldBlock = AICharacter->IsInHitReact();
 	if (bShouldBlock)
+		
 	{
 		BB->SetValueAsBool(ShouldBlockKey.SelectedKeyName, true);
 	}

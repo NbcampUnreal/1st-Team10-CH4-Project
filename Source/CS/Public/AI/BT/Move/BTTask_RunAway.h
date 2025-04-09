@@ -20,6 +20,12 @@ public:
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
+	void FinishRunAway(UBehaviorTreeComponent* OwnerComp);
+
 	UPROPERTY(EditAnywhere, Category = "RunAway")
-	float RunDistance = 200.0f; 
+	float RunDistance = 200.f;
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector TargetActorKey;
+private:
+	FTimerHandle RunAwayTimerHandle;
 };

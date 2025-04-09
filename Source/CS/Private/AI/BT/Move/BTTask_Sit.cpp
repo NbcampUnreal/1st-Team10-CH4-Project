@@ -4,6 +4,7 @@
 #include "AI/BT/Move/BTTask_Sit.h"
 #include "AIController.h"
 #include "AI/Character/AIBaseCharacter.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 
 UBTTask_Sit::UBTTask_Sit()
@@ -16,11 +17,35 @@ EBTNodeResult::Type UBTTask_Sit::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	AAIController* AICon = OwnerComp.GetAIOwner();
 	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
 
-	if (AIPawn)
+	if (!AIPawn) return EBTNodeResult::Failed;
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	BB->SetValueAsBool(FName("IsBusy"), true);
+	UAnimMontage* SitMontage = AIPawn->GetSitMontage();
+	if (SitMontage)
 	{
-		UAnimMontage* SitMontage = AIPawn->GetSitMontage();
-		AIPawn->PlayAnimMontage(SitMontage); 
-		return EBTNodeResult::Succeeded;
+		AIPawn->PlayAnimMontage(SitMontage);
+		AIPawn->StopMovement();
+		
+		AIPawn->GetWorldTimerManager().SetTimer(
+			SitFinishHandle,
+			FTimerDelegate::CreateUObject(this, &UBTTask_Sit::FinishSit, &OwnerComp),
+			0.8f, false
+		);
+		return EBTNodeResult::InProgress;
 	}
 	return EBTNodeResult::Failed;
+}
+
+void UBTTask_Sit::FinishSit(UBehaviorTreeComponent* OwnerComp)
+{
+	AAIController* AICon = OwnerComp->GetAIOwner();
+	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
+	AIPawn->ResumeMovement();
+	UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent();
+	if (BB)
+	{
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		BB->SetValueAsBool(FName("ShouldCrouch"), false);
+	}
+	FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 }

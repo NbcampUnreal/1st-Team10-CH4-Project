@@ -36,6 +36,10 @@ public:
 	virtual bool IsBlocking();
 	virtual bool IsInHitReact();
 	bool bIsBlocking = false;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UCSAttributeComponent* Attributes;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
@@ -53,9 +57,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* DeathMontage;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UCSAttributeComponent* Attributes;
+	
 
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;

@@ -65,23 +65,24 @@ public:
 	
 	virtual void Die() override;
 	virtual void PlayHitReactMontage() override;
-
-
-	float LastDamageTime = -100.f;
-	void UpdateLastDamageTime();
-	bool WasRecentlyDamaged(float DamageTimeout) const;
+	
+;
 protected:
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = true))
 	UBehaviorTree* Tree;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = true))
 	APatrolPath* PatrolPath;
-	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
-
+	UPROPERTY(EditAnywhere, Category = "UI")
+	class UWidgetComponent* WidgetComponenet;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
+	class UCSAttributeComponent* AttributeComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
+	class UCSCombatComponent* CombatComponent;
+	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* PunchMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -100,18 +101,21 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* SitMontage;
 	
-	UPROPERTY()
-	class UWidgetComponent* WidgetComponenet;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
-	class UCSAttributeComponent* AttributeComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
-	class UCSCombatComponent* CombatComponent;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TSubclassOf<AActor> CastProjectile;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StunTime", meta = (AllowPrivateAccess = true))
 	float HitStunDuration = 0.5f;
 	float LastHitTime = 0.f;
+
+	mutable int32 CurrentPunchIndex = 0;
+	mutable float LastPunchTime = 0.0f;
+	
+	mutable int32 CurrentKickIndex = 0;
+	mutable float LastKickTime = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ComboTiomer", meta = (AllowPrivateAccess = true))
+	float ComboResetCooldown = 1.0f;
 	
 	FTimerHandle HitReactTimerHandle;
 	FTimerHandle BlockTimerHandle;

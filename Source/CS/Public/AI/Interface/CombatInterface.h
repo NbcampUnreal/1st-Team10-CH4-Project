@@ -35,5 +35,8 @@ public:
 	int Block();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	int32 Dodge(AActor* Attacker);
+	int Dodge(AActor* Attacker);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int RunAway(AActor* Attacker);
 };

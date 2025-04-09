@@ -22,6 +22,13 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	BB->SetValueAsBool(FName("IsBusy"), true);
+	
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
 	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
@@ -41,7 +48,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::FinishLatentTaskEarly, &OwnerComp),
-						0.3f, false
+						0.25f, false
 					);
 
 					return EBTNodeResult::InProgress;
@@ -64,6 +71,12 @@ void UBTTask_MeleeAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerCom
 	{
 		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
 		{
+			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
+			{
+				
+				BBComp->SetValueAsBool(FName("IsBusy"), false);
+				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+			}
 			if (MontageHasfinished(NPC))
 			{
 				

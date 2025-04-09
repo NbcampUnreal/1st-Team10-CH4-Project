@@ -22,6 +22,13 @@ EBTNodeResult::Type UBTTask_RangeComboAttack::ExecuteTask(UBehaviorTreeComponent
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	BB->SetValueAsBool(FName("IsBusy"), true);
+
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
 	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
@@ -34,13 +41,14 @@ EBTNodeResult::Type UBTTask_RangeComboAttack::ExecuteTask(UBehaviorTreeComponent
 			
 				if (MontageHasfinished(NPC))
 				{
+					NPC->StopMovement();
 					Combat->Execute_RangeComboAttack(NPC);
 
 					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_RangeComboAttack::FinishLatentTaskEarly, &OwnerComp),
-						1.0f, false
+						1.5f, false
 					);
 
 					return EBTNodeResult::InProgress;
@@ -62,10 +70,13 @@ void UBTTask_RangeComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Own
 		{
 			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
 			{
+				
+				BBComp->SetValueAsBool(FName("IsBusy"), false);
 				BBComp->SetValueAsBool(FName("RangeCombo"), false);
 			}
 			if (MontageHasfinished(NPC))
 			{
+				NPC->ResumeMovement();
 				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 			}
 			else
