@@ -21,11 +21,13 @@ EBTNodeResult::Type UBTTask_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	if (!NPC) return EBTNodeResult::Failed;
 	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	
 	AActor* Attacker = Cast<AActor>(BB->GetValueAsObject(TargetActorKey.SelectedKeyName));
 	if (!Attacker) return EBTNodeResult::Failed;
 
 	if (ICombatInterface* ICombat = Cast<ICombatInterface>(NPC))
 	{
+		BB->SetValueAsBool(FName("IsBusy"), true);
 		int32 Result = ICombat->Execute_Dodge(NPC, Attacker);
 
 		if (Result > 0)
@@ -51,6 +53,8 @@ void UBTTask_Dodge::FinishDodge(UBehaviorTreeComponent* OwnerComp)
 	{
 		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
 		BB->SetValueAsBool(ShouldDodgeKey.SelectedKeyName, false);
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		
 		AAIController* AICon = OwnerComp->GetAIOwner();
 		AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon ? AICon->GetPawn() : nullptr);
 		AActor* TargetActor = Cast<AActor>(BB->GetValueAsObject(FName("TargetActor")));

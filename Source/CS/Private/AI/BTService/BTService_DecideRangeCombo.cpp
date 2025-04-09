@@ -22,14 +22,20 @@ void UBTService_DecideRangeCombo::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	AActor* Target = Cast<AActor>(BB->GetValueAsObject(FName("TargetActor")));
 
 	if (!AIPawn || !Target || !BB) return;
+
+	bool bIsBusy = BB->GetValueAsBool(FName("IsBusy"));
+	if (bIsBusy) return;
 	
-	if (BB->GetValueAsBool(FName("RangeCombo")))
+	const float Distance = FVector::Dist(AIPawn->GetActorLocation(), Target->GetActorLocation());
+	
+	if (Distance < MinRange)
 	{
+		BB->SetValueAsBool(FName("RangeCombo"), false);
 		return;
 	}
-
-	const float Distance = FVector::Dist(AIPawn->GetActorLocation(), Target->GetActorLocation());
-
+	
+	if (BB->GetValueAsBool(FName("RangeCombo"))) return;
+	
 	if (Distance >= MinRange && Distance <= MaxRange && FMath::FRand() < Chance)
 	{
 		BB->SetValueAsBool(FName("RangeCombo"), true);

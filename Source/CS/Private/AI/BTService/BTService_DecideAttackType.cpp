@@ -22,11 +22,11 @@ void UBTService_DecideAttackType::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	}
 	else if (Rand < 90)
 	{
-		ChosenAttack = 0; 
+		ChosenAttack = 0;
 	}
 	else
 	{
-		ChosenAttack = 2; 
+		ChosenAttack = 2;
 	}
 
 	if (OwnerComp.GetBlackboardComponent())

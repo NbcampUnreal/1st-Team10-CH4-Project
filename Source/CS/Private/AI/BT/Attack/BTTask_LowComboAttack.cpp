@@ -22,8 +22,9 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	BB->SetValueAsBool(FName("IsBusy"), true);
+	
 
 	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
 	{
@@ -36,6 +37,8 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 		{
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
+				BB->SetValueAsBool(FName("IsBusy"), true);
+	
 				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
 				NPC->StopMovement();
 			
@@ -53,9 +56,9 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 			}
 		}
 	}
-
 	return EBTNodeResult::Failed;
 }
+
 
 void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
 {

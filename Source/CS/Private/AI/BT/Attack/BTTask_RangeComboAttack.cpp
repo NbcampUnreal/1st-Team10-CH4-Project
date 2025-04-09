@@ -22,8 +22,8 @@ EBTNodeResult::Type UBTTask_RangeComboAttack::ExecuteTask(UBehaviorTreeComponent
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	BB->SetValueAsBool(FName("IsBusy"), true);
 
 	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
 	{
@@ -41,6 +41,7 @@ EBTNodeResult::Type UBTTask_RangeComboAttack::ExecuteTask(UBehaviorTreeComponent
 			
 				if (MontageHasfinished(NPC))
 				{
+					BB->SetValueAsBool(FName("IsBusy"), true);
 					NPC->StopMovement();
 					Combat->Execute_RangeComboAttack(NPC);
 

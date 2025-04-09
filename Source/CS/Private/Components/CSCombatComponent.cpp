@@ -98,7 +98,17 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
                     UBlackboardComponent* BB = AIController->GetBlackboardComponent();
                     if (BB)
                     {
-                        BB->SetValueAsBool("ShouldBlock", true);
+                        float RandomValue = FMath::FRand(); // 0.0 ~ 1.0
+                        if (RandomValue < 0.7f)
+                        {
+                            BB->SetValueAsBool("ShouldBlock", true);
+                            BB->SetValueAsBool("ShouldDodge", false);
+                        }
+                        else
+                        {
+                            BB->SetValueAsBool("ShouldBlock", false);
+                            BB->SetValueAsBool("ShouldDodge", true);
+                        }
                     }
                 }
 

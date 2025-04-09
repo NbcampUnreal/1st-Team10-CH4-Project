@@ -29,7 +29,6 @@ int AAIBossCharacter::Block_Implementation()
 	{
 		PlayAnimMontage(BlockMontage);
 		StopMovement();
-
 	}
 	return 1;
 }
@@ -67,7 +66,13 @@ void AAIBossCharacter::Dodge_StartDash(AActor* Attacker)
 void AAIBossCharacter::Dodge_MoveToSafeZone(AActor* Attacker)
 {
 	ResumeMovement(); 
+	if (!Attacker) return;
+
 	AAIController* AIController = Cast<AAIController>(GetController());
+	if (!AIController)
+	{
+		return;
+	}
 	
 	FVector MyLocation = GetActorLocation();
 	FVector AttackerLocation = Attacker->GetActorLocation();
@@ -76,6 +81,10 @@ void AAIBossCharacter::Dodge_MoveToSafeZone(AActor* Attacker)
 	FVector RunDirection = FVector(0.f, YDir, 0.f);
 
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (!NavSys)
+	{
+		return;
+	}
 	
 	FNavLocation NavLocation;
 
@@ -98,7 +107,6 @@ void AAIBossCharacter::Dodge_MoveToSafeZone(AActor* Attacker)
 			}
 		}
 	}
-
 	AIController->MoveToLocation(NavLocation.Location, -1.f, true);
 }
 
