@@ -180,7 +180,7 @@ void ACSPlayerController::Server_SelectCharacter_Implementation(EJobTypes Select
     if (LobbyGameMode) {
         // LobbyGameMode의 SetPlayerSelection 함수 시그니처도 EJobTypes 로 변경 필요
         // 확인 후 호출 또는 주석 처리
-        LobbyGameMode->SetPlayerSelection(this, SelectedJob);
+        LobbyGameMode->SetSelectedPlayerJob(this, SelectedJob);
     }
     else { UE_LOG(LogTemp, Warning, TEXT("Server_SelectCharacter: LobbyGameMode not found.")); }
 }
