@@ -197,15 +197,13 @@ void ACSGameModeBase::ReturnToLobby()
 
 	if (CSGameInstance && CSGameInstance->LevelData)
 	{
-		const FString ContextStr = TEXT("ReturnToLobby");
-		const FLevelRow* LevelRow = CSGameInstance->LevelData->FindRow<FLevelRow>(FName("LobbyLevel"), ContextStr);
-		if (LevelRow && !LevelRow->MapPath.IsEmpty())
-		{
-			const FString TravelURL = LevelRow->MapPath + TEXT("?listen");
+		const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("LobbyLevel"));
+		if (!LevelRow || LevelRow->MapPath.IsEmpty()) return;
 
-			bUseSeamlessTravel = true;
-			GetWorld()->ServerTravel(TravelURL);
-		}
+		const FString TravelURL = LevelRow->MapPath + TEXT("?listen");
+
+		bUseSeamlessTravel = true;
+		GetWorld()->ServerTravel(TravelURL);
 	}
 }
 

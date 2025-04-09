@@ -261,3 +261,11 @@ const FCharacterRow* UCSGameInstance::FindCharacterRowByJob(EJobTypes Job) const
 	// FName RowName(*RowNameString);
 	return CharacterData->FindRow<FCharacterRow>(RowName, TEXT("FindCharacterRowByJob"));
 }
+
+const FLevelRow* UCSGameInstance::FindLevelRow(FName RowName) const
+{
+	if (!LevelData) return nullptr;
+	const FString Context = TEXT("FineLevelRow");
+
+	return LevelData->FindRow<FLevelRow>(RowName, Context);
+}

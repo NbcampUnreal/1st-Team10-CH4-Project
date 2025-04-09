@@ -5,6 +5,7 @@
 #include "CSTypes/CSGameTypes.h"
 #include "CSTypes/CSCharacterTypes.h"
 #include "Data/CSCharacterRow.h"
+#include "Data/CSLevelRow.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"      // 필수
 #include "FindSessionsCallbackProxy.h"  // FOnlineSessionSearchResult 사용 위해 추가
@@ -50,6 +51,7 @@ public:
 
 	/** 헬퍼 함수 */
 	const FCharacterRow* FindCharacterRowByJob(EJobTypes Job) const;
+	const FLevelRow* FindLevelRow(FName RowName) const;
 
 private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);

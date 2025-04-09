@@ -161,21 +161,23 @@ void ACSSingleGameMode::SpawnBoss()
 
 void ACSSingleGameMode::RestartSingleGame()
 {
-	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+	if (CSGameInstance)
+	{
+		const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("SingleModeLevel"));
+		if (!LevelRow || LevelRow->MapPath.IsEmpty()) return;
+
+		UGameplayStatics::OpenLevel(this, FName(*LevelRow->MapPath));
+	}
 }
 
 void ACSSingleGameMode::ReturnToMainMenu()
 {
 	if (CSGameInstance)
 	{
-		const FString ContextStr = TEXT("ReturnToMainMenu");
-		if (const FLevelRow* Row = CSGameInstance->LevelData->FindRow<FLevelRow>(FName("MainMenuLevel"), ContextStr))
-		{
-			if (!Row->MapPath.IsEmpty())
-			{
-				UGameplayStatics::OpenLevel(this, FName(*Row->MapPath));
-			}
-		}
+		const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("MainMenuLevel"));
+		if (!LevelRow || LevelRow->MapPath.IsEmpty()) return;
+
+		UGameplayStatics::OpenLevel(this, FName(*LevelRow->MapPath));
 	}
 }
 
