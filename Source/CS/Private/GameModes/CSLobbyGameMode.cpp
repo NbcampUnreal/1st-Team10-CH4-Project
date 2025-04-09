@@ -3,6 +3,7 @@
 #include "GameStates/CSLobbyGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
+#include "Characters/Type/CSLobbyCharacter.h"
 #include "Managers/CSSpawnManager.h"
 #include "Camera/CameraActor.h"
 #include "Data/CSLevelRow.h"
@@ -12,6 +13,8 @@ ACSLobbyGameMode::ACSLobbyGameMode()
 {
 	GameStateClass = ACSLobbyGameState::StaticClass();
 	PlayerStateClass = ACSPlayerState::StaticClass();
+	DefaultPawnClass = nullptr;
+
 	MatchType = EMatchType::EMT_None;
 }
 
@@ -48,7 +51,7 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		}
 	}
 
-	SetPlayerSelection(NewPlayer, EJobTypes::EJT_Fighter);
+	SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
 
 	FTimerHandle DelayTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, this, &ACSLobbyGameMode::PositionLobbyCharacters, 0.2f, false);
@@ -232,24 +235,55 @@ void ACSLobbyGameMode::AssignPlayerToSlot(ACSPlayerState* PlayerState, ESpawnSlo
 	{
 		if (Manager->SlotType == SlotType)
 		{
-			if (AController* Controller = Cast<AController>(PlayerState->GetOwner()))
+			if (APlayerController* PlayerController = Cast<APlayerController>(PlayerState->GetOwner()))
 			{
-				if (APawn* Pawn = Controller->GetPawn())
-				{
-					Pawn->SetActorLocation(Manager->GetActorLocation());
-					Pawn->SetActorRotation(Manager->GetActorRotation());
-				}
+				SpawnOrUpdateLobbyCharacter(PlayerController, Manager->GetActorLocation(), Manager->GetActorRotation());
 			}
 			break;
 		}
 	}
 }
 
-void ACSLobbyGameMode::SetPlayerSelection(APlayerController* Player, EJobTypes NewJob)
+void ACSLobbyGameMode::SpawnOrUpdateLobbyCharacter(APlayerController* PlayerController, const FVector& Location, const FRotator& Rotation)
+{
+	if (!PlayerController) return;
+
+	ACSLobbyCharacter* LobbyCharacter = nullptr;
+
+	if (LobbyCharacterMap.Contains(PlayerController))
+	{
+		LobbyCharacter = LobbyCharacterMap[PlayerController];
+	}
+	else
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = PlayerController;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		LobbyCharacter = GetWorld()->SpawnActor<ACSLobbyCharacter>(ACSLobbyCharacter::StaticClass(), Location, Rotation, SpawnParams);
+		if (LobbyCharacter)
+		{
+			LobbyCharacterMap.Add(PlayerController, LobbyCharacter);
+		}
+	}
+
+	if (LobbyCharacter)
+	{
+		LobbyCharacter->SetActorLocation(Location);
+		LobbyCharacter->SetActorRotation(Rotation);
+	}
+}
+
+void ACSLobbyGameMode::SetSelectedPlayerJob(APlayerController* Player, EJobTypes NewJob)
 {
 	if (ACSPlayerState* CSPlayerState = Player->GetPlayerState<ACSPlayerState>())
 	{
 		CSPlayerState->SelectedJob = NewJob;
+
+		if (ACSLobbyCharacter* LobbyCharacter = LobbyCharacterMap.FindRef(Player))
+		{
+			LobbyCharacter->UpdateMeshFromJobType(NewJob);
+		}
 	}
 }
 

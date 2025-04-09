@@ -8,6 +8,13 @@
 ACSLobbyCharacter::ACSLobbyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+    bReplicates = true;
+
+    if (GetMesh())
+    {
+        GetMesh()->SetIsReplicated(true);
+    }
 }
 
 void ACSLobbyCharacter::BeginPlay()
