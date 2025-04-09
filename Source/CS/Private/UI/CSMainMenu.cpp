@@ -31,8 +31,9 @@ void UCSMainMenu::OnArcadeModeClicked()
     UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
     if (GI) {
         GI->SetMatchType(EMatchType::EMT_Single);
-        // GI->StartingSinglePlay(); // GameInstance 함수 사용 (LevelData 필요)
-        UGameplayStatics::OpenLevel(GetWorld(), FName("StageLevel")); // 또는 직접 레벨 열기
+        RemoveFromParent();
+
+        UGameplayStatics::OpenLevel(GetWorld(), FName("SingleModeLevel")); // StageLevel 이름 확인
         UE_LOG(LogTemp, Log, TEXT("Opening StageLevel directly for Arcade Mode."));
     }
     else { UE_LOG(LogTemp, Error, TEXT("Failed to get GameInstance for Arcade Mode.")); }
