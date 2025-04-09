@@ -1,4 +1,22 @@
 #pragma once
+#include "CoreMinimal.h"
+#include "Engine/DataTable.h"
+#include "Animation/AnimInstance.h"
+#include "CsCharacterTypes.generated.h"
+
+USTRUCT(BlueprintType)
+struct FCharacterLobbyData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<USkeletalMesh> LobbyMesh = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UAnimInstance> LobbyAnimClass = nullptr;
+};
+
 
 UENUM(BlueprintType)
 enum class ECharacterTypes : uint8
@@ -20,6 +38,7 @@ enum class EFacingDirection : uint8
 UENUM(BlueprintType)
 enum class EJobTypes : uint8
 {
+	EJT_None UMETA(DisplayName = "None"),
 	EJT_Fighter UMETA(DisplayName = "Fighter"),
 	EJT_SwordMan UMETA(DisplayName = "SwordMan")
 };

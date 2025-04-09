@@ -99,7 +99,7 @@ void ACSCoopGameMode::AllAIStartLogic()
 		{
 			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
 			{
-				/*AIController->StartLogicAI();*/
+				AIController->StartLogicAI();
 			}
 		}
 	}

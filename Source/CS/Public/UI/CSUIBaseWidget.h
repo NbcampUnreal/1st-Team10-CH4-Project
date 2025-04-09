@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CSTypes/CSCharacterTypes.h"
 #include "CSUIBaseWidget.generated.h"
 
 /**
@@ -24,8 +25,8 @@ public:
     virtual void UpdateTeamUI_Implementation(int32 TeamID);
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
-    void UpdateCharacterUI(FName SelectedCharacterID);
-    virtual void UpdateCharacterUI_Implementation(FName SelectedCharacterID);
+    void UpdateCharacterUI(EJobTypes NewJob);
+    virtual void UpdateCharacterUI_Implementation(EJobTypes NewJob);
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "UI")
     void UpdateSelectedMapUI(FName SelectedMap);

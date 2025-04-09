@@ -3,6 +3,7 @@
 #include "GameInstance/CSGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Managers/CSSpawnManager.h"
+#include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSGameModeBase::ACSGameModeBase()
@@ -99,8 +100,7 @@ void ACSGameModeBase::SpawnAllPlayers()
 			{
 				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 				{
-					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, TEXT("SpawnPlayer"));
-
+					const FCharacterRow* Row = CSGameInstance->FindCharacterRowByJob(CSPlayerState->SelectedJob);
 					if (!Row || !Row->CharacterClass.IsValid()) continue;
 
 					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
@@ -178,7 +178,17 @@ void ACSGameModeBase::ReturnToLobby()
 		}
 	}
 
-	bUseSeamlessTravel = true;
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen"));
+	if (CSGameInstance && CSGameInstance->LevelData)
+	{
+		const FString ContextStr = TEXT("ReturnToLobby");
+		const FLevelRow* LevelRow = CSGameInstance->LevelData->FindRow<FLevelRow>(FName("LobbyLevel"), ContextStr);
+		if (LevelRow && !LevelRow->MapPath.IsEmpty())
+		{
+			const FString TravelURL = LevelRow->MapPath + TEXT("?listen");
+
+			bUseSeamlessTravel = true;
+			GetWorld()->ServerTravel(TravelURL);
+		}
+	}
 }
 

@@ -9,7 +9,6 @@
 #include "GameStates/CSLobbyGameState.h"
 #include "GameInstance/CSGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
-#include "GameModes/CSSingleLobbyGameMode.h"
 #include "UI/CSUIBaseWidget.h"
 
 
@@ -119,6 +118,14 @@ void ACSPlayerController::Client_ShowLobbyUI_Implementation()
 	}
 }
 
+void ACSPlayerController::Client_ShowNoSessionPopup_Implementation()
+{
+	if (IsLocalController() && CurrentActiveUI)
+	{
+		//CurrentActiveUI->ShowNoSessionPopup();
+	}
+}
+
 bool ACSPlayerController::Server_RequestTeamChange_Validate()
 {
 	// Additional validation can be here if needed
@@ -140,18 +147,18 @@ void ACSPlayerController::Server_RequestTeamChange_Implementation()
 	}
 }
 
-bool ACSPlayerController::Server_SelectCharacter_Validate(FName CharacterID)
+bool ACSPlayerController::Server_SelectCharacter_Validate(EJobTypes SelectedJob)
 {
 	return true;
 }
 
-void ACSPlayerController::Server_SelectCharacter_Implementation(FName CharacterID)
+void ACSPlayerController::Server_SelectCharacter_Implementation(EJobTypes SelectedJob)
 {
 	ACSLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSLobbyGameMode>();
 
 	if (LobbyGameMode)
 	{
-		LobbyGameMode->SetPlayerSelection(this, CharacterID);
+		//LobbyGameMode->SetPlayerSelection(this, SelectedJob); // 해당 게임모드 시그니처 변경 필요
 	}
 	else
 	{
@@ -208,12 +215,12 @@ bool ACSPlayerController::Server_RequestReturnToMainMenu_Validate()
 
 void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
 {
-	ACSSingleLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSSingleLobbyGameMode>();
+	/*ACSSingleLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSSingleLobbyGameMode>();
 
 	if (LobbyGameMode)
 	{
 		LobbyGameMode->ReturnToMainMenu(this);
-	}
+	}*/
 }
 
 void ACSPlayerController::Client_OnSuddenDeath_Implementation()
@@ -240,11 +247,11 @@ void ACSPlayerController::UpdateTeamUI(int32 TeamID)
 	}
 }
 
-void ACSPlayerController::UpdateCharacterUI(FName SelectedCharacterID)
+void ACSPlayerController::UpdateCharacterUI(EJobTypes NewJob)
 {
 	if (IsLocalController() && CurrentActiveUI)
 	{
-		CurrentActiveUI->UpdateCharacterUI(SelectedCharacterID);
+		CurrentActiveUI->UpdateCharacterUI(NewJob);
 	}
 }
 

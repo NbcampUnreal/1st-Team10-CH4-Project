@@ -10,9 +10,6 @@ struct FCharacterRow : public FTableRowBase
 	GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FName CharacterID;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSoftClassPtr<APawn> CharacterClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
