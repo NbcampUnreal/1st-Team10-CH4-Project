@@ -11,22 +11,21 @@
 #include "GameInstance/CSGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
 #include "UI/CSUIBaseWidget.h"
-#include "UI/CSUIBaseWidget.h"
 #include "UI/CSMainMenu.h"
 #include "UI/CSLobbyBaseWidget.h"
 #include "UI/CSVersusLobbyWidget.h"
 #include "UI/CSCoopLobbyWidget.h"
 #include "UI/CSInGameHUD.h" // HUD 베이스 클래스 예시
 #include "Kismet/GameplayStatics.h"
-#include "Engine/World.h" // GetWorld()
 
-
-ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr) {} // 초기화
+ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr) {}
 
 void ACSPlayerController::BeginPlay()
 {
     Super::BeginPlay();
-    if (IsLocalController()) {
+
+    if (IsLocalController())
+    {
         InitializeCurrentUI();
     }
 }
@@ -53,7 +52,6 @@ void ACSPlayerController::InitializeCurrentUI()
         UIClassToCreate = MainMenuWidgetClass;
     }
     else if (CurrentLevelName == FName("LobbyLevel")) { // 레벨 이름 확인
-        UE_LOG(LogTemp, Log, TEXT("In Lobby Level, waiting for Client_ShowLobbyUI RPC."));
     }
     else if (CurrentLevelName == FName("StageLevel")) { // 레벨 이름 확인
         UIClassToCreate = StageHUDClass;
@@ -216,11 +214,9 @@ void ACSPlayerController::Client_OnSuddenDeath_Implementation()
     }
 }
 
-// 체력 업데이트
 void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
 {
     if (IsLocalController() && CurrentActiveUI) {
-        // HUD 위젯으로 캐스팅 후 함수 호출
         if (UCSInGameHUD* HUD = Cast<UCSInGameHUD>(CurrentActiveUI)) {
             HUD->UpdateHealth(Health, MaxHealth);
         }

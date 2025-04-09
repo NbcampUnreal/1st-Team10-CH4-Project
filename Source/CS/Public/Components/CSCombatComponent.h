@@ -14,6 +14,7 @@ class CS_API UCSCombatComponent : public UActorComponent
 
 public:
     UCSCombatComponent();
+
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

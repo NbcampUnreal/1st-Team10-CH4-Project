@@ -8,7 +8,6 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "CSPlayerController.generated.h"
 
-// 전방 선언
 class UCSUIBaseWidget;
 class UCSVersusLobbyWidget;
 class UCSCoopLobbyWidget;
@@ -20,12 +19,6 @@ class CS_API ACSPlayerController : public APlayerController
 
 public:
 	ACSPlayerController();
-
-	// 제거된 UI 함수들
-	// void UpdateReadyUI(bool bReady);
-	// void UpdateTeamUI(int32 TeamID);
-	// void UpdateCharacterUI(EJobTypes NewJob);
-	// void UpdateMatchTimeUI(int32 Time);
 
 	// 유지되는 함수들
 	void HealthUpdate(float Health, float MaxHealth);

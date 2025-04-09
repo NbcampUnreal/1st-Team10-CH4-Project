@@ -80,8 +80,8 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
                 return;
             }
     
-            // Damage Calculation
-            float DamageToApply = 10.0f;
+            float DamageToApply = 10.f;
+
             AController* InstigatorController = Owner->GetController();
             AActor* DamageCauser = Owner;
 
