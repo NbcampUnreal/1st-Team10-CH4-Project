@@ -31,9 +31,6 @@ protected:
 	/** 플레이어별 스폰 슬롯 타입 반환 */
 	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) const override;
 
-	/** AI 전체 StartLogic 처리 */
-	void AllAIStartLogic();
-
 	/** AI 사망 처리 */
 	void HandleAIDeath(AActor* DeadAI) override;
 

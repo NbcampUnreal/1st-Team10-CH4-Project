@@ -57,6 +57,9 @@ protected:
 	/** 모든 플레이어 인풋 허용 설정 */
 	void SetAllPlayerInputEnabled(bool bEnabled);
 
+	/** AI 전체 StartLogic 처리 */
+	void AllAIStartLogic(const TArray<APawn*>& InAIPawns);
+
 	/** 제한 시간 카운트다운 시작 */
 	void StartMatchTimer();
 

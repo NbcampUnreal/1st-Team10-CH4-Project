@@ -40,7 +40,8 @@ void ACSCoopGameMode::HandleStartGame()
 {
 	Super::HandleStartGame();
 
-	AllAIStartLogic();
+	AllAIStartLogic(PendingAIPawns);
+	PendingAIPawns.Empty();
 }
 
 void ACSCoopGameMode::SpawnAIEnemies()
@@ -91,22 +92,6 @@ TSubclassOf<APawn> ACSCoopGameMode::SelectRandomAIClass()
 	return Row->AICharacterClass.LoadSynchronous();
 }
 
-void ACSCoopGameMode::AllAIStartLogic()
-{
-	for (TWeakObjectPtr<APawn> AIPawnPtr : PendingAIPawns)
-	{
-		if (APawn* AIPawn = AIPawnPtr.Get())
-		{
-			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
-			{
-				AIController->StartLogicAI();
-			}
-		}
-	}
-
-	PendingAIPawns.Empty();
-}
-
 void ACSCoopGameMode::HandlePlayerDeath(AController* DeadPlayer)
 {
 	if (ACSPlayerState* CSPlayerState = DeadPlayer ? DeadPlayer->GetPlayerState<ACSPlayerState>() : nullptr)
@@ -133,7 +118,7 @@ void ACSCoopGameMode::UpdateMatchTimer()
 {
 	Super::UpdateMatchTimer();
 
-	if (BaseGameState && BaseGameState->RemainingMatchTime <= 0)
+	if (BaseGameState && BaseGameState->GetRemainingMatchTime() <= 0)
 	{
 		FinishMatch(false); 
 	}
@@ -151,7 +136,7 @@ void ACSCoopGameMode::FinishMatch(bool bPlayersWin)
 {
 	if (CoopGameState)
 	{
-		CoopGameState->MatchResult = bPlayersWin ? EMatchResult::EMR_Win : EMatchResult::EMR_Lose;
+		bPlayersWin ? CoopGameState->SetMatchResult(EMatchResult::EMR_Win) : CoopGameState->SetMatchResult(EMatchResult::EMR_Lose);
 	}
 
 	HandleEndGame();

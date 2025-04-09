@@ -46,7 +46,7 @@ void ACSVersusGameMode::UpdateMatchTimer()
 {
 	Super::UpdateMatchTimer();
 	
-	if (BaseGameState && BaseGameState->RemainingMatchTime <= 0)
+	if (BaseGameState && BaseGameState->GetRemainingMatchTime() <= 0)
 	{
 		TriggerSuddenDeath();
 	}

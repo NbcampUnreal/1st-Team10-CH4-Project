@@ -2,6 +2,7 @@
 #include "GameStates/CSGameStateBase.h"
 #include "GameInstance/CSGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
+#include "AI/Controller/AIBaseController.h"
 #include "Managers/CSSpawnManager.h"
 #include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
@@ -75,13 +76,27 @@ void ACSGameModeBase::SetAllPlayerInputEnabled(bool bEnabled)
 	}
 }
 
+void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
+{
+	for (APawn* AIPawn : InAIPawns)
+	{
+		if (AIPawn && AIPawn->GetController())
+		{
+			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
+			{
+				AIController->StartLogicAI();
+			}
+		}
+	}
+}
+
 void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
 	MatchPhase = NewPhase;
 
 	if (BaseGameState)
 	{
-		BaseGameState->MatchPhase = NewPhase;
+		BaseGameState->SetMatchPhase(NewPhase);
 	}
 }
 
@@ -139,7 +154,7 @@ void ACSGameModeBase::StartMatchTimer()
 {
 	if (BaseGameState)
 	{
-		BaseGameState->RemainingMatchTime = MatchTimeLimit;
+		BaseGameState->SetRemainingMatchTime(MatchTimeLimit);
 	}
 
 	GetWorldTimerManager().SetTimer(MatchTimerHandle, this, &ACSGameModeBase::UpdateMatchTimer, 1.0f, true);
@@ -149,9 +164,11 @@ void ACSGameModeBase::UpdateMatchTimer()
 {
 	if (BaseGameState)
 	{
-		BaseGameState->RemainingMatchTime--;
+		int32 NewTime = BaseGameState->GetRemainingMatchTime();
+		BaseGameState->SetRemainingMatchTime(NewTime - 1);
+		
 
-		if (BaseGameState->RemainingMatchTime <= 0)
+		if (BaseGameState->GetRemainingMatchTime() <= 0)
 		{
 			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
 		}
