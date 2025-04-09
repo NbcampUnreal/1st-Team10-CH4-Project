@@ -27,9 +27,13 @@ public:
 	void ChangeTeam(APlayerController* Player);
 
 	UFUNCTION(BlueprintCallable)
-	void SetPlayerSelection(APlayerController* Player, EJobTypes NewJob);
+	void SetSelectedPlayerJob(APlayerController* Player, EJobTypes NewJob);
 
 protected:
+	/** 로비 캐릭터 컨트롤 하기 위한 Map */
+	UPROPERTY()
+	TMap<APlayerController*, class ACSLobbyCharacter*> LobbyCharacterMap;
+
 	/** 현재 매치 타입 (Versus / Coop) */
 	EMatchType MatchType;
 
@@ -52,5 +56,6 @@ protected:
 	TMap<int32, TArray<ESpawnSlotType>> GetSlotPriorityForMatchType() const;
 	void GetAllSpawnManagers(TArray<class ACSSpawnManager*>& OutManagers);
 	void AssignPlayerToSlot(class ACSPlayerState* PlayerState, ESpawnSlotType SlotType, const TArray<class ACSSpawnManager*>& Managers);
+	void SpawnOrUpdateLobbyCharacter(APlayerController* PlayerController, const FVector& Location, const FRotator& Rotation);
 };
 
