@@ -26,7 +26,11 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
 
     const FName FirstSocketName = TraceStartName;
     const FVector SocketStart = Owner->GetMesh()->GetSocketLocation(FirstSocketName);
+<<<<<<< HEAD
 	const FName SecondSocketName = TraceEndName;
+=======
+    const FName SecondSocketName = FName("hand_l");
+>>>>>>> origin/AI
     const FVector TraceStart = SocketStart;
     const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
     const float TraceRadius = 30.0f;
@@ -78,9 +82,15 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             {
                 return;
             }
+<<<<<<< HEAD
     
             float DamageToApply = 10.f;
 
+=======
+
+            // Damage Calculation
+            float DamageToApply = 10.0f;
+>>>>>>> origin/AI
             AController* InstigatorController = Owner->GetController();
             AActor* DamageCauser = Owner;
 
