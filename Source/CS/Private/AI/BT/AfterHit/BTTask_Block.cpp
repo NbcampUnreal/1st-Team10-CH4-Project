@@ -17,7 +17,6 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 {
 	const bool bShouldBlock = OwnerComp.GetBlackboardComponent()->GetValueAsBool(ShouldBlockKey.SelectedKeyName);
 	const bool bIsPlayerAttacking = OwnerComp.GetBlackboardComponent()->GetValueAsBool(IsPlayerAttackingKey.SelectedKeyName);
-
 	
 	if (!(bShouldBlock || bIsPlayerAttacking))
 	{
@@ -35,7 +34,7 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 			NPC->GetWorldTimerManager().SetTimer(
 				BlockTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, &OwnerComp),
-				1.5f, false
+				0.7f, false
 			);
 
 			return EBTNodeResult::InProgress;

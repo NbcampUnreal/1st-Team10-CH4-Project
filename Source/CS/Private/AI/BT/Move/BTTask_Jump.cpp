@@ -4,6 +4,7 @@
 #include "AI/BT/Move/BTTask_Jump.h"
 #include "AIController.h"
 #include "AI/Character/AIBaseCharacter.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 
 UBTTask_Jump::UBTTask_Jump()
@@ -11,15 +12,36 @@ UBTTask_Jump::UBTTask_Jump()
 	NodeName = TEXT("Jump");
 }
 
+
 EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	AAIController* AICon = OwnerComp.GetAIOwner();
 	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
 
-	if (AIPawn)
+	if (!AIPawn) return EBTNodeResult::Failed;
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	BB->SetValueAsBool(FName("IsBusy"), true);
+	AIPawn->Jump();
+	
+	AIPawn->GetWorldTimerManager().SetTimer(
+		JumpFinishHandle,
+		FTimerDelegate::CreateUObject(this, &UBTTask_Jump::FinishJump, &OwnerComp),
+		1.0f, false
+	);
+
+	return EBTNodeResult::InProgress;
+}
+
+void UBTTask_Jump::FinishJump(UBehaviorTreeComponent* OwnerComp)
+{
+	if (!OwnerComp) return;
+
+	UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent();
+	if (BB)
 	{
-		AIPawn->Jump();
-		return EBTNodeResult::Succeeded;
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		BB->SetValueAsBool(FName("ShouldJump"), false);
 	}
-	return EBTNodeResult::Failed;
+
+	FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 }

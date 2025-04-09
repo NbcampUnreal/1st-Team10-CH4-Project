@@ -16,29 +16,27 @@ void UBTService_DecideRangeCombo::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	const auto* Controller = OwnerComp.GetAIOwner();
-	const auto* AIChar = Cast<AAIBaseCharacter>(Controller ? Controller->GetPawn() : nullptr);
-	const auto* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	AAIController* AICon = OwnerComp.GetAIOwner();
+	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon ? AICon->GetPawn() : nullptr);
+	AActor* Target = Cast<AActor>(BB->GetValueAsObject(FName("TargetActor")));
 
-	if (!AIChar || !Player) return;
-
-	const float Distance = FVector::Dist(AIChar->GetActorLocation(), Player->GetActorLocation());
-
-	if (Distance <= ComboTriggerDistance)
+	if (!AIPawn || !Target || !BB) return;
+	
+	if (BB->GetValueAsBool(FName("RangeCombo")))
 	{
-		const int32 Rand = FMath::RandRange(0, 99);
-		const bool bDoCombo = Rand < ComboChance;
+		return;
+	}
 
-		if (UBlackboardComponent* BBComp = OwnerComp.GetBlackboardComponent())
-		{
-			BBComp->SetValueAsBool(RangeComboKey.SelectedKeyName, bDoCombo);
-		}
+	const float Distance = FVector::Dist(AIPawn->GetActorLocation(), Target->GetActorLocation());
+
+	if (Distance >= MinRange && Distance <= MaxRange && FMath::FRand() < Chance)
+	{
+		BB->SetValueAsBool(FName("RangeCombo"), true);
 	}
 	else
 	{
-		if (UBlackboardComponent* BBComp = OwnerComp.GetBlackboardComponent())
-		{
-			BBComp->SetValueAsBool(RangeComboKey.SelectedKeyName, false);
-		}
+		BB->SetValueAsBool(FName("RangeCombo"), false);
 	}
 }
+

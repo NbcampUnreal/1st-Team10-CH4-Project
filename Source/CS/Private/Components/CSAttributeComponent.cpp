@@ -51,13 +51,7 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
 
 	UE_LOG(LogTemp, Warning, TEXT("Server: %s - New Health: %.1f"), *GetOwner()->GetName(), Health);
-
 	
-	AAIBaseCharacter* VictimCharacter = Cast<AAIBaseCharacter>(GetOwner());
-	if (VictimCharacter)
-	{
-		VictimCharacter->UpdateLastDamageTime();
-	}
 	
 	if (!IsAlive())
 	{

@@ -11,14 +11,26 @@ UBTTask_BlackboardBase{ObjectInitializer}
 };
 EBTNodeResult::Type UBTTask_ChasePlayers::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	if (!BB) return EBTNodeResult::Failed;
+	bool bIsBusy = BB->GetValueAsBool(FName("IsBusy"));
+	if (bIsBusy)
+	{
+		return EBTNodeResult::Failed;
+	}
+
 	if (auto* const Cont = Cast<AAIBaseController>(OwnerComp.GetAIOwner()))
 	{
-		auto const PlayerLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(GetSelectedBlackboardKey());
-
+		FVector PlayerLocation = BB->GetValueAsVector(GetSelectedBlackboardKey());
+		
+		BB->SetValueAsBool(FName("IsBusy"), true);
+		
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(Cont, PlayerLocation);
-
+		
+		BB->SetValueAsBool(FName("IsBusy"), false);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
+
 	return EBTNodeResult::Failed;
 }

@@ -14,16 +14,14 @@ public:
 
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-
-
+	
 	UPROPERTY(EditAnywhere, Category = "AI")
-	int32 ComboChance = 20;
-
-
+	float MinRange = 130.f;    // 최소 거리
+	UPROPERTY(EditAnywhere, Category = "AI")
+	float MaxRange = 200.f;    // 최대 거리
+	UPROPERTY(EditAnywhere, Category = "AI")
+	float Chance = 0.6f;       // 발동 확률
+	
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector RangeComboKey;
-
-
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float ComboTriggerDistance = 160.0f;
 };
