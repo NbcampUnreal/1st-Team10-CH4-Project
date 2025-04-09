@@ -50,7 +50,6 @@ public:
 	UAnimMontage* GetJumpAttackMontage() const { return JumpAttackMontage; }
 	UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
 	UAnimMontage* GetSitMontage() const { return SitMontage; }
-
 	
 	virtual int MeleeAttack_Implementation() override;
 	virtual int KickAttack_Implementation() override;
@@ -65,8 +64,7 @@ public:
 	
 	virtual void Die() override;
 	virtual void PlayHitReactMontage() override;
-	
-;
+
 protected:
 	virtual void BeginPlay() override;
 	

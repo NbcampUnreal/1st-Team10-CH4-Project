@@ -166,13 +166,18 @@ void AAIBaseCharacter::StopMovement()
 
 void AAIBaseCharacter::PlayHitReactMontage()
 {
-	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AAIController* AICon = Cast<AAIController>(GetController()))
 	{
 		if (UBlackboardComponent* BB = AICon->GetBlackboardComponent())
 		{
 			BB->SetValueAsBool(FName("IsHitReacting"), true);
+			BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+			BB->SetValueAsBool(FName("ShouldJump"), false);
+			BB->SetValueAsBool(FName("ShouldCrouch"), false);
+			BB->SetValueAsBool(FName("ShouldRunAway"), false);
+			BB->SetValueAsBool(FName("RangeCombo"), false);
+			BB->SetValueAsBool(FName("IsBusy"), true);
 		}
 	}
 	
@@ -204,6 +209,13 @@ void AAIBaseCharacter::ResumeMovement()
 		if (UBlackboardComponent* BB = AICon->GetBlackboardComponent())
 		{
 			BB->SetValueAsBool(FName("IsHitReacting"), false);
+			BB->SetValueAsBool(FName("IsBusy"), false);
+			
+			const float BlockChance = 0.4f;
+			if (FMath::FRand() < BlockChance)
+			{
+				BB->SetValueAsBool(FName("ShouldBlock"), true);
+			}
 		}
 	}
 }
@@ -216,7 +228,6 @@ void AAIBaseCharacter::Die()
 	StopMovement();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetSimulatePhysics(true);
 
@@ -242,3 +253,4 @@ void AAIBaseCharacter::Die()
 void AAIBaseCharacter::StopBlock()
 {
 }
+

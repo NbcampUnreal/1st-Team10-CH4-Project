@@ -76,7 +76,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
             ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
             if (VictimCharacter && VictimCharacter->IsBlocking())
             {
-                UE_LOG(LogTemp, Warning, TEXT("%s is blocking! No damage."), *HitActor->GetName());
                 return;
             }
 
@@ -88,7 +87,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
             UCSAttributeComponent* VictimAttributes = HitActor->FindComponentByClass<UCSAttributeComponent>();
             if (VictimAttributes)
             {
-                UE_LOG(LogTemp, Warning, TEXT("Server: Applying %.1f damage to %s"), DamageToApply, *HitActor->GetName());
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
             }
 
@@ -101,17 +99,15 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
                     if (BB)
                     {
                         float RandomValue = FMath::FRand(); // 0.0 ~ 1.0
-                        if (RandomValue < 0.5f)
+                        if (RandomValue < 0.7f)
                         {
                             BB->SetValueAsBool("ShouldBlock", true);
                             BB->SetValueAsBool("ShouldDodge", false);
-                            UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldBlock set to TRUE!"), *VictimCharacter->GetName());
                         }
                         else
                         {
                             BB->SetValueAsBool("ShouldBlock", false);
                             BB->SetValueAsBool("ShouldDodge", true);
-                            UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldDodge set to TRUE!"), *VictimCharacter->GetName());
                         }
                     }
                 }

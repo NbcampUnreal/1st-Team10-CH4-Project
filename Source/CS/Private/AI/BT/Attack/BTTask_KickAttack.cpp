@@ -21,12 +21,12 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 		return EBTNodeResult::Succeeded;
 	}
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	BB->SetValueAsBool(FName("IsBusy"), true);
-	
 	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
 	{
 		return EBTNodeResult::Failed;
 	}
+	
+	
 	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
@@ -39,6 +39,8 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 			
 				if (MontageHasfinished(NPC))
 				{
+					BB->SetValueAsBool(FName("IsBusy"), true);
+
 					Combat->Execute_KickAttack(NPC);
 
 					

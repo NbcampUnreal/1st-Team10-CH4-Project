@@ -23,7 +23,6 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		return EBTNodeResult::Succeeded;
 	}
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	BB->SetValueAsBool(FName("IsBusy"), true);
 	
 	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
 	{
@@ -42,7 +41,8 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 
 				if (MontageHasfinished(NPC))
 				{
-					
+					BB->SetValueAsBool(FName("IsBusy"), true);
+
 					Combat->Execute_MeleeAttack(NPC);
 
 					NPC->GetWorldTimerManager().SetTimer(

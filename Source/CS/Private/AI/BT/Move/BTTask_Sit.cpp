@@ -18,12 +18,13 @@ EBTNodeResult::Type UBTTask_Sit::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
 
 	if (!AIPawn) return EBTNodeResult::Failed;
+	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	BB->SetValueAsBool(FName("IsBusy"), true);
+	
 	UAnimMontage* SitMontage = AIPawn->GetSitMontage();
 	if (SitMontage)
 	{
-		AIPawn->PlayAnimMontage(SitMontage);
+		BB->SetValueAsBool(FName("IsBusy"), true);
 		AIPawn->StopMovement();
 		
 		AIPawn->GetWorldTimerManager().SetTimer(

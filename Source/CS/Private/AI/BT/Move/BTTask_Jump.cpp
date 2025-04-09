@@ -19,8 +19,10 @@ EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
 
 	if (!AIPawn) return EBTNodeResult::Failed;
+	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	BB->SetValueAsBool(FName("IsBusy"), true);
+	
 	AIPawn->Jump();
 	
 	AIPawn->GetWorldTimerManager().SetTimer(
