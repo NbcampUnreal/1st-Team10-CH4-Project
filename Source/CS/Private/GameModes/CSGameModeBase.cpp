@@ -2,7 +2,9 @@
 #include "GameStates/CSGameStateBase.h"
 #include "GameInstance/CSGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
+#include "AI/Controller/AIBaseController.h"
 #include "Managers/CSSpawnManager.h"
+#include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSGameModeBase::ACSGameModeBase()
@@ -74,13 +76,27 @@ void ACSGameModeBase::SetAllPlayerInputEnabled(bool bEnabled)
 	}
 }
 
+void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
+{
+	for (APawn* AIPawn : InAIPawns)
+	{
+		if (AIPawn && AIPawn->GetController())
+		{
+			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
+			{
+				AIController->StartLogicAI();
+			}
+		}
+	}
+}
+
 void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
 	MatchPhase = NewPhase;
 
 	if (BaseGameState)
 	{
-		BaseGameState->MatchPhase = NewPhase;
+		BaseGameState->SetMatchPhase(NewPhase);
 	}
 }
 
@@ -99,8 +115,7 @@ void ACSGameModeBase::SpawnAllPlayers()
 			{
 				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 				{
-					const FCharacterRow* Row = CSGameInstance->CharacterData->FindRow<FCharacterRow>(CSPlayerState->SelectedCharacterID, TEXT("SpawnPlayer"));
-
+					const FCharacterRow* Row = CSGameInstance->FindCharacterRowByJob(CSPlayerState->SelectedJob);
 					if (!Row || !Row->CharacterClass.IsValid()) continue;
 
 					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
@@ -139,7 +154,7 @@ void ACSGameModeBase::StartMatchTimer()
 {
 	if (BaseGameState)
 	{
-		BaseGameState->RemainingMatchTime = MatchTimeLimit;
+		BaseGameState->SetRemainingMatchTime(MatchTimeLimit);
 	}
 
 	GetWorldTimerManager().SetTimer(MatchTimerHandle, this, &ACSGameModeBase::UpdateMatchTimer, 1.0f, true);
@@ -149,9 +164,11 @@ void ACSGameModeBase::UpdateMatchTimer()
 {
 	if (BaseGameState)
 	{
-		BaseGameState->RemainingMatchTime--;
+		int32 NewTime = BaseGameState->GetRemainingMatchTime();
+		BaseGameState->SetRemainingMatchTime(NewTime - 1);
+		
 
-		if (BaseGameState->RemainingMatchTime <= 0)
+		if (BaseGameState->GetRemainingMatchTime() <= 0)
 		{
 			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
 		}
@@ -178,7 +195,15 @@ void ACSGameModeBase::ReturnToLobby()
 		}
 	}
 
-	bUseSeamlessTravel = true;
-	GetWorld()->ServerTravel(TEXT("/Game/Maps/Lobby?listen"));
+	if (CSGameInstance && CSGameInstance->LevelData)
+	{
+		const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("LobbyLevel"));
+		if (!LevelRow || LevelRow->MapPath.IsEmpty()) return;
+
+		const FString TravelURL = LevelRow->MapPath + TEXT("?listen");
+
+		bUseSeamlessTravel = true;
+		GetWorld()->ServerTravel(TravelURL);
+	}
 }
 

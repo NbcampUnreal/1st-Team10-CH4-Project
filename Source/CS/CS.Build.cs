@@ -18,7 +18,9 @@ public class CS : ModuleRules
 				"GameplayTasks",
 				"NavigationSystem",
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"OnlineSubsystem",
+				"OnlineSubsystemUtils"
 			});
 
 

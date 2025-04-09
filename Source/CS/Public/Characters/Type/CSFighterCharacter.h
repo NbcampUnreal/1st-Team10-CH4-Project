@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Characters/CSPlayerCharacter.h"
+#include "Struct/AttackMontageStrucct.h"
 #include "CSFighterCharacter.generated.h"
 
 /**
@@ -31,29 +32,23 @@ public:
 	UInputAction* P_Casting;
 	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
 	UInputAction* K_Casting;
-	UPROPERTY(EditAnywhere, Category = "Input|Fighter")
-	UInputAction* Guard;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* P_AttackMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* K_AttackMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* P_CastingMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* K_CastingMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TArray<FAttackMontageStruct> PunchMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TArray<FAttackMontageStruct> KickMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TArray<FAttackMontageStruct> PunchCastMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TArray<FAttackMontageStruct> KickCastMontage;
 
 private:
 	// Combo_1(Punch)
-	void PlayPCombo1Montage();
-	void PlayPCombo2Montage();
-	void PlayPCombo3Montage();
+	void PlayPComboMontage();
 	void PlayPComboAnim();
 
 	// Combo_2(Kick)
-	void PlayKCombo1Montage();
-	void PlayKCombo2Montage();
-	void PlayKCombo3Montage();
+	void PlayKComboMontage();
 	void PlayKComboAnim();
 
 	// Casting

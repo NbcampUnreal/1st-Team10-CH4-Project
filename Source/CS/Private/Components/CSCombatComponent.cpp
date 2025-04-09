@@ -19,14 +19,14 @@ UCSCombatComponent::UCSCombatComponent()
     bCanCombo = true;
 }
 
-void UCSCombatComponent::Server_PerformHitCheck_Implementation()
+void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName)
 {
 	ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;
 
-    const FName FirstSocketName = FName("hand_r");
+    const FName FirstSocketName = TraceStartName;
     const FVector SocketStart = Owner->GetMesh()->GetSocketLocation(FirstSocketName);
-	const FName SecondSocketName = FName("hand_l");
+	const FName SecondSocketName = TraceEndName;
     const FVector TraceStart = SocketStart;
 	const FVector TraceEnd = Owner->GetMesh()->GetSocketLocation(SecondSocketName);
     const float TraceRadius = 30.0f;
@@ -77,7 +77,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
             ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
             if (VictimCharacter->IsBlocking())
             {
-                UE_LOG(LogTemp, Warning, TEXT("%s is blocking! No damage."), *HitActor->GetName());
                 return;
             }
     
@@ -89,7 +88,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
             UCSAttributeComponent* VictimAttributes = HitActor->FindComponentByClass<UCSAttributeComponent>();
             if (VictimAttributes)
             {
-                UE_LOG(LogTemp, Warning, TEXT("Server: Applying %.1f damage to %s"), DamageToApply, *HitActor->GetName());
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
             }
 
@@ -103,7 +101,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation()
                     if (BB)
                     {
                         BB->SetValueAsBool("ShouldBlock", true);
-                        UE_LOG(LogTemp, Warning, TEXT("[Combat] %s: ShouldBlock set to TRUE!"), *VictimCharacter->GetName());
                     }
                 }
 

@@ -3,14 +3,18 @@
 #include "GameStates/CSLobbyGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
+#include "Characters/Type/CSLobbyCharacter.h"
 #include "Managers/CSSpawnManager.h"
 #include "Camera/CameraActor.h"
+#include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSLobbyGameMode::ACSLobbyGameMode()
 {
 	GameStateClass = ACSLobbyGameState::StaticClass();
 	PlayerStateClass = ACSPlayerState::StaticClass();
+	DefaultPawnClass = nullptr;
+
 	MatchType = EMatchType::EMT_None;
 }
 
@@ -36,17 +40,21 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		//CSPlayerController->Client_ShowLobbyUI();
 	}
 
-	if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(NewPlayer->PlayerState))
+	if (MatchType == EMatchType::EMT_Versus)
 	{
-		int32 Num = GameState.Get()->PlayerArray.Num();
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(NewPlayer->PlayerState))
+		{
+			int32 Num = GameState.Get()->PlayerArray.Num();
 
-		CSPlayerState->PlayerIndex = Num;
-		CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
+			CSPlayerState->PlayerIndex = Num;
+			CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
+		}
 	}
 
-	SetPlayerSelection(NewPlayer, FName("Fingter"));
+	SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
 
-	PositionLobbyCharacters();
+	FTimerHandle DelayTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, this, &ACSLobbyGameMode::PositionLobbyCharacters, 0.2f, false);
 }
 
 void ACSLobbyGameMode::StartMatchIfReady()
@@ -79,15 +87,25 @@ void ACSLobbyGameMode::StartMatchIfReady()
 
 void ACSLobbyGameMode::TryStartMatch()
 {
-	if (const ACSLobbyGameState* LobbyGameState = GetGameState<ACSLobbyGameState>())
-	{
-		if (LobbyGameState->SelectedMap != NAME_None)
-		{
-			FString MapPath = LobbyGameState->SelectedMap.ToString();
-			FString TravelURL = MapPath + TEXT("?listen");
+	const ACSLobbyGameState* LobbyGameState = GetGameState<ACSLobbyGameState>();
+	if (!LobbyGameState || LobbyGameState->SelectedMap == NAME_None) return;
 
-			bUseSeamlessTravel = true;
-			GetWorld()->ServerTravel(TravelURL);
+	if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+	{
+		const int32 PlayerCount = GameState->PlayerArray.Num();
+		CSGameInstance->ExpectedPlayerCount = PlayerCount;
+
+		if (CSGameInstance->LevelData)
+		{
+			const FString ContextStr = TEXT("TryStartMatch");
+			const FLevelRow* LevelRow = CSGameInstance->LevelData->FindRow<FLevelRow>(LobbyGameState->SelectedMap, ContextStr);
+			if (LevelRow && !LevelRow->MapPath.IsEmpty())
+			{
+				const FString TravelURL = LevelRow->MapPath + TEXT("?listen");
+
+				bUseSeamlessTravel = true;
+				GetWorld()->ServerTravel(TravelURL);
+			}
 		}
 	}
 }
@@ -107,24 +125,25 @@ void ACSLobbyGameMode::ChangeTeam(APlayerController* Player)
 
 void ACSLobbyGameMode::PositionLobbyCharacters()
 {
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
-
-	TArray<ACSSpawnManager*> SpawnManagers;
-	for (AActor* Actor : FoundActors)
+	switch (MatchType)
 	{
-		if (ACSSpawnManager* CSSpawnManager = Cast<ACSSpawnManager>(Actor))
-		{
-			SpawnManagers.Add(CSSpawnManager);
-		}
+	case EMatchType::EMT_Versus:
+		PositionVersusCharacters();
+		break;
+
+	case EMatchType::EMT_Coop:
+		PositionCoopCharacters();
+		break;
+
+	default:
+		break;
 	}
+}
 
-	// 팀별 슬롯 우선순위 정의 (각 팀마다 가운데가 우선)
-	TMap<int32, TArray<ESpawnSlotType>> TeamSlotPriority;
-	TeamSlotPriority.Add(0, { ESpawnSlotType::Versus_Team0_Slot0, ESpawnSlotType::Versus_Team0_Slot1, ESpawnSlotType::Versus_Team0_Slot2 });
-	TeamSlotPriority.Add(1, { ESpawnSlotType::Versus_Team1_Slot0, ESpawnSlotType::Versus_Team1_Slot1, ESpawnSlotType::Versus_Team1_Slot2 });
+void ACSLobbyGameMode::PositionVersusCharacters()
+{
+	const auto TeamSlotPriority = GetSlotPriorityForMatchType();
 
-	// 팀별 플레이어 목록 구성
 	TMap<int32, TArray<ACSPlayerState*>> TeamMap;
 	for (APlayerState* PlayerState : GameState->PlayerArray)
 	{
@@ -134,41 +153,140 @@ void ACSLobbyGameMode::PositionLobbyCharacters()
 		}
 	}
 
-	// 각 팀에 대해 순서대로 슬롯 배정
-	for (auto& TeamEntry : TeamMap)
+	TArray<ACSSpawnManager*> SpawnManagers;
+	GetAllSpawnManagers(SpawnManagers);
+
+	for (auto& Entry : TeamMap)
 	{
-		int32 TeamID = TeamEntry.Key;
-		TArray<ACSPlayerState*>& Players = TeamEntry.Value;
-		int32 MaxSlotCount = FMath::Min(Players.Num(), TeamSlotPriority[TeamID].Num());
+		int32 TeamID = Entry.Key;
+		TArray<ACSPlayerState*>& Players = Entry.Value;
 
-		for (int32 i = 0; i < MaxSlotCount; ++i)
+		for (int32 i = 0; i < Players.Num(); ++i)
 		{
-			ESpawnSlotType SlotType = TeamSlotPriority[TeamID][i];
-
-			for (ACSSpawnManager* SpawnManager : SpawnManagers)
+			if (TeamSlotPriority.Contains(TeamID) && i < TeamSlotPriority[TeamID].Num())
 			{
-				if (SpawnManager->SlotType == SlotType)
-				{
-					if (AController* PlayerController = Players[i]->GetOwner<AController>())
-					{
-						if (APawn* Pawn = PlayerController->GetPawn())
-						{
-							Pawn->SetActorLocation(SpawnManager->GetActorLocation());
-							Pawn->SetActorRotation(SpawnManager->GetActorRotation());
-						}
-					}
-					break;
-				}
+				AssignPlayerToSlot(Players[i], TeamSlotPriority[TeamID][i], SpawnManagers);
 			}
 		}
 	}
 }
 
-void ACSLobbyGameMode::SetPlayerSelection(APlayerController* Player, FName CharacterID)
+void ACSLobbyGameMode::PositionCoopCharacters()
+{
+	TMap<int32, TArray<ESpawnSlotType>> SlotMap = GetSlotPriorityForMatchType();
+	if (!SlotMap.Contains(0)) return;
+	const TArray<ESpawnSlotType>& SlotList = SlotMap[0];
+
+	TArray<ACSSpawnManager*> SpawnManagers;
+	GetAllSpawnManagers(SpawnManagers);
+
+	int32 Index = 0;
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		{
+			if (Index >= SlotList.Num()) break;
+			AssignPlayerToSlot(CSPlayerState, SlotList[Index], SpawnManagers);
+			++Index;
+		}
+	}
+}
+
+TMap<int32, TArray<ESpawnSlotType>> ACSLobbyGameMode::GetSlotPriorityForMatchType() const
+{
+	TMap<int32, TArray<ESpawnSlotType>> Result;
+
+	switch (MatchType)
+	{
+	case EMatchType::EMT_Versus:
+		Result.Add(0, { ESpawnSlotType::Versus_Team0_Slot0, ESpawnSlotType::Versus_Team0_Slot1 });
+		Result.Add(1, { ESpawnSlotType::Versus_Team1_Slot0, ESpawnSlotType::Versus_Team1_Slot1 });
+		break;
+
+	case EMatchType::EMT_Coop:
+		Result.Add(0, {
+			ESpawnSlotType::Coop_Player_Slot0,
+			ESpawnSlotType::Coop_Player_Slot1,
+			ESpawnSlotType::Coop_Player_Slot2,
+			ESpawnSlotType::Coop_Player_Slot3 });
+		break;
+
+	default:
+		break;
+	}
+
+	return Result;
+}
+
+void ACSLobbyGameMode::GetAllSpawnManagers(TArray<ACSSpawnManager*>& OutManagers)
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSSpawnManager::StaticClass(), FoundActors);
+
+	for (AActor* Actor : FoundActors)
+	{
+		if (ACSSpawnManager* SpawnManager = Cast<ACSSpawnManager>(Actor))
+		{
+			OutManagers.Add(SpawnManager);
+		}
+	}
+}
+
+void ACSLobbyGameMode::AssignPlayerToSlot(ACSPlayerState* PlayerState, ESpawnSlotType SlotType, const TArray<ACSSpawnManager*>& Managers)
+{
+	for (ACSSpawnManager* Manager : Managers)
+	{
+		if (Manager->SlotType == SlotType)
+		{
+			if (APlayerController* PlayerController = Cast<APlayerController>(PlayerState->GetOwner()))
+			{
+				SpawnOrUpdateLobbyCharacter(PlayerController, Manager->GetActorLocation(), Manager->GetActorRotation());
+			}
+			break;
+		}
+	}
+}
+
+void ACSLobbyGameMode::SpawnOrUpdateLobbyCharacter(APlayerController* PlayerController, const FVector& Location, const FRotator& Rotation)
+{
+	if (!PlayerController) return;
+
+	ACSLobbyCharacter* LobbyCharacter = nullptr;
+
+	if (LobbyCharacterMap.Contains(PlayerController))
+	{
+		LobbyCharacter = LobbyCharacterMap[PlayerController];
+	}
+	else
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = PlayerController;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		LobbyCharacter = GetWorld()->SpawnActor<ACSLobbyCharacter>(ACSLobbyCharacter::StaticClass(), Location, Rotation, SpawnParams);
+		if (LobbyCharacter)
+		{
+			LobbyCharacterMap.Add(PlayerController, LobbyCharacter);
+		}
+	}
+
+	if (LobbyCharacter)
+	{
+		LobbyCharacter->SetActorLocation(Location);
+		LobbyCharacter->SetActorRotation(Rotation);
+	}
+}
+
+void ACSLobbyGameMode::SetSelectedPlayerJob(APlayerController* Player, EJobTypes NewJob)
 {
 	if (ACSPlayerState* CSPlayerState = Player->GetPlayerState<ACSPlayerState>())
 	{
-		CSPlayerState->SelectedCharacterID = CharacterID;
+		CSPlayerState->SelectedJob = NewJob;
+
+		if (ACSLobbyCharacter* LobbyCharacter = LobbyCharacterMap.FindRef(Player))
+		{
+			LobbyCharacter->UpdateMeshFromJobType(NewJob);
+		}
 	}
 }
 
@@ -190,8 +308,21 @@ bool ACSLobbyGameMode::IsTeamBalanced()
 
 void ACSLobbyGameMode::SetViewLobbyCam(APlayerController* NewPlayer)
 {
+	FName CameraTag;
+
+	switch (MatchType)
+	{
+	case EMatchType::EMT_Versus:
+		CameraTag = FName("LobbyCamera_Versus");
+		break;
+
+	case EMatchType::EMT_Coop:
+		CameraTag = FName("LobbyCamera_Coop");
+		break;
+	}
+
 	TArray<AActor*> FoundCameras;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), CameraTag, FoundCameras);
 
 	if (FoundCameras.Num() > 0)
 	{
