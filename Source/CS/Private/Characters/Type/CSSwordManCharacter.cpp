@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
 #include "Components/CSCombatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ACSSwordManCharacter::ACSSwordManCharacter()
 {
@@ -37,32 +38,102 @@ void ACSSwordManCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(Lignt_ComboAction, ETriggerEvent::Started, this, &ACSSwordManCharacter::PlayLightComboAnim);
-		//EnhancedInputComponent->BindAction(K_ComboAction, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayKComboAnim);
-		EnhancedInputComponent->BindAction(Lignt_Casting, ETriggerEvent::Started, this, &ACSSwordManCharacter::PlayLightCastAnim);
-		//EnhancedInputComponent->BindAction(K_Casting, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayKCastingAnim);
+		EnhancedInputComponent->BindAction(Light_ComboAction, ETriggerEvent::Started, this, &ACSSwordManCharacter::HandleLightAttackPress);
+		EnhancedInputComponent->BindAction(Light_ComboAction, ETriggerEvent::Completed, this, &ACSSwordManCharacter::HandleLightAttackRelease);
+		EnhancedInputComponent->BindAction(Heavy_AttackAction, ETriggerEvent::Started, this, &ACSSwordManCharacter::PlayHeavyAttackAnim);
 	}
 }
 
-/* Combo 1 */
+void ACSSwordManCharacter::HandleLightAttackPress()
+{
+	if (CombatComponent || CombatComponent->GetCanCombo())
+	{
+
+		bIsLightAttackPressed = true;
+		bPerformedCounter = false;
+
+		GetWorldTimerManager().SetTimer(LightAttackHoldTimer, this, &ACSSwordManCharacter::CheckForCounterAttack, CounterHoldThreshold, false);
+	}
+}
+
+void ACSSwordManCharacter::HandleLightAttackRelease()
+{
+	if (!bIsLightAttackPressed) return;
+
+	bIsLightAttackPressed = false;
+
+	if (GetWorldTimerManager().IsTimerActive(LightAttackHoldTimer))
+	{
+		GetWorldTimerManager().ClearTimer(LightAttackHoldTimer);
+	}
+
+	if (!bPerformedCounter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Light Attack Released AND Play Anim"));
+		PlayLightComboMontage();
+	}
+}
+
+void ACSSwordManCharacter::CheckForCounterAttack()
+{
+	if (bIsLightAttackPressed && CombatComponent && CombatComponent->GetCanCombo())
+	{
+		if (CounterMontage)
+		{
+			bPerformedCounter = true;
+			PlayPlayerMontage(CounterMontage, FName("Counter"));
+
+			CombatComponent->ResetComboData();
+		}
+	}
+}
+
 void ACSSwordManCharacter::PlayLightComboMontage()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Play Light Combo Montage"));
+
+	if (!CombatComponent || !CombatComponent->GetCanCombo() || LightMontage.Num() <= 0) return;
+
 	int32 iCnt = CombatComponent->GetCombo1Cnt();
-	PlayPlayerMontage(LightMontage[iCnt].AttackMontage, LightMontage[iCnt].Section);
-	CombatComponent->Combo1CntIncrease();
+
+	if (LightMontage.IsValidIndex(iCnt))
+	{
+		if (LightMontage[iCnt].AttackMontage)
+		{
+			PlayPlayerMontage(LightMontage[iCnt].AttackMontage, LightMontage[iCnt].Section);
+			CombatComponent->Combo1CntIncrease();
+		}
+		else
+		{
+			CombatComponent->ResetComboData();
+		}
+	}
+	else
+	{
+		CombatComponent->ResetComboData();
+	}
 }
 
-void ACSSwordManCharacter::PlayLightComboAnim()
+void ACSSwordManCharacter::PlayHeavyAttackAnim()
 {
-	if (!CombatComponent->GetCanCombo()) return;
+	if (!CombatComponent || !CombatComponent->GetCanCombo() || HeavyMontage.Num() <= 0) return;
 
-	PlayLightComboMontage();
-}
+	int32 iCnt = CombatComponent->GetCombo1Cnt();
 
-/* Casting */
-void ACSSwordManCharacter::PlayLightCastAnim()
-{
-	if (!CombatComponent->GetCanCombo()) return;
-
-	PlayPlayerMontage(LightCastMontage[0].AttackMontage, LightCastMontage[0].Section);
+	if (HeavyMontage.IsValidIndex(iCnt))
+	{
+		if (HeavyMontage[iCnt].AttackMontage)
+		{
+			PlayPlayerMontage(HeavyMontage[iCnt].AttackMontage, HeavyMontage[iCnt].Section);
+			CombatComponent->Combo1CntIncrease();
+		}
+		else
+		{
+			CombatComponent->ResetComboData();
+		}
+	}
+	else
+	{
+		CombatComponent->ResetComboData();
+	}
 }

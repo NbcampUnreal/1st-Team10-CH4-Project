@@ -25,24 +25,33 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
 	UInputMappingContext* SwordManMappingContext;
 	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
-	UInputAction* Lignt_ComboAction;
+	UInputAction* Light_ComboAction;
 	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
-	UInputAction* K_ComboAction;
-	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
-	UInputAction* Lignt_Casting;
-	UPROPERTY(EditAnywhere, Category = "Input|SwordMan")
-	UInputAction* K_Casting;
+	UInputAction* Heavy_AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TArray<FAttackMontageStruct> LightMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	TArray<FAttackMontageStruct> LightCastMontage;
+	TArray<FAttackMontageStruct> HeavyMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TObjectPtr<UAnimMontage> CounterMontage;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float CounterHoldThreshold = 0.5f;
 
 private:
-	// Combo_1(Light)
+	void HandleLightAttackPress();
+	void HandleLightAttackRelease();
+	void CheckForCounterAttack();
 	void PlayLightComboMontage();
-	void PlayLightComboAnim();
+	void PlayHeavyAttackAnim();
 
-	// Casting
-	void PlayLightCastAnim();
+	FTimerHandle LightAttackHoldTimer;
+
+	bool bIsLightAttackPressed = false;
+	bool bPerformedCounter = false;
+
 };
