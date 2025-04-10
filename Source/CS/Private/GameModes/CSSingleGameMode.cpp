@@ -29,14 +29,16 @@ void ACSSingleGameMode::BeginPlay()
 	}
 
 	SingleGameState = GetGameState<ACSSingleGameState>();
+
+	InitGameLogic();
 }
 
 void ACSSingleGameMode::InitGameLogic()
 {
+	UE_LOG(LogTemp, Warning, TEXT("SingleGameMode: InitGameLogic 호출됨"));
 	CountInitialAI();
 	UpdateGameStateAIStatus();
 
-	SpawnAllPlayers();
 	InitTagPlayer();
 
 	HandleStartGame();
