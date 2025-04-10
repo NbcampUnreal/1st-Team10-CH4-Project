@@ -10,6 +10,8 @@ ACSLobbyCharacter::ACSLobbyCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
     bReplicates = true;
+    bAlwaysRelevant = true;
+    SetReplicateMovement(true);
 
     if (GetMesh())
     {
@@ -23,10 +25,8 @@ void ACSLobbyCharacter::BeginPlay()
 
 void ACSLobbyCharacter::UpdateMeshFromJobType(EJobTypes JobType)
 {
-    if (!CharacterLobbyDataTable) return;
-
 	// Tranfer JobType to FName for DataTable lookup
-    FName RowName = FName(*UEnum::GetValueAsString(JobType));
+    FName RowName = *UEnum::GetDisplayValueAsText(JobType).ToString(); // "EJT_Fighter"
 
 	// if failed, print ContextString
     static const FString ContextString(TEXT("CharacterLobbyData"));
