@@ -25,4 +25,7 @@ public:
 	UAnimMontage* AttackMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Section;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage = 10.f;
 };

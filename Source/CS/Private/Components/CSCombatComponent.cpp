@@ -17,9 +17,22 @@ UCSCombatComponent::UCSCombatComponent()
     iCombo_1_Cnt = 0;
     iCombo_2_Cnt = 0;
     bCanCombo = true;
+
+    CurrentAttackDamage = 0.f;
 }
 
-void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName)
+void UCSCombatComponent::BeginPlay()
+{
+    Super::BeginPlay();
+}
+
+void UCSCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(UCSCombatComponent, bIsAttacking);
+}
+
+void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage)
 {
     ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;
@@ -80,7 +93,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             }
             
             // Damage Calculation
-            float DamageToApply = 10.0f;
+            float DamageToApply = AttackDamage;
 
             AController* InstigatorController = Owner->GetController();
             AActor* DamageCauser = Owner;
@@ -118,18 +131,51 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
     }
 }
 
-
-void UCSCombatComponent::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
-void UCSCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(UCSCombatComponent, bIsAttacking);
-}
-
+//void UCSCombatComponent::Server_RequestAttack_Implementation(FAttackMontageStruct AttackDataToPlay)
+//{
+//    ACharacter* Owner = Cast<ACharacter>(GetOwner());
+//    
+//    if (!Owner || !AttackDataToPlay.AttackMontage) return;
+//    
+//
+//    if (GetCanCombo())
+//    {
+//        CanComboChange(false);
+//        bIsAttacking = true;
+//        CurrentAttackDamage = AttackDataToPlay.Damage;
+//        ClearHitActors();
+//
+//        Multicast_PlayMontage(AttackDataToPlay.AttackMontage, AttackDataToPlay.Section);
+//        UE_LOG(LogTemp, Log, TEXT("Server_RequestAttack: %s"), *AttackDataToPlay.AttackMontage->GetName());
+//
+//        // If multicast working well on server then remove
+//        UAnimInstance* AnimInstance = Owner->GetMesh()->GetAnimInstance();
+//        if (AnimInstance)
+//        {
+//            AnimInstance->Montage_Play(AttackDataToPlay.AttackMontage);
+//            if (AttackDataToPlay.Section != NAME_None)
+//            {
+//                AnimInstance->Montage_JumpToSection(AttackDataToPlay.Section);
+//            }
+//        }
+//    }
+//}
+//
+//void UCSCombatComponent::Multicast_PlayMontage_Implementation(UAnimMontage* MontageToPlay, FName SectionToPlay)
+//{
+//	ACharacter* Owner = Cast<ACharacter>(GetOwner());
+//	if (!Owner || !MontageToPlay) return;
+//
+//	UAnimInstance* AnimInstance = Owner->GetMesh() ? Owner->GetMesh()->GetAnimInstance() : nullptr;
+//    if (AnimInstance)
+//    {
+//        AnimInstance->Montage_Play(MontageToPlay, 1.0f);
+//        if (SectionToPlay != NAME_None)
+//        {
+//            AnimInstance->Montage_JumpToSection(SectionToPlay, MontageToPlay);
+//        }
+//    }
+//}
 void UCSCombatComponent::Combo1CntIncrease()
 {
     iCombo_1_Cnt++;
@@ -160,6 +206,11 @@ bool UCSCombatComponent::GetCanCombo()
     return bCanCombo;
 }
 
+float UCSCombatComponent::GetCurrentAttackDamage() const
+{
+    return CurrentAttackDamage;
+}
+
 void UCSCombatComponent::ResetComboData()
 {
     iCombo_1_Cnt = 0;
@@ -169,7 +220,6 @@ void UCSCombatComponent::ResetComboData()
 
 void UCSCombatComponent::ClearHitActors()
 {
-    UE_LOG(LogTemp, Error, TEXT("!!!!!!!!!! ClearHitActors CALLED !!!!!!!!!!"));
 	HitActorsThisAttack.Empty();
 }
 
@@ -196,6 +246,11 @@ void UCSCombatComponent::SetIsAttacking(bool bAttacking)
         // 클라일 경우 서버에 알림
         ServerSetIsAttacking(bAttacking);
     }
+}
+
+void UCSCombatComponent::SetCurrentAttackDamage(float Damage)
+{
+	CurrentAttackDamage = Damage;
 }
 
 void UCSCombatComponent::MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
@@ -236,6 +291,7 @@ void UCSCombatComponent::OnRep_IsAttacking()
         }
     }
 }
+
 
 void UCSCombatComponent::ServerStartAttack_Implementation()
 {

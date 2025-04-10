@@ -53,10 +53,8 @@ void ACSSwordManCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void ACSSwordManCharacter::HandleLightAttackPress()
 {
-	UE_LOG(LogTemp, Warning, TEXT("HandleLightAttackPress"));
 	if (CombatComponent && CombatComponent->GetCanCombo())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HandleLightAttackPress 2"));
 		bIsLightAttackPressed = true;
 		bPerformedCounter = false;
 
@@ -89,7 +87,7 @@ void ACSSwordManCharacter::CheckForCounterAttack()
 		{
 			bPerformedCounter = true;
 			PlayPlayerMontage(CounterMontage, FName("Counter"));
-
+			CombatComponent->SetCurrentAttackDamage(CounterAttackDamage);
 			CombatComponent->ResetComboData();
 		}
 	}
@@ -99,16 +97,16 @@ void ACSSwordManCharacter::PlayLightComboMontage()
 {
 	if (!CombatComponent || !CombatComponent->GetCanCombo() || LightMontage.Num() <= 0) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("PlayLightComboMontage"));
 	int32 iCnt = CombatComponent->GetCombo1Cnt();
 
 	if (LightMontage.IsValidIndex(iCnt))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayLightComboMontage %d"), iCnt);
-		if (LightMontage[iCnt].AttackMontage)
+		const FAttackMontageStruct& CurrentAttackData = LightMontage[iCnt];
+
+		if (CurrentAttackData.AttackMontage)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayLightComboMontage %s"), *LightMontage[iCnt].AttackMontage->GetName());
-			PlayPlayerMontage(LightMontage[iCnt].AttackMontage, LightMontage[iCnt].Section);
+			PlayPlayerMontage(CurrentAttackData.AttackMontage, CurrentAttackData.Section);
+			CombatComponent->SetCurrentAttackDamage(CurrentAttackData.Damage);
 			CombatComponent->Combo1CntIncrease();
 		}
 		else
@@ -130,9 +128,12 @@ void ACSSwordManCharacter::PlayHeavyAttackAnim()
 
 	if (HeavyMontage.IsValidIndex(iCnt))
 	{
-		if (HeavyMontage[iCnt].AttackMontage)
+		const FAttackMontageStruct& CurrentAttackData = HeavyMontage[iCnt];
+
+		if (CurrentAttackData.AttackMontage)
 		{
-			PlayPlayerMontage(HeavyMontage[iCnt].AttackMontage, HeavyMontage[iCnt].Section);
+			PlayPlayerMontage(CurrentAttackData.AttackMontage, CurrentAttackData.Section);
+			CombatComponent->SetCurrentAttackDamage(CurrentAttackData.Damage);
 			CombatComponent->Combo1CntIncrease();
 		}
 		else
@@ -154,9 +155,12 @@ void ACSSwordManCharacter::PlayCombinationAnim()
 
 	if (CombinationMontage.IsValidIndex(iCnt))
 	{
-		if (CombinationMontage[iCnt].AttackMontage)
+		const FAttackMontageStruct& CurrentAttackData = CombinationMontage[iCnt];
+
+		if (CurrentAttackData.AttackMontage)
 		{
-			PlayPlayerMontage(CombinationMontage[iCnt].AttackMontage, CombinationMontage[iCnt].Section);
+			PlayPlayerMontage(CurrentAttackData.AttackMontage, CurrentAttackData.Section);
+			CombatComponent->SetCurrentAttackDamage(CurrentAttackData.Damage);
 			CombatComponent->Combo1CntIncrease();
 		}
 		else

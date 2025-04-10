@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CSTypes/CSCharacterTypes.h"
+#include "Struct/AttackMontageStrucct.h"
 #include "CSCombatComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -20,9 +21,16 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool GetIsAttacking() const { return bIsAttacking; }
+    bool GetCanCombo();
+
+	UFUNCTION(BlueprintPure, Category = "Combat")
+    float GetCurrentAttackDamage() const;
 
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void SetIsAttacking(bool bAttacking);
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void SetCurrentAttackDamage(float Damage);
 
     UFUNCTION(NetMulticast, Reliable)
     void MultiSetMontageData(UAnimMontage* PlayMontage, FName Section);
@@ -46,7 +54,7 @@ public:
     void Combo2CntIncrease();
     int32 GetCombo2Cnt();
     void CanComboChange(bool Check);
-    bool GetCanCombo();
+
     UFUNCTION(BlueprintCallable, Category = "Combo")
     void ResetComboData();
 
@@ -54,17 +62,38 @@ public:
     void ClearHitActors();
 
     UFUNCTION(Server, Reliable, BlueprintCallable)
-    void Server_PerformHitCheck(FName TraceStartName, FName TraceEndName);
-	void Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName);
+    void Server_PerformHitCheck(FName TraceStartName, FName TraceEndName, float AttackDamage);
+	void Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage);
 
     UFUNCTION()
     void PerformAttack(UAnimMontage* Montage, FName SectionName);
 
+
+
+    //UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
+    //void Server_RequestAttack(FAttackMontageStruct AttackDataToPlay);
+	//void Server_RequestAttack_Implementation(FAttackMontageStruct AttackDataToPlay);
+
+    //UFUNCTION(NetMulticast, Reliable)
+    //void Multicast_PlayMontage(UAnimMontage* MontageToPlay, FName SectionToPlay);
+	//void Multicast_PlayMontage_Implementation(UAnimMontage* MontageToPlay, FName SectionToPlay);
+
 protected:
     virtual void BeginPlay() override;
 
+    UPROPERTY(ReplicatedUsing = OnRep_IsAttacking)
+    bool bIsAttacking = false;
+
+    UFUNCTION()
+    void OnRep_IsAttacking();
+
     UAnimMontage* ServerPlayMontage;
     FName ServerSection;
+
+    UPROPERTY()
+    TArray<TWeakObjectPtr<AActor>> HitActorsThisAttack;
+
+    float CurrentAttackDamage;
 
     // Combo Data
     int32 iCombo_1_Cnt;
@@ -72,17 +101,10 @@ protected:
     bool bCanCombo;
 
 private:
-    UPROPERTY(ReplicatedUsing = OnRep_IsAttacking)
-    bool bIsAttacking = false;
-
-    UFUNCTION()
-    void OnRep_IsAttacking();
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerSetIsAttacking(bool bAttacking);
     void ServerSetIsAttacking_Implementation(bool bAttacking);
     bool ServerSetIsAttacking_Validate(bool bAttacking);
     
-    UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> HitActorsThisAttack;
 };
