@@ -201,7 +201,10 @@ void AAIBaseCharacter::PlayHitReactMontage()
 
 void AAIBaseCharacter::ResumeMovement()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
 	GetWorldTimerManager().ClearTimer(HitReactTimerHandle);
 
 	if (AAIController* AICon = Cast<AAIController>(GetController()))

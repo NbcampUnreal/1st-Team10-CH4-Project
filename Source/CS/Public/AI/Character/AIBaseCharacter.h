@@ -40,7 +40,8 @@ public:
 	UAnimMontage* GetJumpAttackMontage() const { return JumpAttackMontage; }
 	UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
 	UAnimMontage* GetSitMontage() const { return SitMontage; }
-	
+	UAnimMontage* GetJumpRunMontage() const { return JumpRunMontage;}
+	UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
 	virtual int MeleeAttack_Implementation() override;
 	virtual int KickAttack_Implementation() override;
 	virtual int LowComboAttack_Implementation() override;
@@ -85,6 +86,10 @@ protected:
 	UAnimMontage* LowComboAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* RangeComboAttackMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* JumpRunMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* DodgeMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* SitMontage;
