@@ -92,8 +92,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE EJobTypes GetJobType() const { return JobState; }
 
-	UFUNCTION(BlueprintCallable, Category = "Ground State")
-	void SetGroundState(EGroundTypes EGTState);
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Ground State")
+	void ServerSetGroundState(EGroundTypes EGTState);
+	void ServerSetGroundState_Implementation(EGroundTypes EGTState);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSetGroundState(EGroundTypes EGTState);
+	void MultiSetGroundState_Implementation(EGroundTypes EGTState);
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE EGroundTypes GetGroundState() const { return GroundState; }
 };

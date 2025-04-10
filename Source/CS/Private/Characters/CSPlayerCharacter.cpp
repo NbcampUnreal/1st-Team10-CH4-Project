@@ -118,7 +118,16 @@ void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	if (ActionState == ECharacterTypes::ECT_Launch && !GetCharacterMovement()->IsFalling())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("GetUp")));
+		ActionState = ECharacterTypes::ECT_Attacking;
+		if (GroundState == EGroundTypes::EGT_Up)
+		{
+			PlayPlayerMontage(GetUpBackMontage, "Default");
+		}
+		else if (GroundState == EGroundTypes::EGT_Down)
+		{
+			PlayPlayerMontage(GetUpBellyMontage, "Default");
+		}
+		return;
 	}
 
 	if (ActionState == ECharacterTypes::ECT_Dead || ActionState != ECharacterTypes::ECT_Unoccupied) return;
@@ -137,6 +146,7 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 
 	if (AnimInstance && PlayMontage)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("GetUp")));
 		CombatComponent->CanComboChange(false);
 		AnimInstance->Montage_Play(PlayMontage);
 		FName SectionName;
@@ -150,13 +160,13 @@ void ACSPlayerCharacter::GuardStart()
 {
 	if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
-		ActionState = ECharacterTypes::ECT_Defending;
+		ServerSetActionState(ECharacterTypes::ECT_Defending);
 	}
 }
 
 void ACSPlayerCharacter::GuardEnd()
 {
-	ActionState = ECharacterTypes::ECT_Unoccupied;
+	ServerSetActionState(ECharacterTypes::ECT_Unoccupied);
 }
 
 void ACSPlayerCharacter::StopMovement_Implementation()

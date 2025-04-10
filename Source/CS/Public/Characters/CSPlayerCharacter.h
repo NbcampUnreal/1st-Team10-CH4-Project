@@ -32,7 +32,6 @@ public:
  	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
 	void GuardStart();
 	void GuardEnd();
-
 	
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);

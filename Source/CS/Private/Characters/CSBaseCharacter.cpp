@@ -178,7 +178,12 @@ void ACSBaseCharacter::MultiLaunchCharacter_Implementation()
     this->LaunchCharacter(FVector(0, 0, 500), true, true);
 }
 
-void ACSBaseCharacter::SetGroundState(EGroundTypes EGTState)
+void ACSBaseCharacter::ServerSetGroundState_Implementation(EGroundTypes EGTState)
+{
+    MultiSetGroundState(EGTState);
+}
+
+void ACSBaseCharacter::MultiSetGroundState_Implementation(EGroundTypes EGTState)
 {
     GroundState = EGTState;
 }

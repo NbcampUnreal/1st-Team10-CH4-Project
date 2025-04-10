@@ -17,6 +17,11 @@ void ACSFighterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!CombatComponent)
+	{
+		CombatComponent = FindComponentByClass<UCSCombatComponent>();
+	}
+
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 	{
@@ -51,6 +56,7 @@ void ACSFighterCharacter::PlayPComboMontage()
 {
 	int32 iCnt = CombatComponent->GetCombo1Cnt();
 	PlayPlayerMontage(PunchMontage[iCnt].AttackMontage, PunchMontage[iCnt].Section);
+	CombatComponent->SetCurrentAttackDamage(PunchMontage[iCnt].Damage);
 	CombatComponent->Combo1CntIncrease();
 }
 
@@ -66,6 +72,7 @@ void ACSFighterCharacter::PlayKComboMontage()
 {
 	int32 iCnt = CombatComponent->GetCombo2Cnt();
 	PlayPlayerMontage(KickMontage[iCnt].AttackMontage, KickMontage[iCnt].Section);
+	CombatComponent->SetCurrentAttackDamage(KickMontage[iCnt].Damage);
 	CombatComponent->Combo2CntIncrease();
 }
 
@@ -82,6 +89,7 @@ void ACSFighterCharacter::PlayPCastingAnim()
 	if (!CombatComponent->GetCanCombo()) return;
 
 	PlayPlayerMontage(PunchCastMontage[0].AttackMontage, PunchCastMontage[0].Section);
+	CombatComponent->SetCurrentAttackDamage(PunchCastMontage[0].Damage);
 }
 
 void ACSFighterCharacter::PlayKCastingAnim()
@@ -89,5 +97,6 @@ void ACSFighterCharacter::PlayKCastingAnim()
 	if (!CombatComponent->GetCanCombo()) return;
 
 	PlayPlayerMontage(KickCastMontage[0].AttackMontage, KickCastMontage[0].Section);
+	CombatComponent->SetCurrentAttackDamage(KickCastMontage[0].Damage);
 }
 
