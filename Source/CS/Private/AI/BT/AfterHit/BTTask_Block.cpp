@@ -1,4 +1,4 @@
-// UBTTask_Block.cpp
+
 
 #include "AI/BT/AfterHit/BTTask_Block.h"
 #include "AI/Controller/AIBaseController.h"
@@ -19,6 +19,7 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	const bool bShouldBlock = OwnerComp.GetBlackboardComponent()->GetValueAsBool(ShouldBlockKey.SelectedKeyName);
 	const bool bIsPlayerAttacking = OwnerComp.GetBlackboardComponent()->GetValueAsBool(IsPlayerAttackingKey.SelectedKeyName);
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+
 	if (!(bShouldBlock || bIsPlayerAttacking))
 	{
 		return EBTNodeResult::Failed;
@@ -26,14 +27,22 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 	auto* AIController = OwnerComp.GetAIOwner();
 	auto* NPC = Cast<AAIBaseCharacter>(AIController->GetPawn());
+	if (!NPC) return EBTNodeResult::Failed;
+	
+	if (UAnimInstance* AnimInstance = NPC->GetMesh()->GetAnimInstance())
+	{
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->StopAllMontages(0.1f);
+		}
+	}
 
 	if (auto* ICombat = Cast<ICombatInterface>(NPC))
 	{
 		BB->SetValueAsBool(FName("IsBusy"), true);
-		
+
 		if (ICombat->Execute_Block(NPC))
 		{
-		
 			NPC->GetWorldTimerManager().SetTimer(
 				BlockTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, &OwnerComp),
@@ -45,6 +54,7 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	}
 	return EBTNodeResult::Failed;
 }
+
 
 void UBTTask_Block::FinishBlock(UBehaviorTreeComponent* OwnerComp)
 {
@@ -70,6 +80,7 @@ void UBTTask_Block::FinishBlock(UBehaviorTreeComponent* OwnerComp)
 			BB->SetValueAsBool(FName("IsBusy"), false);
 			BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), true);
 			FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
+			return;
 		}
 
 		if (FMath::FRand() < 0.7f)
@@ -79,6 +90,7 @@ void UBTTask_Block::FinishBlock(UBehaviorTreeComponent* OwnerComp)
 				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, OwnerComp),
 				0.6f, false
 			);
+			return;
 		}
 	}
 	NPC->StopBlock();

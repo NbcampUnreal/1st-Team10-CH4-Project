@@ -18,15 +18,25 @@ EBTNodeResult::Type UBTTask_Sit::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
 
 	if (!AIPawn) return EBTNodeResult::Failed;
-	
+
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	
+
+	if (UAnimInstance* AnimInstance = AIPawn->GetMesh()->GetAnimInstance())
+	{
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->StopAllMontages(0.1f);
+		}
+	}
+
 	UAnimMontage* SitMontage = AIPawn->GetSitMontage();
 	if (SitMontage)
 	{
 		BB->SetValueAsBool(FName("IsBusy"), true);
 		AIPawn->StopMovement();
-		
+
+		AIPawn->PlayAnimMontage(SitMontage);
+
 		AIPawn->GetWorldTimerManager().SetTimer(
 			SitFinishHandle,
 			FTimerDelegate::CreateUObject(this, &UBTTask_Sit::FinishSit, &OwnerComp),
@@ -37,16 +47,20 @@ EBTNodeResult::Type UBTTask_Sit::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	return EBTNodeResult::Failed;
 }
 
+
 void UBTTask_Sit::FinishSit(UBehaviorTreeComponent* OwnerComp)
 {
-	AAIController* AICon = OwnerComp->GetAIOwner();
-	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn());
-	AIPawn->ResumeMovement();
-	UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent();
-	if (BB)
+	if (!OwnerComp) return;
+
+	if (AAIController* AICon = OwnerComp->GetAIOwner())
 	{
-		BB->SetValueAsBool(FName("IsBusy"), false);
-		BB->SetValueAsBool(FName("ShouldCrouch"), false);
+		if (AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn()))
+		{
+			if (AIPawn->IsValidLowLevel())
+			{
+				AIPawn->ResumeMovement();
+			}
+		}
 	}
 	FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 }

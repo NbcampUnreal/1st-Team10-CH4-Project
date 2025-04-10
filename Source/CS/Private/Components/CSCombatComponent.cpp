@@ -90,7 +90,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             {
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
             }
-
             if (VictimCharacter)
             {
                 AAIBaseController* AIController = Cast<AAIBaseController>(VictimCharacter->GetController());
@@ -242,7 +241,6 @@ void UCSCombatComponent::ServerStartAttack_Implementation()
 {
     SetIsAttacking(true);
     ClearHitActors();
-
     ACSBaseCharacter* Character = Cast<ACSBaseCharacter>(GetOwner());
 
     if (Character && Character->HasAuthority() && ServerPlayMontage)

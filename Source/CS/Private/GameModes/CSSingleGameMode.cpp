@@ -40,6 +40,7 @@ void ACSSingleGameMode::InitGameLogic()
 	UpdateGameStateAIStatus();
 
 	InitTagPlayer();
+	InitBossGateActor();
 
 	HandleStartGame();
 }
@@ -111,6 +112,17 @@ void ACSSingleGameMode::InitTagPlayer()
 	}
 }
 
+void ACSSingleGameMode::InitBossGateActor()
+{
+	TArray<AActor*> Found;
+	UGameplayStatics::GetAllActorsOfClass(this, ACSBossGate::StaticClass(), Found);
+
+	if (Found.Num() > 0)
+	{
+		BossGateActor = Cast<ACSBossGate>(Found[0]);
+	}
+}
+
 void ACSSingleGameMode::CountInitialAI()
 {
 	PendingAIPawns.Empty();
@@ -156,7 +168,7 @@ void ACSSingleGameMode::StartBossPhase()
 void ACSSingleGameMode::SpawnBoss()
 {
 	if(!BossCharacterClass) return;
-
+	UE_LOG(LogTemp, Warning, TEXT("보스 스폰함수 호출됨"));
 	TArray<AActor*> SpawnPoints;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("BossSpawnPoint"), SpawnPoints);
 

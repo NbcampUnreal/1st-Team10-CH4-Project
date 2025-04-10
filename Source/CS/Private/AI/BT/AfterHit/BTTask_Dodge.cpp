@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "AI/Character/AIBaseCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 UBTTask_Dodge::UBTTask_Dodge()
