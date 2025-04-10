@@ -32,7 +32,10 @@ public:
  	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
 	void GuardStart();
 	void GuardEnd();
-	void Dodge();
+	void DodgeStart();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void DodgeEnd();
 	
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
@@ -65,6 +68,10 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayDodgeMontage();
 	void Multicast_PlayDodgeMontage_Implementation();
+
+	UFUNCTION(Server, Reliable)
+	void Server_FinishDodge();
+	void Server_FinishDodge_Implementation();
 	/*
 	* Callback function for input
 	*/

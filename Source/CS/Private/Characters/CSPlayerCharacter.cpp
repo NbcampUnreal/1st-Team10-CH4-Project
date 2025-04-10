@@ -83,7 +83,8 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
 		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::GuardStart);
 		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::GuardEnd);
-		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::Dodge);
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::DodgeStart);
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::DodgeEnd);
 	}
 }
 
@@ -173,11 +174,19 @@ void ACSPlayerCharacter::GuardEnd()
 	ServerSetActionState(ECharacterTypes::ECT_Unoccupied);
 }
 
-void ACSPlayerCharacter::Dodge()
+void ACSPlayerCharacter::DodgeStart()
 {
 	if (ActionState == ECharacterTypes::ECT_Unoccupied)
 	{
 		Server_PerformDodge();
+	}
+}
+
+void ACSPlayerCharacter::DodgeEnd()
+{
+	if (ActionState == ECharacterTypes::ECT_Dodge)
+	{
+		Server_FinishDodge();
 	}
 }
 
@@ -226,6 +235,15 @@ void ACSPlayerCharacter::Multicast_PlayDodgeMontage_Implementation()
 		{
 			AnimInstance->Montage_Play(DodgeMontage, 1.f);
 		}
+	}
+}
+
+void ACSPlayerCharacter::Server_FinishDodge_Implementation()
+{
+	if (ActionState == ECharacterTypes::ECT_Dodge)
+	{
+		ActionState = ECharacterTypes::ECT_Unoccupied;
+		OnRep_ActionState();
 	}
 }
 
@@ -318,9 +336,12 @@ void ACSPlayerCharacter::ServerSetFacingDirection_Implementation(EFacingDirectio
 
 void ACSPlayerCharacter::UpdateRotation()
 {
-	float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
-	FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
-	SetActorRotation(NewRotation);
+	if (ActionState == ECharacterTypes::ECT_Unoccupied)
+	{
+		float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
+		FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
+		SetActorRotation(NewRotation);
+	}
 }
 
 void ACSPlayerCharacter::OnRep_FacingDirection()
