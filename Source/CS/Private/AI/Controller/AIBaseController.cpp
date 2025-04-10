@@ -27,7 +27,6 @@ void AAIBaseController::OnPossess(APawn* InPawn)
 			RunBehaviorTree(Tree);
 			/*BehaviorTreeComponent = NewObject<UBehaviorTreeComponent>(this, TEXT("BTComponent"));
 			BehaviorTreeComponent->RegisterComponent();*/
-			
 		}
 	}
 }
