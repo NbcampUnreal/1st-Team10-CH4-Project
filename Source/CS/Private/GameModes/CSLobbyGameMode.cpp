@@ -32,6 +32,16 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
+	UE_LOG(LogTemp, Warning, TEXT("PostLogin called for: %s"), *NewPlayer->GetName());
+
+	if (MatchType == EMatchType::EMT_None)
+	{
+		if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
+		{
+			MatchType = GI->GetMatchType();
+		}
+	}
+
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(NewPlayer))
 	{
 		CSPlayerController->Client_ShowLobbyUI();
@@ -51,13 +61,11 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	FTimerHandle DelayHandle;
 	GetWorld()->GetTimerManager().SetTimer(DelayHandle, [this, NewPlayer]()
 		{
-			UE_LOG(LogTemp, Warning, TEXT("=== Delayed Setup Executing for %s ==="), *NewPlayer->GetName());
-
 			SetViewLobbyCam(NewPlayer);
-			SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
 			PositionLobbyCharacters();
+			SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
 
-		}, 1.0f, false);
+		}, 1.5f, false);
 }
 
 void ACSLobbyGameMode::StartMatchIfReady()
@@ -146,7 +154,7 @@ void ACSLobbyGameMode::PositionLobbyCharacters()
 void ACSLobbyGameMode::PositionVersusCharacters()
 {
 	const auto TeamSlotPriority = GetSlotPriorityForMatchType();
-	UE_LOG(LogTemp, Warning, TEXT("포지션 벌서스 캐릭터 함수 호출됨"));
+
 	TMap<int32, TArray<ACSPlayerState*>> TeamMap;
 	for (APlayerState* PlayerState : GameState->PlayerArray)
 	{
@@ -158,11 +166,6 @@ void ACSLobbyGameMode::PositionVersusCharacters()
 
 	TArray<ACSSpawnManager*> SpawnManagers;
 	GetAllSpawnManagers(SpawnManagers);
-
-	if (SpawnManagers.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("스폰매니저 못찾음"));
-	}
 
 	for (auto& Entry : TeamMap)
 	{
@@ -258,7 +261,7 @@ void ACSLobbyGameMode::AssignPlayerToSlot(ACSPlayerState* PlayerState, ESpawnSlo
 void ACSLobbyGameMode::SpawnOrUpdateLobbyCharacter(APlayerController* PlayerController, const FVector& Location, const FRotator& Rotation)
 {
 	if (!PlayerController) return;
-
+	
 	ACSLobbyCharacter* LobbyCharacter = nullptr;
 
 	if (LobbyCharacterMap.Contains(PlayerController))
@@ -271,10 +274,11 @@ void ACSLobbyGameMode::SpawnOrUpdateLobbyCharacter(APlayerController* PlayerCont
 		SpawnParams.Owner = PlayerController;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		LobbyCharacter = GetWorld()->SpawnActor<ACSLobbyCharacter>(ACSLobbyCharacter::StaticClass(), Location, Rotation, SpawnParams);
+		if (!LobbyCharacterClass) return;
+		
+		LobbyCharacter = GetWorld()->SpawnActor<ACSLobbyCharacter>(LobbyCharacterClass, Location, Rotation, SpawnParams);
 		if (LobbyCharacter)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Spawned LobbyCharacter for %s"), *PlayerController->GetName());
 			LobbyCharacterMap.Add(PlayerController, LobbyCharacter);
 		}
 	}
@@ -318,7 +322,6 @@ bool ACSLobbyGameMode::IsTeamBalanced()
 void ACSLobbyGameMode::SetViewLobbyCam(APlayerController* NewPlayer)
 {
 	FName CameraTag;
-	UE_LOG(LogTemp,Warning, TEXT("LobbyGameMode: SetViewLobbyCam Called"))
 	switch (MatchType)
 	{
 	case EMatchType::EMT_Versus:

@@ -30,6 +30,10 @@ public:
 	void SetSelectedPlayerJob(APlayerController* Player, EJobTypes NewJob);
 
 protected:
+	/** 스폰할 로비 전용 캐릭터 */
+	UPROPERTY(EditDefaultsOnly, Category = "Lobby")
+	TSubclassOf<class ACSLobbyCharacter> LobbyCharacterClass;
+
 	/** 로비 캐릭터 컨트롤 하기 위한 Map */
 	UPROPERTY()
 	TMap<APlayerController*, class ACSLobbyCharacter*> LobbyCharacterMap;
