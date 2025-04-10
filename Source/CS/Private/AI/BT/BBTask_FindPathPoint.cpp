@@ -1,30 +1,46 @@
 #include "AI/BT/BBTask_FindPathPoint.h"
 #include "AI/Character/AIBaseCharacter.h"
 #include "AI/Controller/AIBaseController.h"
+#include "AI/PatrolPath.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBBTask_FindPathPoint::UBBTask_FindPathPoint(FObjectInitializer const& ObjectInitializer) :
-UBTTask_BlackboardBase{ObjectInitializer}
+UBBTask_FindPathPoint::UBBTask_FindPathPoint(FObjectInitializer const& ObjectInitializer)
+	: UBTTask_BlackboardBase{ ObjectInitializer }
 {
 	NodeName = TEXT("Find Path Point");
 }
+
 EBTNodeResult::Type UBBTask_FindPathPoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	if (auto* const cont = Cast<AAIBaseController>(OwnerComp.GetAIOwner()))
+	if (AAIBaseController* const Controller = Cast<AAIBaseController>(OwnerComp.GetAIOwner()))
 	{
-		if (auto* const BC = OwnerComp.GetBlackboardComponent())
+		if (UBlackboardComponent* const BB = OwnerComp.GetBlackboardComponent())
 		{
-			auto const Index = BC->GetValueAsInt((GetSelectedBlackboardKey()));
-			if (auto* AI = Cast<AAIBaseCharacter>(cont->GetPawn()))
+			const int32 Index = BB->GetValueAsInt(GetSelectedBlackboardKey());
+
+			if (AAIBaseCharacter* const AI = Cast<AAIBaseCharacter>(Controller->GetPawn()))
 			{
-				auto const Point = AI->GetPatrolPath()->GetPatrolPoint(Index);
-				auto const GlobalPoint = AI->GetPatrolPath()->GetActorTransform().TransformPosition(Point);
-				BC -> SetValueAsVector(PatrolPathVectorkey.SelectedKeyName, GlobalPoint);
+				APatrolPath* PatrolPath = AI->GetPatrolPath();
+
+				if (!PatrolPath)
+				{
+					return EBTNodeResult::Failed;
+				}
+
+				if (Index < 0 || Index >= PatrolPath->Num())
+				{
+					return EBTNodeResult::Failed;
+				}
+
+				FVector const Point = PatrolPath->GetPatrolPoint(Index);
+				FVector const GlobalPoint = PatrolPath->GetActorTransform().TransformPosition(Point);
+				BB->SetValueAsVector(PatrolPathVectorkey.SelectedKeyName, GlobalPoint);
 
 				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 				return EBTNodeResult::Succeeded;
 			}
 		}
 	}
+	
 	return EBTNodeResult::Failed;
 }
