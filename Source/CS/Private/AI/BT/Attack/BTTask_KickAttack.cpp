@@ -42,7 +42,6 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 					BB->SetValueAsBool(FName("IsBusy"), true);
 
 					Combat->Execute_secondAttack(NPC);
-
 					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,

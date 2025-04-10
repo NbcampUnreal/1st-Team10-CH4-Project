@@ -138,7 +138,7 @@ int AAIBaseCharacter::firstAttack_Implementation()
 }
 int AAIBaseCharacter::secondAttack_Implementation()
 {
-	AI_Attack(GetfirstAttackMontage(), GetsecondAttackName());
+	AI_Attack(GetsecondAttackMontage(), GetsecondAttackName());
 	return 1;
 }
 int AAIBaseCharacter::LowComboAttack_Implementation()
@@ -366,58 +366,57 @@ int AAIBaseCharacter::RunAway_Implementation(AActor* Attacker)
 
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (!AIController) return 0;
-	
+
+	// 👉 현재 몽타주 중지
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
 		if (AnimInstance->IsAnyMontagePlaying())
 		{
 			AnimInstance->StopAllMontages(0.1f);
+			UE_LOG(LogTemp, Warning, TEXT("▶ RunAway: 몽타주 중단"));
 		}
 	}
 
 	FVector MyLocation = GetActorLocation();
 	FVector AttackerLocation = Attacker->GetActorLocation();
+	FVector RunDirection = (MyLocation - AttackerLocation).GetSafeNormal2D(); // 👉 정확한 반대 방향
 
-	float YDir = FMath::Sign(MyLocation.Y - AttackerLocation.Y);
-	FVector RunDirection = FVector(0.f, YDir, 0.f);
+	FVector TargetLocation = MyLocation + RunDirection * 300.f;
 
+	// 👉 네비게이션 위치 보정
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
 	if (!NavSys) return 0;
 
-	FNavLocation NavLocation;
+	FNavLocation ProjectedLocation;
+	bool bProjected = NavSys->ProjectPointToNavigation(TargetLocation, ProjectedLocation, FVector(100.f));
 
-	const float MinDistance = 200.f;
-	const float MaxDistance = 400.f;
-	const int MaxAttempts = 10;
-	bool bFoundValid = false;
-
-	for (int i = 0; i < MaxAttempts; ++i)
+	if (!bProjected)
 	{
-		FVector BasePoint = MyLocation + RunDirection * MinDistance;
-
-		if (NavSys->GetRandomReachablePointInRadius(BasePoint, MaxDistance, NavLocation))
-		{
-			float ActualDistance = FVector::Dist2D(MyLocation, NavLocation.Location);
-			if (ActualDistance >= MinDistance)
-			{
-				NavLocation.Location.X = MyLocation.X;
-				NavLocation.Location.Z = MyLocation.Z;
-
-				bFoundValid = true;
-				break;
-			}
-		}
-	}
-
-	if (!bFoundValid)
-	{
+		UE_LOG(LogTemp, Error, TEXT("❌ RunAway 실패: 유효한 NavMesh 위치 없음"));
 		return 0;
 	}
 
+	// 👉 이동 요청
 	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalLocation(NavLocation.Location);
+	MoveRequest.SetGoalLocation(ProjectedLocation.Location);
 	MoveRequest.SetAcceptanceRadius(5.f);
-	AIController->MoveTo(MoveRequest);
 
-	return 1;
+	EPathFollowingRequestResult::Type Result = AIController->MoveTo(MoveRequest);
+
+	switch (Result)
+	{
+	case EPathFollowingRequestResult::RequestSuccessful:
+		UE_LOG(LogTemp, Warning, TEXT("✅ RunAway 시작 위치: %s"), *ProjectedLocation.Location.ToString());
+		return 1;
+
+	case EPathFollowingRequestResult::AlreadyAtGoal:
+		UE_LOG(LogTemp, Warning, TEXT("⚠️ 이미 목표 위치에 있음"));
+		return 1;
+
+	case EPathFollowingRequestResult::Failed:
+	default:
+		UE_LOG(LogTemp, Error, TEXT("❌ RunAway 실패: MoveTo 실패"));
+		return 0;
+	}
 }
+
