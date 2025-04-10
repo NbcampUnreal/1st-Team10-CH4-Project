@@ -19,7 +19,13 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
-	
+
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
+
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
 		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
@@ -27,16 +33,17 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
 				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
-
-				// 공격 애니메이션이 끝났는지 확인
 				if (MontageHasfinished(NPC))
 				{
+
+					BB->SetValueAsBool(FName("IsBusy"), true);
+
 					Combat->Execute_MeleeAttack(NPC);
-					
+
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishLatentTaskEarly, &OwnerComp),
-						2.0f, false
+						0.8f, false
 					);
 
 					return EBTNodeResult::InProgress;
@@ -44,9 +51,9 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 			}
 		}
 	}
-
 	return EBTNodeResult::Failed;
 }
+
 
 void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
 {
@@ -63,7 +70,6 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 			}
 			else
 			{
-				
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
 					FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishLatentTaskEarly, OwnerComp),

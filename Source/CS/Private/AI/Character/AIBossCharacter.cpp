@@ -49,19 +49,32 @@ int AAIBossCharacter::Dodge_Implementation(AActor* Attacker)
 void AAIBossCharacter::Dodge_StartDash(AActor* Attacker)
 {
 	if (!Attacker) return;
+	
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->StopAllMontages(0.1f);
+		}
+	}
 
 	FVector MyLocation = GetActorLocation();
 	FVector AttackerLocation = Attacker->GetActorLocation();
 	
 	float YDir = FMath::Sign(MyLocation.Y - AttackerLocation.Y);
 	FVector AwayDir = FVector(0.f, YDir, 0.f);
-
-	float DashStrength = 1600.f;
+	
+	float DashStrength = 900.f;
 	LaunchCharacter(AwayDir * DashStrength, true, true);
-
+	
 	FTimerHandle DodgeMoveTimerHandle;
-	GetWorldTimerManager().SetTimer(DodgeMoveTimerHandle, FTimerDelegate::CreateUObject(this, &AAIBossCharacter::Dodge_MoveToSafeZone, Attacker), 0.25f, false);
+	GetWorldTimerManager().SetTimer(
+		DodgeMoveTimerHandle,
+		FTimerDelegate::CreateUObject(this, &AAIBossCharacter::Dodge_MoveToSafeZone, Attacker),
+		0.25f, false
+	);
 }
+
 
 void AAIBossCharacter::Dodge_MoveToSafeZone(AActor* Attacker)
 {
@@ -117,6 +130,14 @@ int AAIBossCharacter::RunAway_Implementation(AActor* Attacker)
 
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (!AIController) return 0;
+	
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->StopAllMontages(0.1f);
+		}
+	}
 
 	FVector MyLocation = GetActorLocation();
 	FVector AttackerLocation = Attacker->GetActorLocation();
@@ -156,23 +177,13 @@ int AAIBossCharacter::RunAway_Implementation(AActor* Attacker)
 	{
 		return 0;
 	}
-	
-	if (FMath::FRand() < 0.3f)
-	{
-		FVector LaunchVelocity = (RunDirection + FVector(0.f, 0.f, 0.8f)) * 600.f;
-		LaunchCharacter(LaunchVelocity, true, true);
-	}
-	else
-	{
-		auto Result = AIController->MoveToLocation(NavLocation.Location, -1.f, true);
-		if (Result == EPathFollowingRequestResult::RequestSuccessful)
-		{
-			return 1;
-		}
-	}
+
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalLocation(NavLocation.Location);
+	MoveRequest.SetAcceptanceRadius(5.f);
+	AIController->MoveTo(MoveRequest);
 
 	return 1;
 }
-
 
 
