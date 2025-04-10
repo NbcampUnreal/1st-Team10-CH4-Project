@@ -4,4 +4,5 @@
 AAINormalCharacter::AAINormalCharacter()
 {
 	AIControllerClass = AAINormalController::StaticClass();
+	Tags.Add(FName("Normal"));
 }
