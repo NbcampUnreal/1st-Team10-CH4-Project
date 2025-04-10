@@ -51,11 +51,13 @@ EBTNodeResult::Type UBTTask_Sit::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 void UBTTask_Sit::FinishSit(UBehaviorTreeComponent* OwnerComp)
 {
 	if (!OwnerComp) return;
-
+	UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent();
 	if (AAIController* AICon = OwnerComp->GetAIOwner())
 	{
 		if (AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AICon->GetPawn()))
 		{
+			BB->SetValueAsBool(FName("ShouldCrouch"), false);
+			BB->SetValueAsBool(FName("IsBusy"), false);
 			if (AIPawn->IsValidLowLevel())
 			{
 				AIPawn->ResumeMovement();
