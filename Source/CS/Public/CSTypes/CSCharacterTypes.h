@@ -24,6 +24,7 @@ enum class ECharacterTypes : uint8
 	ECT_Attacking UMETA(DisplayName = "Attacking"),
 	ECT_Defending UMETA(DisplayName = "Defending"),
 	ECT_Moving UMETA(DisplayName = "Moving"),
+	ECT_Launch UMETA(DisplayName = "Launched"),
 	ECT_Dead UMETA(DisplayName = "Dead")
 };
 
@@ -47,4 +48,11 @@ enum class EDamageType : uint8
 {
 	EDT_Nomal UMETA(DisplayName = "Nomal"),
 	EDT_Launch UMETA(DisplayName = "Launch")
+};
+
+UENUM(BlueprintType)
+enum class EGroundTypes : uint8
+{
+	EGT_Down UMETA(DisplayName = "Down"),
+	EGT_Up UMETA(DisplayName = "Up")
 };

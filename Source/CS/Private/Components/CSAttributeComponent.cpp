@@ -67,11 +67,14 @@ void UCSAttributeComponent::CharacterLaunch(FHitResult HitResult)
 {
 	if (!GetOwner()->HasAuthority()) return;
 	if (!IsAlive()) return;
+	
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Launch")));
 
 	ACSBaseCharacter* OwningPlayerCharacter = Cast<ACSBaseCharacter>(GetOwner());
 	if (OwningPlayerCharacter)
 	{
-		OwningPlayerCharacter->LaunchCharacter(FVector(0, 0, 10), false, true);
+		OwningPlayerCharacter->ServerSetActionState(ECharacterTypes::ECT_Launch);
+		OwningPlayerCharacter->ServerLaunchCharacter();
 	}
 }
 
