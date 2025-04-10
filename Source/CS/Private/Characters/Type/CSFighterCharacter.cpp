@@ -55,6 +55,7 @@ void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void ACSFighterCharacter::PlayPComboMontage()
 {
 	int32 iCnt = CombatComponent->GetCombo1Cnt();
+	
 	PlayPlayerMontage(PunchMontage[iCnt].AttackMontage, PunchMontage[iCnt].Section);
 	CombatComponent->SetCurrentAttackDamage(PunchMontage[iCnt].Damage);
 	CombatComponent->Combo1CntIncrease();

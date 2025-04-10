@@ -32,6 +32,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void SetCurrentAttackDamage(float Damage);
 
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void ActivateSuddenDeathMode();
+
+    // Sudden death mode test
+    UFUNCTION(Server, Reliable)
+    void Server_ActivateSuddenDeath();
+	void Server_ActivateSuddenDeath_Implementation();
+
     UFUNCTION(NetMulticast, Reliable)
     void MultiSetMontageData(UAnimMontage* PlayMontage, FName Section);
     void MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section);
@@ -99,6 +107,12 @@ protected:
     int32 iCombo_1_Cnt;
     int32 iCombo_2_Cnt;
     bool bCanCombo;
+
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Combat")
+    bool bIsSuddenDeathActive;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+    float SuddenDeathDamage;
 
 private:
 

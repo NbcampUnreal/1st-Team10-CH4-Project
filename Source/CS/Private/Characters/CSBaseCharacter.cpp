@@ -92,11 +92,6 @@ bool ACSBaseCharacter::IsAlive()
     return Attributes && Attributes->IsAlive();
 }
 
-void ACSBaseCharacter::ActivateSuddenDeath()
-{
-	// TODO: Damage Increase
-}
-
 bool ACSBaseCharacter::CanAttack()
 {
 	return false;

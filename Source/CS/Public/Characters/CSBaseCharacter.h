@@ -31,7 +31,6 @@ public:
 	virtual void Multicast_PlayDeathMontage();
 	virtual void Multicast_PlayDeathMontage_Implementation();
 	
-	virtual void ActivateSuddenDeath();
 	virtual bool IsAlive();
 	virtual bool IsBlocking();
 	virtual bool IsInHitReact();

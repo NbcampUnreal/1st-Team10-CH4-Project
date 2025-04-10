@@ -19,6 +19,9 @@ UCSCombatComponent::UCSCombatComponent()
     bCanCombo = true;
 
     CurrentAttackDamage = 0.f;
+
+    bIsSuddenDeathActive = false;
+    SuddenDeathDamage = 100.f;
 }
 
 void UCSCombatComponent::BeginPlay()
@@ -30,6 +33,7 @@ void UCSCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(UCSCombatComponent, bIsAttacking);
+	DOREPLIFETIME(UCSCombatComponent, bIsSuddenDeathActive);
 }
 
 void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage, EDamageType DType)
@@ -51,6 +55,11 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
     ActorsToIgnore.Add(Owner);
 
     FHitResult HitResult;
+
+    if (bIsSuddenDeathActive)
+    {
+        AttackDamage = SuddenDeathDamage;
+    }
 
     // Debug Lines
     const bool bDrawDebug = true;
@@ -251,6 +260,21 @@ void UCSCombatComponent::SetIsAttacking(bool bAttacking)
 void UCSCombatComponent::SetCurrentAttackDamage(float Damage)
 {
 	CurrentAttackDamage = Damage;
+}
+
+void UCSCombatComponent::ActivateSuddenDeathMode()
+{
+    if (bIsSuddenDeathActive) return;
+    Server_ActivateSuddenDeath();
+}
+
+void UCSCombatComponent::Server_ActivateSuddenDeath_Implementation()
+{
+    if (!bIsSuddenDeathActive)
+    {
+		UE_LOG(LogTemp, Warning, TEXT("SUDDEN DEATH MODE ACTIVATED!"));
+        bIsSuddenDeathActive = true;
+    }
 }
 
 void UCSCombatComponent::MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
