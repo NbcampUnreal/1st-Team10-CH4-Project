@@ -42,6 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void EndAttack();
 
+	UFUNCTION(BlueprintCallable)
+	void ComboStateChange();
+
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void StopMovement() override;
 	virtual void StopMovement_Implementation() override;
@@ -53,7 +56,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
 	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
-	
+
 	/*
 	* Callback function for input
 	*/

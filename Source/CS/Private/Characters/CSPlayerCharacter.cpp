@@ -146,7 +146,6 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 
 	if (AnimInstance && PlayMontage)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("GetUp")));
 		CombatComponent->CanComboChange(false);
 		AnimInstance->Montage_Play(PlayMontage);
 		FName SectionName;
@@ -158,6 +157,8 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 
 void ACSPlayerCharacter::GuardStart()
 {
+	if (ActionState == ECharacterTypes::ECT_Launch) return;
+
 	if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
 		ServerSetActionState(ECharacterTypes::ECT_Defending);
@@ -166,6 +167,8 @@ void ACSPlayerCharacter::GuardStart()
 
 void ACSPlayerCharacter::GuardEnd()
 {
+	if (ActionState == ECharacterTypes::ECT_Launch) return;
+
 	ServerSetActionState(ECharacterTypes::ECT_Unoccupied);
 }
 
@@ -246,6 +249,11 @@ void ACSPlayerCharacter::EndAttack()
 	}
 	ActionState = ECharacterTypes::ECT_Unoccupied;
 	OnRep_ActionState();
+}
+
+void ACSPlayerCharacter::ComboStateChange()
+{
+	CombatComponent->CanComboChange(false);
 }
 
 void ACSPlayerCharacter::UpdateFacingDirection(float XInput)

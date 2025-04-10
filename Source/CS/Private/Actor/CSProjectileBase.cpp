@@ -3,6 +3,7 @@
 
 #include "Actor/CSProjectileBase.h"
 #include "Components/SphereComponent.h"
+#include "Components/CSAttributeComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
@@ -39,11 +40,16 @@ void ACSProjectileBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Damage Event
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Overlap")));
 	AActor* SpawnActor = GetOwner();
 
 	if (SpawnActor != OtherActor)
 	{
+		UCSAttributeComponent* VictimAttributes = OtherActor->FindComponentByClass<UCSAttributeComponent>();
+		if (VictimAttributes)
+		{
+			VictimAttributes->ReceiveDamage(25.0f, SpawnActor->GetInstigatorController(), SpawnActor, EDamageType::EDT_Nomal, SweepResult);
+		}
+
 		ServerDestroyProjectile();
 	}
 }

@@ -305,6 +305,8 @@ void UCSCombatComponent::ServerStartAttack_Implementation()
 
         if (AnimInstance)
         {
+            //FString test = ServerPlayMontage->GetName();
+            //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%s"), *test));
             AnimInstance->Montage_Play(ServerPlayMontage);
             AnimInstance->Montage_JumpToSection(ServerSection);
 
