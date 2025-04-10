@@ -43,12 +43,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<UAnimMontage> CounterMontage;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float CounterHoldThreshold = 0.5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float CounterAttackDamage = 10.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Damage")
+	float CounterAttackDamage = 25.f;
 
 private:
 	void HandleLightAttackPress();
