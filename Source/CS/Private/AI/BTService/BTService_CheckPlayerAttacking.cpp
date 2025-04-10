@@ -1,4 +1,7 @@
 #include "AI/BTService/BTService_CheckPlayerAttacking.h"
+
+#include "AIController.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Characters/CSBaseCharacter.h"
@@ -17,19 +20,27 @@ void UBTService_CheckPlayerAttacking::TickNode(UBehaviorTreeComponent& OwnerComp
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	if (!BB) return;
-	
+
 	if (BB->GetValueAsBool(FName("IsBusy"))) return;
-	
+
 	AActor* Target = Cast<AActor>(BB->GetValueAsObject(FName("TargetActor")));
 	if (!Target) return;
-	
+
 	UCSCombatComponent* Combat = Target->FindComponentByClass<UCSCombatComponent>();
 	if (!Combat) return;
 
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	if (!AIController) return;
+
+	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(AIController->GetPawn());
+	if (!AIPawn) return;
 	
-	if (Combat->GetIsAttacking())
+	const float Distance = FVector::Dist(AIPawn->GetActorLocation(), Target->GetActorLocation());
+	const float BlockReactionDistance = 200.f;
+
+	if (Combat->GetIsAttacking() && Distance <= BlockReactionDistance)
 	{
-		if (FMath::FRand() < 0.8f)
+		if (FMath::FRand() < 0.5f)
 		{
 			BB->SetValueAsBool(FName("ShouldBlock"), true);
 			BB->SetValueAsBool(FName("ShouldDodge"), false);

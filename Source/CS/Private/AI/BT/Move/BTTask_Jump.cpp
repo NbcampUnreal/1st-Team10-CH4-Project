@@ -6,12 +6,12 @@
 #include "AI/Character/AIBaseCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UBTTask_Jump::UBTTask_Jump()
 {
 	NodeName = TEXT("Jump");
 }
-
 
 EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -20,11 +20,19 @@ EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 
 	if (!AIPawn) return EBTNodeResult::Failed;
 	
+	if (UAnimInstance* AnimInstance = AIPawn->GetMesh()->GetAnimInstance())
+	{
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->StopAllMontages(0.1f);
+		}
+	}
+
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	BB->SetValueAsBool(FName("IsBusy"), true);
-	
+
 	AIPawn->Jump();
-	
+
 	AIPawn->GetWorldTimerManager().SetTimer(
 		JumpFinishHandle,
 		FTimerDelegate::CreateUObject(this, &UBTTask_Jump::FinishJump, &OwnerComp),
@@ -33,6 +41,7 @@ EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 
 	return EBTNodeResult::InProgress;
 }
+
 
 void UBTTask_Jump::FinishJump(UBehaviorTreeComponent* OwnerComp)
 {

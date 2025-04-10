@@ -25,32 +25,39 @@ void UBTService_AnalyzeSituation::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	if (!BB) return;
-	bool bIsBusy = BB->GetValueAsBool(FName("IsBusy"));
-	if (bIsBusy)
-	{
-		return;
-	}
-	bool bIsJumping = BB->GetValueAsBool(ShouldJumpKey.SelectedKeyName);
-	bool bIsSitting = BB->GetValueAsBool(ShouldCrouchKey.SelectedKeyName);
-	bool bIsRunning = BB->GetValueAsBool(ShouldRunAwayKey.SelectedKeyName);
 
-	if (bIsJumping || bIsSitting || bIsRunning)
-	{
+	if (BB->GetValueAsBool(FName("IsBusy")))
 		return;
-	}
+
+	if (auto* AIPawn = Cast<AAIBaseCharacter>(OwnerComp.GetAIOwner()->GetPawn()))
+	{
+		auto* Player = UGameplayStatics::GetPlayerCharacter(AIPawn->GetWorld(), 0);
+		if (!Player) return;
+
+		const float Distance = FVector::Dist(AIPawn->GetActorLocation(), Player->GetActorLocation());
+		
+		BB->SetValueAsBool(ShouldJumpKey.SelectedKeyName, false);
+		BB->SetValueAsBool(ShouldCrouchKey.SelectedKeyName, false);
+		BB->SetValueAsBool(ShouldRunAwayKey.SelectedKeyName, false);
+
 	
-	ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	AAIBaseCharacter* AIPawn = Cast<AAIBaseCharacter>(OwnerComp.GetAIOwner()->GetPawn());
-	if (!Player || !AIPawn) return;
+		int32 Roll = FMath::RandRange(0, 99);
 
-	float Distance = FVector::Dist(AIPawn->GetActorLocation(), Player->GetActorLocation());
-
-	bool bShouldJump = (FMath::FRand() < 0.4f);
-	bool bShouldCrouch = (FMath::FRand() < 0.1f);
-	bool bShouldRunAway = (Distance < 300.f && FMath::FRand() < 0.5f);
-
-	BB->SetValueAsBool(ShouldJumpKey.SelectedKeyName, bShouldJump);
-	BB->SetValueAsBool(ShouldCrouchKey.SelectedKeyName, bShouldCrouch);
-	BB->SetValueAsBool(ShouldRunAwayKey.SelectedKeyName, bShouldRunAway);
+		
+		if (Distance < 300.f && Roll < 30)
+		{
+			BB->SetValueAsBool(ShouldRunAwayKey.SelectedKeyName, true);
+		}
+		else if (Roll < 60) 
+		{
+			BB->SetValueAsBool(ShouldJumpKey.SelectedKeyName, true);
+		}
+		else if (Roll < 80) 
+		{
+			BB->SetValueAsBool(ShouldCrouchKey.SelectedKeyName, true);
+		}
+	}
 }
+
+
 
