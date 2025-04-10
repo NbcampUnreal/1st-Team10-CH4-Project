@@ -41,3 +41,10 @@ enum class EJobTypes : uint8
 	EJT_Fighter UMETA(DisplayName = "Fighter"),
 	EJT_SwordMan UMETA(DisplayName = "SwordMan")
 };
+
+UENUM(BlueprintType)
+enum class EDamageType : uint8
+{
+	EDT_Nomal UMETA(DisplayName = "Nomal"),
+	EDT_Launch UMETA(DisplayName = "Launch")
+};

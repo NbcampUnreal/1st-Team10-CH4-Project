@@ -32,7 +32,7 @@ void UCSCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
     DOREPLIFETIME(UCSCombatComponent, bIsAttacking);
 }
 
-void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage)
+void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage, EDamageType DType)
 {
     ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;
@@ -101,7 +101,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             UCSAttributeComponent* VictimAttributes = HitActor->FindComponentByClass<UCSAttributeComponent>();
             if (VictimAttributes)
             {
-                VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser);
+                VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser, DType, HitResult);
             }
             if (VictimCharacter)
             {
