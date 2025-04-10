@@ -42,13 +42,12 @@ private:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	void ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser);
+	void ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, EDamageType DType, FHitResult HitResult);
+	void CharacterLaunch(FHitResult HitResult);
 
 	bool IsAlive();
 
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetHealthPercent() const { return Health / MaxHealth; }
-	
-
 };

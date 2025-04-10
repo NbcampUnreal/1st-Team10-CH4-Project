@@ -42,7 +42,7 @@ void UCSAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(UCSAttributeComponent, MaxHealth);
 }
 
-void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser)
+void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, EDamageType DType, FHitResult HitResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server: %s - ReceiveDamage Called. Damage: %.1f"), *GetOwner()->GetName(), DamageAmount);
 	if (!GetOwner()->HasAuthority()) return;
@@ -51,11 +51,28 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
 
 	UE_LOG(LogTemp, Warning, TEXT("Server: %s - New Health: %.1f"), *GetOwner()->GetName(), Health);
-	
-	
+
 	if (!IsAlive())
 	{
 		HandleDeath();
+	}
+
+	if (DType == EDamageType::EDT_Launch)
+	{
+		CharacterLaunch(HitResult);
+	}
+}
+
+void UCSAttributeComponent::CharacterLaunch(FHitResult HitResult)
+{
+	if (!GetOwner()->HasAuthority()) return;
+	if (!IsAlive()) return;
+	
+	ACSBaseCharacter* OwningPlayerCharacter = Cast<ACSBaseCharacter>(GetOwner());
+	if (OwningPlayerCharacter)
+	{
+		OwningPlayerCharacter->ServerSetActionState(ECharacterTypes::ECT_Launch);
+		OwningPlayerCharacter->ServerLaunchCharacter();
 	}
 }
 

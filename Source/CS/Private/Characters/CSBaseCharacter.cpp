@@ -54,6 +54,8 @@ void ACSBaseCharacter::Die()
 
 void ACSBaseCharacter::PlayHitReactMontage_Implementation()
 {
+    if (ActionState == ECharacterTypes::ECT_Launch) return;
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 	if (AnimInstance && HitReactMontage)
@@ -154,6 +156,31 @@ void ACSBaseCharacter::SetupStimulusSource()
         StimulusSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
         StimulusSource->RegisterWithPerceptionSystem();
     }
+}
+
+void ACSBaseCharacter::ServerSetActionState_Implementation(ECharacterTypes ECTState)
+{
+    MultiSetActionState(ECTState);
+}
+
+void ACSBaseCharacter::MultiSetActionState_Implementation(ECharacterTypes ECTState)
+{
+    ActionState = ECTState;
+}
+
+void ACSBaseCharacter::ServerLaunchCharacter_Implementation()
+{
+    MultiLaunchCharacter();
+}
+
+void ACSBaseCharacter::MultiLaunchCharacter_Implementation()
+{
+    this->LaunchCharacter(FVector(0, 0, 500), true, true);
+}
+
+void ACSBaseCharacter::SetGroundState(EGroundTypes EGTState)
+{
+    GroundState = EGTState;
 }
 
 bool ACSBaseCharacter::IsBlocking()

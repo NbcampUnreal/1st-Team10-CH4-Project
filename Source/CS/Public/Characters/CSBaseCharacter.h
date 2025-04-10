@@ -51,6 +51,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Job")
 	EJobTypes JobState;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Job")
+	EGroundTypes GroundState;
+
 	UFUNCTION()
 	virtual void OnRep_ActionState();
 
@@ -60,14 +63,37 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* DeathMontage;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* GetUpBellyMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* GetUpBackMontage;
 
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;
 	void SetupStimulusSource();
 
 public:
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerSetActionState(ECharacterTypes ECTState);
+	void ServerSetActionState_Implementation(ECharacterTypes ECTState);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSetActionState(ECharacterTypes ECTState);
+	void MultiSetActionState_Implementation(ECharacterTypes ECTState);
+
+	UFUNCTION(Server, Reliable)
+	void ServerLaunchCharacter();
+	void ServerLaunchCharacter_Implementation();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiLaunchCharacter();
+	void MultiLaunchCharacter_Implementation();
+
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE ECharacterTypes GetActionState() const { return ActionState; }
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE EJobTypes GetJobType() const { return JobState; }
+
+	UFUNCTION(BlueprintCallable, Category = "Ground State")
+	void SetGroundState(EGroundTypes EGTState);
+	UFUNCTION(BlueprintPure, Category = "Character State")
+	FORCEINLINE EGroundTypes GetGroundState() const { return GroundState; }
 };

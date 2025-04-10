@@ -38,7 +38,7 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 
 					BB->SetValueAsBool(FName("IsBusy"), true);
 
-					Combat->Execute_MeleeAttack(NPC);
+					Combat->Execute_firstAttack(NPC);
 
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
@@ -82,8 +82,8 @@ void UBTTask_MeleeNormalAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Ow
 
 bool UBTTask_MeleeNormalAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {
-	if (!AI || !AI->GetMesh() || !AI->GetPunchMontage()) return true;
+	if (!AI || !AI->GetMesh() || !AI->GetfirstAttackMontage()) return true;
 
 	auto* AnimInstance = AI->GetMesh()->GetAnimInstance();
-	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetPunchMontage());
+	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetfirstAttackMontage());
 }

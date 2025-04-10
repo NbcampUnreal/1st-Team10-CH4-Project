@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AIBossCharacter.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "AIFighterCharacter.generated.h"
 
 UCLASS()
-class CS_API AAIFighterCharacter : public AAIBossCharacter
+class CS_API AAIFighterCharacter : public AAIBaseCharacter
 {
 	GENERATED_BODY()
 
