@@ -32,42 +32,57 @@ void ACSPlayerController::BeginPlay()
 
 void ACSPlayerController::InitializeCurrentUI()
 {
+    UWorld* World = GetWorld();
+    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+    if (!GI || !World) return;
+
+    FName CurrentLevelName = FName(*World->GetName());
+    EMatchType CurrentMatchType = GI->GetMatchType();
+
+    UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Checking Level=%s, MatchType=%d"), *CurrentLevelName.ToString(), (int32)CurrentMatchType);
+
+    // --- 로비 레벨 예외 처리 추가 ---
+    if (CurrentLevelName == FName("LobbyLevel")) // 레벨 이름 확인
+    {
+        UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: In LobbyLevel, skipping UI creation/removal logic. Client_ShowLobbyUI is responsible."));
+        // 로비에서는 항상 UI 입력 모드 + 커서 표시
+        FInputModeUIOnly InputModeData;
+        // Client_ShowLobbyUI에서 포커스 설정하므로 여기서는 생략 가능
+        // InputModeData.SetWidgetToFocus(...);
+        SetInputMode(InputModeData);
+        bShowMouseCursor = true;
+        return; // 이 함수에서 더 이상 UI 관련 작업 안 함
+    }
+    // --- 예외 처리 끝 ---
+
+    // 로비 레벨이 아닐 경우에만 기존 UI 제거 및 새 UI 생성 로직 실행
     if (CurrentActiveUI) {
         CurrentActiveUI->RemoveFromParent();
         CurrentActiveUI = nullptr;
+        UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Removed previous CurrentActiveUI."));
     }
-
-    UWorld* World = GetWorld();
-    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
-    // AGameStateBase* GS = World ? World->GetGameState() : nullptr; // GameState 필요 시 사용
-    if (!GI || !World) return;
 
     TSubclassOf<UCSUIBaseWidget> UIClassToCreate = nullptr;
-    EMatchType CurrentMatchType = GI->GetMatchType();
-    FName CurrentLevelName = FName(*World->GetName());
 
-    UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: MatchType=%d, Level=%s"), (int32)CurrentMatchType, *CurrentLevelName.ToString());
-
-    if (CurrentLevelName == FName("MainMenuLevel")) { // 레벨 이름 확인
+    // 레벨 이름 기반으로 생성할 UI 클래스 결정 (LobbyLevel 제외)
+    if (CurrentLevelName == FName("MainMenuLevel")) {
         UIClassToCreate = MainMenuWidgetClass;
     }
-    else if (CurrentLevelName == FName("LobbyLevel")) { // 레벨 이름 확인
-    }
-    else if (CurrentLevelName == FName("StageLevel")) { // 레벨 이름 확인
+    else if (CurrentLevelName == FName("SingleModeLevel")) { // 아케이드 스테이지
         UIClassToCreate = StageHUDClass;
     }
-    else if (CurrentLevelName == FName("BossLevel")) { // 레벨 이름 확인
+    else if (CurrentLevelName == FName("SingleModeBossLevel")) { // 아케이드 보스
         UIClassToCreate = BossHUDClass;
     }
-    else if (CurrentLevelName == FName("VersusLevel")) { // 레벨 이름 확인
+    else if (CurrentLevelName == FName("VersusModeLevel")) { // 대전 플레이
         UIClassToCreate = VersusHUDClass;
     }
-    else if (CurrentLevelName == FName("CoopLevel")) { // 레벨 이름 확인
+    else if (CurrentLevelName == FName("CoopModeLevel")) { // 협동 플레이
         UIClassToCreate = CoopHUDClass;
     }
     else {
         UE_LOG(LogTemp, Warning, TEXT("InitializeCurrentUI: Unknown level or no specific UI defined for Level=%s"), *CurrentLevelName.ToString());
-        UIClassToCreate = MainMenuWidgetClass; // 기본값으로 메인 메뉴 로드
+        // UIClassToCreate = MainMenuWidgetClass; // 필요 시 기본값
     }
 
     if (UIClassToCreate) {
@@ -75,23 +90,23 @@ void ACSPlayerController::InitializeCurrentUI()
         if (CurrentActiveUI) {
             CurrentActiveUI->AddToViewport();
             UE_LOG(LogTemp, Log, TEXT("Initialized UI: %s"), *UIClassToCreate->GetName());
-            // 입력 모드 설정
-            bool bIsUIInputMode = (CurrentLevelName == FName("MainMenuLevel") || CurrentLevelName == FName("LobbyLevel"));
+            // 입력 모드 설정 (MainMenu는 UI, 나머지는 Game)
+            bool bIsUIInputMode = (CurrentLevelName == FName("MainMenuLevel"));
             if (bIsUIInputMode) {
                 FInputModeUIOnly InputModeData;
                 InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget());
                 SetInputMode(InputModeData);
                 bShowMouseCursor = true;
             }
-            else {
+            else { // Game HUDs
                 FInputModeGameOnly InputModeData;
                 SetInputMode(InputModeData);
-                bShowMouseCursor = false;
+                bShowMouseCursor = false; // 게임 플레이 중에는 커서 숨김
             }
         }
         else { UE_LOG(LogTemp, Error, TEXT("Failed to create widget for class %s"), *UIClassToCreate->GetName()); }
     }
-    else { UE_LOG(LogTemp, Warning, TEXT("No UI class determined to create for current state.")); }
+    else { UE_LOG(LogTemp, Warning, TEXT("No UI class determined to create for current state (excluding Lobby).")); }
 }
 
 // 로비 UI 표시 (GameMode 등에서 호출)
