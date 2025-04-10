@@ -20,10 +20,10 @@ class CS_API ICombatInterface
 	
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-	int MeleeAttack();
+	int firstAttack();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
-	int KickAttack();
+	int secondAttack();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	int LowComboAttack();

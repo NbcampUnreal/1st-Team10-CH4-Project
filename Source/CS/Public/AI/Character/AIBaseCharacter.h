@@ -23,17 +23,17 @@ public:
 	
 	UBehaviorTree* GetBehaviorTree() const;
 	APatrolPath* GetPatrolPath() const;
-	
-	FName GetPunchName() const;
-	FName GetKickName() const;
-	FName GetLowComboAttackName() const;
-	FName GetRangeComboAttackName() const;
+
+	virtual FName GetfirstAttackName() const;
+	virtual FName GetsecondAttackName() const;
+	virtual FName GetLowComboAttackName() const;
+	virtual FName GetRangeComboAttackName() const;
 	FName GetJumpName() const;
 	FName GetCrouchName() const;
 	
 	UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
-	UAnimMontage* GetPunchMontage() const { return PunchMontage; }
-	UAnimMontage* GetKickMontage() const { return KickMontage; }
+	UAnimMontage* GetfirstAttackMontage() const { return firstAttackMontage; }
+	UAnimMontage* GetsecondAttackMontage() const { return secondAttackMontage; }
 	UAnimMontage* GetLowComboAttackMontage() const { return LowComboAttackMontage; }
 	UAnimMontage* GetRangeComboAttackMontage() const { return RangeComboAttackMontage; }
 	UAnimMontage* GetBlockMontage() const { return BlockMontage; }
@@ -42,16 +42,22 @@ public:
 	UAnimMontage* GetSitMontage() const { return SitMontage; }
 	UAnimMontage* GetJumpRunMontage() const { return JumpRunMontage;}
 	UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
-	virtual int MeleeAttack_Implementation() override;
-	virtual int KickAttack_Implementation() override;
+	
+	virtual int firstAttack_Implementation() override;
+	virtual int secondAttack_Implementation() override;
 	virtual int LowComboAttack_Implementation() override;
 	virtual int RangeComboAttack_Implementation() override;
+	virtual int Block_Implementation() override;
+	virtual int Dodge_Implementation(AActor* Attacker) override;
+	virtual int RunAway_Implementation(AActor* Attacker) override;
+	virtual void Dodge_StartDash(AActor* Attacker);
+	virtual void Dodge_MoveToSafeZone(AActor* Attacker);
 
 	virtual int AI_Attack(UAnimMontage* SelectedMontage, FName SectionName);
-	void ResumeMovement();
 	
 	virtual void StopBlock();
 	virtual void StopMovement() override;
+	virtual void ResumeMovement();
 	
 	virtual void Die() override;
 	virtual void PlayHitReactMontage() override;
@@ -73,9 +79,9 @@ protected:
 	class UCSCombatComponent* CombatComponent;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* PunchMontage;
+	UAnimMontage* firstAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* KickMontage;
+	UAnimMontage* secondAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* BlockMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -110,6 +116,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ComboTiomer", meta = (AllowPrivateAccess = true))
 	float ComboResetCooldown = 1.0f;
 	
+	int32 CurrentComboIndex = 0;
+	
+	FTimerHandle ComboResetTimerHandle;
 	FTimerHandle HitReactTimerHandle;
 	FTimerHandle BlockTimerHandle;
 };
