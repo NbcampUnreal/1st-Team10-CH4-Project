@@ -20,13 +20,17 @@ public:
 	UCSGameInstance(); // 생성자에서 초기화 순서 맞춤
 	virtual void Init() override;
 
+	// Shutdown 함수 오버라이드 추가
+	virtual void Shutdown() override;
+
 	/** 세션 관련 함수 */
 	UFUNCTION(BlueprintCallable, Category = "Session")
-	void HostSession(EMatchType TypeToHost); // MatchType 파라미터 추가
+	void HostSession(EMatchType TypeToHost);
 
-	// FindOrCreateSession 추가
+	// FindOrCreateSession 제거
+
 	UFUNCTION(BlueprintCallable, Category = "Session")
-	void FindOrCreateSession(EMatchType TypeToFindOrCreate);
+	void FindSessions();
 
 	// JoinFoundSession 유지
 	void JoinFoundSession(const FOnlineSessionSearchResult& SearchResult);
@@ -57,12 +61,14 @@ private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-	void FindSessionsInternal(EMatchType TypeToFind); // 내부 검색 함수
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+	FDelegateHandle DestroySessionCompleteDelegateHandle;
+	// FindSessionsInternal 제거 (FindSessions 가 직접 처리)
 
 	// 멤버 선언 순서 변경
 	IOnlineSessionPtr SessionInterface;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
-	EMatchType PendingMatchType; // 여기로 이동
+	// PendingMatchType 제거 (FindOrCreateSession 없어짐)
 
 	UPROPERTY()
 	EMatchType MatchType;

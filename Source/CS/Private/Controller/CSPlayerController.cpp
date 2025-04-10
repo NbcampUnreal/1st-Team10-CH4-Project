@@ -148,17 +148,7 @@ void ACSPlayerController::Client_ShowNoSessionPopup_Implementation()
     }
 }
 
-// 메인 메뉴 -> GameInstance 호출용 RPC
-bool ACSPlayerController::Server_RequestFindOrCreateSession_Validate(EMatchType MatchType) { return true; }
-void ACSPlayerController::Server_RequestFindOrCreateSession_Implementation(EMatchType MatchType)
-{
-    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
-    if (GI) {
-        UE_LOG(LogTemp, Log, TEXT("Server: Received request to find or create session for type %d"), (int32)MatchType);
-        GI->FindOrCreateSession(MatchType);
-    }
-    else { UE_LOG(LogTemp, Error, TEXT("Server_RequestFindOrCreateSession: GameInstance is null!")); }
-}
+// 메인 메뉴 -> GameInstance 호출용 RPC 제거됨
 
 
 // 기존 RPC 구현들 (UI 업데이트 함수 호출 제거됨)

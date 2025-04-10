@@ -36,11 +36,7 @@ public:
 	void Client_ShowNoSessionPopup();
 	virtual void Client_ShowNoSessionPopup_Implementation();
 
-	// MainMenu -> GameInstance 호출용 RPC
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_RequestFindOrCreateSession(EMatchType MatchType);
-	virtual bool Server_RequestFindOrCreateSession_Validate(EMatchType MatchType);
-	virtual void Server_RequestFindOrCreateSession_Implementation(EMatchType MatchType);
+	// MainMenu -> GameInstance 호출용 RPC 제거됨
 
 	// 로비 상호작용 RPCs
 	UFUNCTION(Server, Reliable, WithValidation)
