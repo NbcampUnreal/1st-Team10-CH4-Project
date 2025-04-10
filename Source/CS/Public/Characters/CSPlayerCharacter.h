@@ -32,6 +32,7 @@ public:
  	void PlayPlayerMontage(UAnimMontage* PlayMontage, FName Section);
 	void GuardStart();
 	void GuardEnd();
+	void Dodge();
 	
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void StartAttack(UAnimMontage* PlayMontage, FName Section);
@@ -56,7 +57,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
 	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_PerformDodge();
+	void Server_PerformDodge_Implementation();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDodgeMontage();
+	void Multicast_PlayDodgeMontage_Implementation();
 	/*
 	* Callback function for input
 	*/
@@ -74,9 +82,14 @@ public:
 	UInputAction* CrouchAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* GuardAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* DodgeAction;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* DodgeMontage;
 
 protected:
 	virtual void BeginPlay() override;

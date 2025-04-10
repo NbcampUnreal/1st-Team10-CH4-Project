@@ -25,6 +25,7 @@ enum class ECharacterTypes : uint8
 	ECT_Defending UMETA(DisplayName = "Defending"),
 	ECT_Moving UMETA(DisplayName = "Moving"),
 	ECT_Launch UMETA(DisplayName = "Launched"),
+	ECT_Dodge UMETA(DisplayName = "Dodging"),
 	ECT_Dead UMETA(DisplayName = "Dead")
 };
 

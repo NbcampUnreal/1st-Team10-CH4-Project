@@ -83,6 +83,7 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
 		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::GuardStart);
 		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::GuardEnd);
+		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::Dodge);
 	}
 }
 
@@ -172,6 +173,14 @@ void ACSPlayerCharacter::GuardEnd()
 	ServerSetActionState(ECharacterTypes::ECT_Unoccupied);
 }
 
+void ACSPlayerCharacter::Dodge()
+{
+	if (ActionState == ECharacterTypes::ECT_Unoccupied)
+	{
+		Server_PerformDodge();
+	}
+}
+
 void ACSPlayerCharacter::StopMovement_Implementation()
 {
 	GetCharacterMovement()->StopMovementImmediately();
@@ -195,6 +204,29 @@ void ACSPlayerCharacter::MultiSpawnProjectile_Implementation(ACSPlayerCharacter*
 		SceneComp->GetComponentRotation(),
 		SpawnParams
 	);
+}
+
+void ACSPlayerCharacter::Server_PerformDodge_Implementation()
+{
+	if (ActionState == ECharacterTypes::ECT_Unoccupied)
+	{
+		ActionState = ECharacterTypes::ECT_Dodge;
+		OnRep_ActionState();
+
+		Multicast_PlayDodgeMontage();
+	}
+}
+
+void ACSPlayerCharacter::Multicast_PlayDodgeMontage_Implementation()
+{
+	if (DodgeMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(DodgeMontage, 1.f);
+		}
+	}
 }
 
 void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
