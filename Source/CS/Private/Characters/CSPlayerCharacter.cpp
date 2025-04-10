@@ -116,6 +116,11 @@ void ACSPlayerCharacter::CrouchEnd(const FInputActionValue& Value)
 
 void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if (ActionState == ECharacterTypes::ECT_Launch && !GetCharacterMovement()->IsFalling())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("GetUp")));
+	}
+
 	if (ActionState == ECharacterTypes::ECT_Dead || ActionState != ECharacterTypes::ECT_Unoccupied) return;
 
 	const FVector2D MovementVector = Value.Get<FVector2D>();

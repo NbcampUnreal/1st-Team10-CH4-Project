@@ -63,6 +63,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* DeathMontage;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* GetUpBellyMontage;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* GetUpBackMontage;
 
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;
