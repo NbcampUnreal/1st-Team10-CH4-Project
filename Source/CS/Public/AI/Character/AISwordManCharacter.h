@@ -1,17 +1,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AIBossCharacter.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "AISwordManCharacter.generated.h"
 
 UCLASS()
-class CS_API AAISwordManCharacter : public AAIBossCharacter
+class CS_API AAISwordManCharacter : public AAIBaseCharacter
 {
 	GENERATED_BODY()
 
 public:
 	AAISwordManCharacter();
-
+	
+	FName GetfirstAttackName() const;
+	FName GetsecondAttackName() const;
+	FName GetLowComboAttackName() const;
+	FName GetRangeComboAttackName() const;
 protected:
 	virtual void BeginPlay() override;
 
