@@ -2,80 +2,86 @@
 #include "CoreMinimal.h"
 #include "UI/CSUIBaseWidget.h"
 #include "CSTypes/CSGameTypes.h"
+#include "CSTypes/CSCharacterTypes.h" // EJobTypes
 #include "Components/Button.h"
-#include "Components/TextBlock.h"
-#include "Components/PanelWidget.h"
-#include "GameFramework/GameStateBase.h"
-#include "Kismet/GameplayStatics.h"
-#include "Controller/CSPlayerController.h"
-#include "PlayerStates/CSPlayerState.h"
-#include "GameModes/CSLobbyGameMode.h"
-#include "Data/CSCharacterRow.h"
-#include "Engine/World.h"
 #include "CSLobbyBaseWidget.generated.h"
 
+// 전방 선언
 class UButton;
 class UTextBlock;
-class UPanelWidget; // 캐릭터 선택 패널용
-class UVerticalBox; // 플레이어 목록용
-class UCSPlayerEntry; // 플레이어 엔트리 클래스
+class UPanelWidget;
+class UVerticalBox; // 예시: 플레이어 목록용
+class UCSPlayerEntry;
 
-UCLASS(Abstract) // 이 클래스 자체로 위젯 생성 불가
+UCLASS(Abstract) // 직접 위젯 생성 불가
 class CS_API UCSLobbyBaseWidget : public UCSUIBaseWidget
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    // PlayerController에서 로비 진입 시 호출
-    UFUNCTION(BlueprintCallable, Category = "Lobby UI")
-    virtual void InitializeLobby(EMatchType CurrentMatchType);
+	// PlayerController에서 로비 진입 시 호출 (MatchType 전달)
+	UFUNCTION(BlueprintCallable, Category = "Lobby UI")
+	virtual void InitializeLobby(EMatchType CurrentMatchType);
 
-    // PlayerController에서 PlayerArray 변경 시 호출
-    UFUNCTION(BlueprintCallable, Category = "Lobby UI")
-    virtual void UpdatePlayerList();
+	// PlayerController 또는 PlayerState 변경 시 호출하여 전체 플레이어 목록 UI 갱신
+	UFUNCTION(BlueprintCallable, Category = "Lobby UI")
+	virtual void UpdatePlayerList();
 
-    // PlayerController에서 PlayerState 업데이트 시 호출 (BP 구현)
-    UFUNCTION(BlueprintImplementableEvent, Category = "Lobby UI")
-    void UpdatePlayerEntryUI(class ACSPlayerState* PlayerState);
+	// PlayerState의 OnRep 함수 등에서 호출되어 특정 플레이어 항목 UI 업데이트 (BP 구현)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Lobby UI")
+	void UpdatePlayerEntryUI(class ACSPlayerState* PlayerState);
 
-    // PlayerController에서 로컬 플레이어 Ready 상태 변경 시 호출
-    UFUNCTION(BlueprintCallable, Category = "Lobby UI")
-    void UpdateLocalReadyStatus(bool bIsReady);
+	// 로컬 플레이어 Ready 상태 변경 시 UI 업데이트
+	UFUNCTION(BlueprintCallable, Category = "Lobby UI")
+	void UpdateLocalReadyStatus(bool bIsReady);
 
 protected:
-    // 공통 위젯 바인딩
-    UPROPERTY(meta = (BindWidget)) UButton* ReadyButton;
-    UPROPERTY(meta = (BindWidget)) UTextBlock* ReadyButtonText;
-    UPROPERTY(meta = (BindWidget)) UButton* StartButton; // 호스트만 활성화
-    UPROPERTY(meta = (BindWidget)) UPanelWidget* CharacterSelectionPanel; // 캐릭터 선택 버튼들 담을 패널
+	// --- 위젯 바인딩 ---
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> ReadyButton;
 
-    // 플레이어 목록용 (파생 클래스에서 구체적인 패널 사용)
-    UPROPERTY(EditDefaultsOnly, Category = "Lobby UI")
-    TSubclassOf<UCSPlayerEntry> PlayerEntryWidgetClass;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> ReadyButtonText;
 
-    EMatchType LobbyMatchType = EMatchType::EMT_None;
-    bool bLocalPlayerIsReady = false;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> StartButton; // 호스트만 활성화/사용
 
-    virtual void NativeConstruct() override;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UPanelWidget> CharacterSelectionPanel; // 캐릭터 선택 버튼들 담을 패널
 
-    // 캐릭터 선택 처리 (버튼 클릭 시 호출)
-    UFUNCTION()
-    void HandleCharacterSelected(EJobTypes SelectedJob);
+	// --- 클래스 변수 ---
+	UPROPERTY(EditDefaultsOnly, Category = "Lobby UI")
+	TSubclassOf<UCSPlayerEntry> PlayerEntryWidgetClass; // 플레이어 항목 위젯 BP 클래스
 
-    UFUNCTION()
-    void OnCharacterButtonClicked();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lobby UI")
+	EMatchType LobbyMatchType;
 
-    // 준비 버튼 클릭
-    UFUNCTION()
-    void OnReadyClicked();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lobby UI")
+	bool bLocalPlayerIsReady;
 
-    // 시작 버튼 클릭 (호스트 전용)
-    UFUNCTION()
-    void OnStartClicked();
+	// --- 함수 ---
+	virtual void NativeConstruct() override;
 
-    // 플레이어 목록 UI 갱신 (내부 함수)
-    virtual void RefreshPlayerList(const TArray<APlayerState*>& PlayerArray);
+	// 캐릭터 선택 버튼 클릭 처리 (BP 또는 C++ 파생 클래스에서 호출)
+	UFUNCTION(BlueprintCallable, Category = "Lobby Actions")
+	void HandleCharacterSelected(EJobTypes SelectedJob);
 
-    // 캐릭터 선택 버튼 생성 및 바인딩 (예시)
-    void SetupCharacterSelection();
+	// 준비 버튼 클릭 핸들러
+	UFUNCTION()
+	void OnReadyClicked();
+
+	// 시작 버튼 클릭 핸들러 (호스트 전용)
+	UFUNCTION()
+	void OnStartClicked();
+
+	// 플레이어 목록 UI 갱신 (파생 클래스에서 오버라이드 필요)
+	virtual void RefreshPlayerList(const TArray<APlayerState*>& PlayerArray);
+
+	// 캐릭터 선택 UI 영역 초기화 (BP 또는 C++에서 호출)
+	UFUNCTION(BlueprintCallable, Category = "Lobby Setup")
+	void SetupCharacterSelection();
+
+	// 캐릭터 버튼 클릭 공통 핸들러 (AddDynamic 연결용)
+	UFUNCTION()
+	void OnCharacterButtonClicked(); // 구현은 BP 권장
 };
