@@ -272,6 +272,7 @@ void UCSCombatComponent::Server_ActivateSuddenDeath_Implementation()
 {
     if (!bIsSuddenDeathActive)
     {
+		UE_LOG(LogTemp, Warning, TEXT("SUDDEN DEATH MODE ACTIVATED!"));
         bIsSuddenDeathActive = true;
     }
 }
