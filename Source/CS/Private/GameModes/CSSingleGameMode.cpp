@@ -5,6 +5,7 @@
 #include "AI/Character/AIBaseCharacter.h"
 #include "AI/Controller/AIBaseController.h"
 #include "Data/CSLevelRow.h"
+#include "Actor/CSBossGate.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSSingleGameMode::ACSSingleGameMode()
@@ -36,6 +37,8 @@ void ACSSingleGameMode::InitGameLogic()
 	UpdateGameStateAIStatus();
 
 	SpawnAllPlayers();
+	InitTagPlayer();
+
 	HandleStartGame();
 }
 
@@ -81,7 +84,7 @@ void ACSSingleGameMode::HandleAIDeath(AActor* DeadAI)
 
 		if (DeadAICount >= TotalAICount)
 		{
-			OpenBossGate();
+			ActivateBossGate();
 			StartBossPhase();
 		}
 	}
@@ -90,6 +93,20 @@ void ACSSingleGameMode::HandleAIDeath(AActor* DeadAI)
 ESpawnSlotType ACSSingleGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState) const
 {
 	return ESpawnSlotType::Single_Player_Slot0;
+}
+
+void ACSSingleGameMode::InitTagPlayer()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (APlayerController* PlayerController = It->Get())
+		{
+			if (APawn* Pawn = PlayerController->GetPawn())
+			{
+				Pawn->Tags.AddUnique("SinglePlayer");
+			}
+		}
+	}
 }
 
 void ACSSingleGameMode::CountInitialAI()
@@ -116,11 +133,11 @@ void ACSSingleGameMode::CountInitialAI()
 	}
 }
 
-void ACSSingleGameMode::OpenBossGate()
+void ACSSingleGameMode::ActivateBossGate()
 {
 	if (BossGateActor)
 	{
-		// 문 열림 연출
+		BossGateActor->Activate();
 	}
 }
 

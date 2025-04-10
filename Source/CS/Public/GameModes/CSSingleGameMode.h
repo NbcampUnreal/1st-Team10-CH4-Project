@@ -36,11 +36,14 @@ protected:
 	/** 플레이어 스폰 슬롯 타입 반환 */
 	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) const override;
 
+	/** 플레이어 Tag 추가 */
+	void InitTagPlayer();
+
 	/** 현재 맵의 AI 수 계산 */
 	void CountInitialAI();
 
 	/** 보스 Phase */
-	void OpenBossGate();
+	void ActivateBossGate();
 	void StartBossPhase();
 	void SpawnBoss();
 
@@ -58,7 +61,7 @@ private:
 	TArray<APawn*> PendingAIPawns;
 
 	UPROPERTY(EditAnywhere, Category = "Boss")
-	AActor* BossGateActor;
+	class ACSBossGate* BossGateActor;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Boss")
 	TSubclassOf<APawn> BossCharacterClass;
