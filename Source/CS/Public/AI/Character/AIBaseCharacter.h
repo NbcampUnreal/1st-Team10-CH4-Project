@@ -9,13 +9,6 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "AIBaseCharacter.generated.h"
 
-UENUM(BlueprintType)
-enum class ECharacterStance : uint8
-{
-	Standing   UMETA(DisplayName = "Standing"),
-	Crouching  UMETA(DisplayName = "Crouching"),
-	Jumping    UMETA(DisplayName = "Jumping")
-};
 
 UCLASS()
 class CS_API AAIBaseCharacter : public ACSBaseCharacter, public ICombatInterface
@@ -27,10 +20,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* AIInputComponent) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stance")
-	ECharacterStance CurrentStance = ECharacterStance::Standing;
-
+	
 	UBehaviorTree* GetBehaviorTree() const;
 	APatrolPath* GetPatrolPath() const;
 	

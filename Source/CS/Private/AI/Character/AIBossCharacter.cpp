@@ -1,5 +1,4 @@
 #include "AI/Character/AIBossCharacter.h"
-
 #include "NavigationSystem.h"
 #include "AI/Controller/AIBossController.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
@@ -11,6 +10,7 @@
 AAIBossCharacter::AAIBossCharacter()
 {
 	AIControllerClass = AAIBossController::StaticClass();
+	Tags.Add(FName("Boss"));
 }
 
 void AAIBossCharacter::BeginPlay()
