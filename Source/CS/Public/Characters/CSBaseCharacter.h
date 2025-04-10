@@ -80,11 +80,11 @@ public:
 	void MultiSetActionState_Implementation(ECharacterTypes ECTState);
 
 	UFUNCTION(Server, Reliable)
-	void ServerLaunchCharacter();
-	void ServerLaunchCharacter_Implementation();
+	void ServerLaunchCharacter(FVector LaunchVector);
+	void ServerLaunchCharacter_Implementation(FVector LaunchVector);
 	UFUNCTION(NetMulticast, Reliable)
-	void MultiLaunchCharacter();
-	void MultiLaunchCharacter_Implementation();
+	void MultiLaunchCharacter(FVector LaunchVector);
+	void MultiLaunchCharacter_Implementation(FVector LaunchVector);
 
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE ECharacterTypes GetActionState() const { return ActionState; }

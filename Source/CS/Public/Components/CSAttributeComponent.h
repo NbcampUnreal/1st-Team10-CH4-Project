@@ -43,7 +43,7 @@ private:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	void ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, EDamageType DType, FHitResult HitResult);
-	void CharacterLaunch(FHitResult HitResult);
+	void CharacterLaunch(AActor* DamageCauser);
 
 	bool IsAlive();
 

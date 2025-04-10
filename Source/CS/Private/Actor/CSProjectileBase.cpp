@@ -32,7 +32,7 @@ void ACSProjectileBase::BeginPlay()
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ACSProjectileBase::OnOverlapBegin);
 
 	GetWorld()->GetTimerManager().SetTimer(
-		DestroyProjectile, this, &ACSProjectileBase::ServerDestroyProjectile, 5.0f, false
+		DestroyProjectile, this, &ACSProjectileBase::MultiDestroyProjectile, 5.0f, false
 	);
 }
 
@@ -44,25 +44,19 @@ void ACSProjectileBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 
 	if (SpawnActor != OtherActor)
 	{
+		MultiDestroyProjectile();
+
 		UCSAttributeComponent* VictimAttributes = OtherActor->FindComponentByClass<UCSAttributeComponent>();
 		if (VictimAttributes)
 		{
 			VictimAttributes->ReceiveDamage(25.0f, SpawnActor->GetInstigatorController(), SpawnActor, EDamageType::EDT_Nomal, SweepResult);
 		}
-
-		ServerDestroyProjectile();
 	}
 }
 
-void ACSProjectileBase::ServerDestroyProjectile_Implementation()
+void ACSProjectileBase::MultiDestroyProjectile_Implementation()
 {
 	GetWorld()->GetTimerManager().ClearTimer(DestroyProjectile);
-	MultiDestoryProjectile();
-}
-
-void ACSProjectileBase::MultiDestoryProjectile_Implementation()
-{
 	Destroy();
 }
-
 

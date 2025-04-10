@@ -163,14 +163,14 @@ void ACSBaseCharacter::MultiSetActionState_Implementation(ECharacterTypes ECTSta
     ActionState = ECTState;
 }
 
-void ACSBaseCharacter::ServerLaunchCharacter_Implementation()
+void ACSBaseCharacter::ServerLaunchCharacter_Implementation(FVector LaunchVector)
 {
-    MultiLaunchCharacter();
+    MultiLaunchCharacter(LaunchVector);
 }
 
-void ACSBaseCharacter::MultiLaunchCharacter_Implementation()
+void ACSBaseCharacter::MultiLaunchCharacter_Implementation(FVector LaunchVector)
 {
-    this->LaunchCharacter(FVector(0, 0, 500), true, true);
+    this->LaunchCharacter(LaunchVector, true, true);
 }
 
 void ACSBaseCharacter::ServerSetGroundState_Implementation(EGroundTypes EGTState)

@@ -35,10 +35,7 @@ public:
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, 
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION(Server, Reliable)
-	void ServerDestroyProjectile();
-	void ServerDestroyProjectile_Implementation();
 	UFUNCTION(NetMulticast, Reliable)
-	void MultiDestoryProjectile();
-	void MultiDestoryProjectile_Implementation();
+	void MultiDestroyProjectile();
+	void MultiDestroyProjectile_Implementation();
 };

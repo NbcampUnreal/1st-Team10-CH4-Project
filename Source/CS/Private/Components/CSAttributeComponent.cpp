@@ -7,6 +7,7 @@
 #include "Characters/CSBaseCharacter.h"
 #include "Characters/CSPlayerCharacter.h"
 #include "Controller/CSPlayerController.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 UCSAttributeComponent::UCSAttributeComponent()
@@ -59,11 +60,20 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 
 	if (DType == EDamageType::EDT_Launch)
 	{
-		CharacterLaunch(HitResult);
+		CharacterLaunch(DamageCauser);
+	}
+	else
+	{
+		ACSBaseCharacter* OwningPlayerCharacter = Cast<ACSBaseCharacter>(GetOwner());
+		if (OwningPlayerCharacter)
+		{
+			FVector LuanchVector = DamageCauser->GetActorForwardVector();
+			OwningPlayerCharacter->ServerLaunchCharacter(LuanchVector * 500);
+		}
 	}
 }
 
-void UCSAttributeComponent::CharacterLaunch(FHitResult HitResult)
+void UCSAttributeComponent::CharacterLaunch(AActor* DamageCauser)
 {
 	if (!GetOwner()->HasAuthority()) return;
 	if (!IsAlive()) return;
@@ -71,8 +81,10 @@ void UCSAttributeComponent::CharacterLaunch(FHitResult HitResult)
 	ACSBaseCharacter* OwningPlayerCharacter = Cast<ACSBaseCharacter>(GetOwner());
 	if (OwningPlayerCharacter)
 	{
+		FVector LuanchVector = DamageCauser->GetActorForwardVector();
+
 		OwningPlayerCharacter->ServerSetActionState(ECharacterTypes::ECT_Launch);
-		OwningPlayerCharacter->ServerLaunchCharacter();
+		OwningPlayerCharacter->ServerLaunchCharacter(LuanchVector * 150 + FVector(0, 0, 500));
 	}
 }
 

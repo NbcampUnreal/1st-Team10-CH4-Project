@@ -147,12 +147,12 @@ void ACSPlayerCharacter::PlayPlayerMontage(UAnimMontage* PlayMontage, FName Sect
 
 	if (AnimInstance && PlayMontage)
 	{
+		StartAttack(PlayMontage, Section);
 		CombatComponent->CanComboChange(false);
 		AnimInstance->Montage_Play(PlayMontage);
 		FName SectionName;
 		SectionName = Section;
 		AnimInstance->Montage_JumpToSection(SectionName);
-		StartAttack(PlayMontage, Section);
 	}
 }
 
