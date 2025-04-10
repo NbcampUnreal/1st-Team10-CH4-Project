@@ -4,6 +4,8 @@
 
 ACSBossGate::ACSBossGate()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
 	SetRootComponent(DoorMesh);
 
@@ -13,8 +15,31 @@ ACSBossGate::ACSBossGate()
 
 	OpenOffset = FVector(-200.f, 0.f, 0.f);
 	OpenDuration = 1.5f;
+	OriginalLocation = FVector::ZeroVector;
+	TargetLocation = FVector::ZeroVector;
+	ElapsedOpenTime = 0.0f;
 	bIsActive = false;
 	bHasOpened = false;
+}
+
+void ACSBossGate::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bHasOpened && ElapsedOpenTime < OpenDuration)
+	{
+		ElapsedOpenTime += DeltaTime;
+
+		const float Alpha = FMath::Clamp(ElapsedOpenTime / OpenDuration, 0.f, 1.f);
+		const FVector NewLocation = FMath::Lerp(OriginalLocation, TargetLocation, Alpha);
+
+		SetActorLocation(NewLocation);
+
+		if (Alpha >= 1.f)
+		{
+			OnDoorOpened();
+		}
+	}
 }
 
 void ACSBossGate::Activate()
@@ -34,21 +59,16 @@ void ACSBossGate::OnTriggerBegin(
 
 	if (OtherActor && OtherActor->ActorHasTag("SinglePlayer"))
 	{
-		const FVector TargetLocation = GetActorLocation() + OpenOffset;
+		OriginalLocation = GetActorLocation();
+		TargetLocation = OriginalLocation + OpenOffset;
 
-		UKismetSystemLibrary::MoveComponentTo(
-			DoorMesh,
-			TargetLocation,
-			GetActorRotation(),
-			false,
-			true,
-			OpenDuration,
-			false,
-			EMoveComponentAction::Move,
-			FLatentActionInfo()
-		);
-
+		ElapsedOpenTime = 0.0f;
 		bHasOpened = true;
 	}
+}
+
+void ACSBossGate::OnDoorOpened()
+{
+	Destroy();
 }
 

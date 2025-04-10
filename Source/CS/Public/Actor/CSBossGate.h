@@ -12,6 +12,8 @@ class CS_API ACSBossGate : public AActor
 public:
 	ACSBossGate();
 
+	virtual void Tick(float DeltaTime) override;
+
 	UFUNCTION(BlueprintCallable)
 	void Activate();
 
@@ -20,6 +22,8 @@ protected:
 	void OnTriggerBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
+
+	void OnDoorOpened();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mesh")
 	TObjectPtr<UStaticMeshComponent> DoorMesh;
@@ -33,8 +37,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Door")
 	float OpenDuration;
 
+	FVector OriginalLocation;
+	FVector TargetLocation;
+
+	float ElapsedOpenTime;
+
 	bool bIsActive;
 	bool bHasOpened;
-
 };
 

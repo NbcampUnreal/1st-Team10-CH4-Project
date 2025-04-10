@@ -39,6 +39,9 @@ protected:
 	/** 플레이어 Tag 추가 */
 	void InitTagPlayer();
 
+	/** 플레이어 Tag 추가 */
+	void InitBossGateActor();
+
 	/** 현재 맵의 AI 수 계산 */
 	void CountInitialAI();
 
@@ -60,7 +63,7 @@ private:
 	UPROPERTY()
 	TArray<APawn*> PendingAIPawns;
 
-	UPROPERTY(EditAnywhere, Category = "Boss")
+	UPROPERTY(VisibleAnywhere, Category = "Boss")
 	class ACSBossGate* BossGateActor;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Boss")
