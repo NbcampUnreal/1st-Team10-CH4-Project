@@ -32,14 +32,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void SetCurrentAttackDamage(float Damage);
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ActivateSuddenDeathMode();
-
-    // Sudden death mode test
-    UFUNCTION(Server, Reliable)
-    void Server_ActivateSuddenDeath();
-	void Server_ActivateSuddenDeath_Implementation();
-
     UFUNCTION(NetMulticast, Reliable)
     void MultiSetMontageData(UAnimMontage* PlayMontage, FName Section);
     void MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section);
@@ -76,16 +68,6 @@ public:
     UFUNCTION()
     void PerformAttack(UAnimMontage* Montage, FName SectionName);
 
-
-
-    //UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Combat")
-    //void Server_RequestAttack(FAttackMontageStruct AttackDataToPlay);
-	//void Server_RequestAttack_Implementation(FAttackMontageStruct AttackDataToPlay);
-
-    //UFUNCTION(NetMulticast, Reliable)
-    //void Multicast_PlayMontage(UAnimMontage* MontageToPlay, FName SectionToPlay);
-	//void Multicast_PlayMontage_Implementation(UAnimMontage* MontageToPlay, FName SectionToPlay);
-
 protected:
     virtual void BeginPlay() override;
 
@@ -114,11 +96,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
     float SuddenDeathDamage;
 
+
 private:
 
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerSetIsAttacking(bool bAttacking);
     void ServerSetIsAttacking_Implementation(bool bAttacking);
     bool ServerSetIsAttacking_Validate(bool bAttacking);
+
+public:
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void SetSuddenDeathActive(bool bActive);
+
+    FORCEINLINE bool IsSuddenDeathActive() const { return bIsSuddenDeathActive; }
     
 };
