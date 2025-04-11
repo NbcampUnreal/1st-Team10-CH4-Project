@@ -57,3 +57,10 @@ enum class EGroundTypes : uint8
 	EGT_Down UMETA(DisplayName = "Down"),
 	EGT_Up UMETA(DisplayName = "Up")
 };
+
+UENUM(BlueprintType)
+enum class EStandUpType : uint8
+{
+	EST_Nomal UMETA(DisplayName = "Nomal"),
+	EST_StandUp UMETA(DisplayName = "StandUp")
+};

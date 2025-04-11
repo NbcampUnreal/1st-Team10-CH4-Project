@@ -119,15 +119,8 @@ void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	if (ActionState == ECharacterTypes::ECT_Launch && !GetCharacterMovement()->IsFalling())
 	{
-		ActionState = ECharacterTypes::ECT_Attacking;
-		if (GroundState == EGroundTypes::EGT_Up)
-		{
-			PlayPlayerMontage(GetUpBackMontage, "Default");
-		}
-		else if (GroundState == EGroundTypes::EGT_Down)
-		{
-			PlayPlayerMontage(GetUpBellyMontage, "Default");
-		}
+		CombatComponent->CanComboChange(false);
+		ServerSetStandUpState(EStandUpType::EST_StandUp);
 		return;
 	}
 
@@ -297,6 +290,7 @@ void ACSPlayerCharacter::EndAttack()
 		}
 	}
 	ActionState = ECharacterTypes::ECT_Unoccupied;
+	ServerSetStandUpState(EStandUpType::EST_Nomal);
 	OnRep_ActionState();
 }
 

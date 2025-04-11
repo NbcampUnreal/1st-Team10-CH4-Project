@@ -50,8 +50,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Job")
 	EJobTypes JobState;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Job")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character LayState")
 	EGroundTypes GroundState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character StandUp")
+	EStandUpType StandUpState;
 
 	UFUNCTION()
 	virtual void OnRep_ActionState();
@@ -61,11 +64,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* DeathMontage;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
-	UAnimMontage* GetUpBellyMontage;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
-	UAnimMontage* GetUpBackMontage;
 
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;
@@ -99,4 +97,12 @@ public:
 	void MultiSetGroundState_Implementation(EGroundTypes EGTState);
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE EGroundTypes GetGroundState() const { return GroundState; }
+
+	UFUNCTION(Server, Reliable, Category = "StandUp State")
+	void ServerSetStandUpState(EStandUpType ESTState);
+	void ServerSetStandUpState_Implementation(EStandUpType ESTState);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSetStandUpState(EStandUpType ESTState);
+	void MultiSetStandUpState_Implementation(EStandUpType ESTState);
+	FORCEINLINE EStandUpType GetStandUpState() const { return StandUpState; }
 };

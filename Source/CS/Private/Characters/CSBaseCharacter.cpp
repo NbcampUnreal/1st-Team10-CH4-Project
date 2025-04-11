@@ -183,6 +183,16 @@ void ACSBaseCharacter::MultiSetGroundState_Implementation(EGroundTypes EGTState)
     GroundState = EGTState;
 }
 
+void ACSBaseCharacter::ServerSetStandUpState_Implementation(EStandUpType ESTState)
+{
+    MultiSetStandUpState(ESTState);
+}
+
+void ACSBaseCharacter::MultiSetStandUpState_Implementation(EStandUpType ESTState)
+{
+    StandUpState = ESTState;
+}
+
 bool ACSBaseCharacter::IsBlocking()
 {
     return bIsBlocking;

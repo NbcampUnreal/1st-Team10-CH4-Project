@@ -47,7 +47,7 @@ void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(P_ComboAction, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayPComboAnim);
 		EnhancedInputComponent->BindAction(K_ComboAction, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayKComboAnim);
 		EnhancedInputComponent->BindAction(P_Casting, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayPCastingAnim);
-		EnhancedInputComponent->BindAction(K_Casting, ETriggerEvent::Started, this, &ACSFighterCharacter::PlayKCastingAnim);
+		EnhancedInputComponent->BindAction(K_Casting, ETriggerEvent::Triggered, this, &ACSFighterCharacter::PlayKCastingAnim);
 	}
 }
 
@@ -64,6 +64,7 @@ void ACSFighterCharacter::PlayPComboMontage()
 void ACSFighterCharacter::PlayPComboAnim()
 {
 	if (!CombatComponent->GetCanCombo()) return;
+	if (bIsCrouched) return;
 
 	PlayPComboMontage();
 }
@@ -80,7 +81,8 @@ void ACSFighterCharacter::PlayKComboMontage()
 void ACSFighterCharacter::PlayKComboAnim()
 {
 	if (!CombatComponent->GetCanCombo()) return;
-	
+	if (bIsCrouched) return;
+
 	PlayKComboMontage();
 }
 
