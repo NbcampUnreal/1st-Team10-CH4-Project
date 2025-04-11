@@ -21,34 +21,21 @@ ACSLobbyCharacter::ACSLobbyCharacter()
 
 void ACSLobbyCharacter::BeginPlay()
 {
+    Super::BeginPlay();
 }
 
 void ACSLobbyCharacter::UpdateMeshFromJobType(EJobTypes JobType)
 {
-	// Tranfer JobType to FName for DataTable lookup
-    FName RowName = *UEnum::GetDisplayValueAsText(JobType).ToString(); // "EJT_Fighter"
+    FName RowName = *UEnum::GetDisplayValueAsText(JobType).ToString();
 
-	// if failed, print ContextString
     static const FString ContextString(TEXT("CharacterLobbyData"));
     FCharacterLobbyData* RowData = CharacterLobbyDataTable->FindRow<FCharacterLobbyData>(RowName, ContextString);
 
-    if (RowData)
-    {
-        USkeletalMesh* NewMesh = RowData->LobbyMesh.LoadSynchronous();
-        TSubclassOf<UAnimInstance> NewAnimClass = RowData->LobbyAnimClass;
+    if (!RowData || !GetMesh()) return;
 
-        if (GetMesh())
-        {
-            GetMesh()->SetSkeletalMesh(NewMesh);
-            GetMesh()->SetAnimInstanceClass(NewAnimClass);
-        }
-    }
-    else
-    {
-        if (GetMesh())
-        {
-            GetMesh()->SetSkeletalMesh(nullptr);
-            GetMesh()->SetAnimInstanceClass(nullptr);
-        }
-    }
+    USkeletalMesh* NewMesh = RowData->LobbyMesh.LoadSynchronous();
+    TSubclassOf<UAnimInstance> NewAnimClass = RowData->LobbyAnimClass;
+
+    GetMesh()->SetSkeletalMesh(NewMesh);
+    GetMesh()->SetAnimInstanceClass(NewAnimClass);
 }
