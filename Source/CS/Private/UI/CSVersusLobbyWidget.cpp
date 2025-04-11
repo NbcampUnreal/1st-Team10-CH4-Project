@@ -71,6 +71,8 @@ void UCSVersusLobbyWidget::OnChangeTeamClicked()
 	ACSPlayerController* PC = GetOwningCSPlayerController();
 	if (PC) {
 		UE_LOG(LogTemp, Log, TEXT("UI: Change team button clicked."));
-		// PC->Server_RequestTeamChange(); // 주석 유지
+		// PlayerController RPC 호출 (주석 해제!)
+		PC->Server_RequestTeamChange();
 	}
+	else { UE_LOG(LogTemp, Warning, TEXT("OnChangeTeamClicked: PlayerController is null!")); }
 }

@@ -82,18 +82,24 @@ void UCSLobbyBaseWidget::HandleCharacterSelected(EJobTypes SelectedJob)
 	ACSPlayerController* PC = GetOwningCSPlayerController();
 	if (PC) {
 		UE_LOG(LogTemp, Log, TEXT("UI: Character selected: %d. Calling RPC."), (int32)SelectedJob);
-		// PC->Server_SelectCharacter(SelectedJob); // 주석 유지
+		// PlayerController RPC 호출 (주석 해제!)
+		PC->Server_SelectCharacter(SelectedJob);
 	}
+	else { UE_LOG(LogTemp, Warning, TEXT("HandleCharacterSelected: PlayerController is null!")); }
 }
 
 void UCSLobbyBaseWidget::OnReadyClicked()
 {
 	ACSPlayerController* PC = GetOwningCSPlayerController();
 	if (PC) {
-		bool bWantsToBeReady = !bLocalPlayerIsReady;
-		// PC->Server_RequestReady(bWantsToBeReady); // 주석 유지
+		bool bWantsToBeReady = !bLocalPlayerIsReady; // 현재 상태의 반대 값 요청
 		UE_LOG(LogTemp, Log, TEXT("UI: Ready button clicked. Requesting ready state: %d"), bWantsToBeReady);
+		// PlayerController RPC 호출 (주석 해제!)
+		PC->Server_RequestReady(bWantsToBeReady);
+		// 로컬 UI 즉시 반영은 PlayerState의 OnRep_IsReady 에서 처리하므로 여기서는 제거
+		// UpdateLocalReadyStatus(bWantsToBeReady);
 	}
+	else { UE_LOG(LogTemp, Warning, TEXT("OnReadyClicked: PlayerController is null!")); }
 }
 
 void UCSLobbyBaseWidget::OnStartClicked()

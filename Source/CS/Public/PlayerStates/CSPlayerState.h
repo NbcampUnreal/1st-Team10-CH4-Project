@@ -28,16 +28,21 @@ public:
     UFUNCTION()
     void OnRep_SelectedJob();
 
-    UPROPERTY(ReplicatedUsing = OnRep_IsReady)
+    // BlueprintReadOnly 추가! + VisibleAnywhere/EditAnywhere 등 필요시 추가
+    UPROPERTY(ReplicatedUsing = OnRep_IsReady, BlueprintReadOnly, Category = "Player State")
     bool bIsReady;
-    UPROPERTY(ReplicatedUsing = OnRep_TeamID)
+
+    // BlueprintReadOnly 추가!
+    UPROPERTY(ReplicatedUsing = OnRep_TeamID, BlueprintReadOnly, Category = "Player State")
     int32 TeamID;
-    UPROPERTY(ReplicatedUsing = OnRep_SelectedJob)
+
+    // BlueprintReadOnly 추가!
+    UPROPERTY(ReplicatedUsing = OnRep_SelectedJob, BlueprintReadOnly, Category = "Player State")
     EJobTypes SelectedJob;
     
-    UPROPERTY(Replicated)
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player State")
     int32 PlayerIndex;
-    UPROPERTY(Replicated)
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player State")
     bool bIsAlive;
 
 protected:
