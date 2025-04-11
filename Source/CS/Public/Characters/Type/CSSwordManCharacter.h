@@ -46,9 +46,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float CounterHoldThreshold = 0.5f;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Damage")
 	float CounterAttackDamage = 25.f;
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	void HandleLightAttackPress();
