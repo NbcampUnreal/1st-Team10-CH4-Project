@@ -11,6 +11,6 @@ class CS_API AAINormalCharacter : public AAIBaseCharacter
 
 public:
 	AAINormalCharacter();
-	FName GetPunchName() const;
-	int AI_Attack(UAnimMontage* SelectedMontage, FName SectionName);
+	virtual FComboAttackData GetFirstAttackData() const override;
+	int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData);
 };
