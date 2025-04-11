@@ -20,11 +20,11 @@ public:
 	virtual void UpdateMatchTimer_Implementation(int32 RemainingSeconds) override; // override 키워드 확인
 
 protected:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
 	TObjectPtr<UProgressBar> HealthBar;
-	UPROPERTY(meta = (BindWidgetOptional))
+	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly) // Optional 에도 추가 가능
 	TObjectPtr<UTextBlock> HealthText;
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
 	TObjectPtr<UTextBlock> MatchTimerText;
 
 	virtual void NativeConstruct() override;
