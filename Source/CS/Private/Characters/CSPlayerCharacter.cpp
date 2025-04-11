@@ -84,7 +84,6 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::GuardStart);
 		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::GuardEnd);
 		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::DodgeStart);
-		EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::DodgeEnd);
 	}
 }
 
@@ -347,4 +346,15 @@ void ACSPlayerCharacter::UpdateRotation()
 void ACSPlayerCharacter::OnRep_FacingDirection()
 {
 	UpdateRotation();
+}
+
+void ACSPlayerCharacter::ActivateSuddenDeathMode()
+{
+	if (HasAuthority())
+	{
+		if (CombatComponent && !CombatComponent->IsSuddenDeathActive())
+		{
+			CombatComponent->SetSuddenDeathActive(true);
+		}
+	}
 }

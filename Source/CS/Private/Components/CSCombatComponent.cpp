@@ -19,8 +19,7 @@ UCSCombatComponent::UCSCombatComponent()
     bCanCombo = true;
 
     CurrentAttackDamage = 0.f;
-
-    bIsSuddenDeathActive = false;
+	bIsSuddenDeathActive = false;
     SuddenDeathDamage = 100.f;
 }
 
@@ -140,51 +139,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
     }
 }
 
-//void UCSCombatComponent::Server_RequestAttack_Implementation(FAttackMontageStruct AttackDataToPlay)
-//{
-//    ACharacter* Owner = Cast<ACharacter>(GetOwner());
-//    
-//    if (!Owner || !AttackDataToPlay.AttackMontage) return;
-//    
-//
-//    if (GetCanCombo())
-//    {
-//        CanComboChange(false);
-//        bIsAttacking = true;
-//        CurrentAttackDamage = AttackDataToPlay.Damage;
-//        ClearHitActors();
-//
-//        Multicast_PlayMontage(AttackDataToPlay.AttackMontage, AttackDataToPlay.Section);
-//        UE_LOG(LogTemp, Log, TEXT("Server_RequestAttack: %s"), *AttackDataToPlay.AttackMontage->GetName());
-//
-//        // If multicast working well on server then remove
-//        UAnimInstance* AnimInstance = Owner->GetMesh()->GetAnimInstance();
-//        if (AnimInstance)
-//        {
-//            AnimInstance->Montage_Play(AttackDataToPlay.AttackMontage);
-//            if (AttackDataToPlay.Section != NAME_None)
-//            {
-//                AnimInstance->Montage_JumpToSection(AttackDataToPlay.Section);
-//            }
-//        }
-//    }
-//}
-//
-//void UCSCombatComponent::Multicast_PlayMontage_Implementation(UAnimMontage* MontageToPlay, FName SectionToPlay)
-//{
-//	ACharacter* Owner = Cast<ACharacter>(GetOwner());
-//	if (!Owner || !MontageToPlay) return;
-//
-//	UAnimInstance* AnimInstance = Owner->GetMesh() ? Owner->GetMesh()->GetAnimInstance() : nullptr;
-//    if (AnimInstance)
-//    {
-//        AnimInstance->Montage_Play(MontageToPlay, 1.0f);
-//        if (SectionToPlay != NAME_None)
-//        {
-//            AnimInstance->Montage_JumpToSection(SectionToPlay, MontageToPlay);
-//        }
-//    }
-//}
 void UCSCombatComponent::Combo1CntIncrease()
 {
     iCombo_1_Cnt++;
@@ -262,21 +216,6 @@ void UCSCombatComponent::SetCurrentAttackDamage(float Damage)
 	CurrentAttackDamage = Damage;
 }
 
-void UCSCombatComponent::ActivateSuddenDeathMode()
-{
-    if (bIsSuddenDeathActive) return;
-    Server_ActivateSuddenDeath();
-}
-
-void UCSCombatComponent::Server_ActivateSuddenDeath_Implementation()
-{
-    if (!bIsSuddenDeathActive)
-    {
-		UE_LOG(LogTemp, Warning, TEXT("SUDDEN DEATH MODE ACTIVATED!"));
-        bIsSuddenDeathActive = true;
-    }
-}
-
 void UCSCombatComponent::MultiSetMontageData_Implementation(UAnimMontage* PlayMontage, FName Section)
 {
     ServerPlayMontage = PlayMontage;
@@ -316,6 +255,16 @@ void UCSCombatComponent::OnRep_IsAttacking()
     }
 }
 
+void UCSCombatComponent::SetSuddenDeathActive(bool bActive)
+{
+    if (GetOwnerRole() == ROLE_Authority)
+    {
+        if (bIsSuddenDeathActive != bActive)
+        {
+            bIsSuddenDeathActive = bActive;
+        }
+    }
+}
 
 void UCSCombatComponent::ServerStartAttack_Implementation()
 {

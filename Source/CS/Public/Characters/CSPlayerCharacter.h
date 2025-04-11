@@ -72,6 +72,10 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_FinishDodge();
 	void Server_FinishDodge_Implementation();
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void ActivateSuddenDeathMode();
+
 	/*
 	* Callback function for input
 	*/
