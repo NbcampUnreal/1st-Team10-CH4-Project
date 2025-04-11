@@ -10,6 +10,7 @@
 ACSGameModeBase::ACSGameModeBase()
 {
 	DefaultPawnClass = nullptr;
+	PlayerStateClass = ACSPlayerState::StaticClass();
 
 	CSGameInstance = nullptr;
 	BaseGameState = nullptr;
@@ -51,6 +52,7 @@ void ACSGameModeBase::PostLogin(APlayerController* NewPlayer)
 
 void ACSGameModeBase::HandleStartGame()
 {
+	UE_LOG(LogTemp, Warning, TEXT("HandleStartGame 호출됨"));
 	SetMatchPhase(EMatchPhase::EMP_Playing);
 	SetAllPlayerInputEnabled(true);
 	StartMatchTimer();
@@ -102,8 +104,12 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 
 void ACSGameModeBase::SpawnAllPlayers()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Called SpawnAllPlayers"));
+
 	const TMap<ESpawnSlotType, ACSSpawnManager*> SlotMap = FindAllSpawnManager();
 	if (SlotMap.IsEmpty()) return;
+
+	RestorePlayerLobbyData();
 
 	for (APlayerState* PlayerState : GameState->PlayerArray)
 	{
@@ -116,18 +122,46 @@ void ACSGameModeBase::SpawnAllPlayers()
 				if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 				{
 					const FCharacterRow* Row = CSGameInstance->FindCharacterRowByJob(CSPlayerState->SelectedJob);
-					if (!Row || !Row->CharacterClass.IsValid()) continue;
-
+					if (!Row) continue;
+					
 					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
-					APawn* Spawned = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
+					if (!CharacterClass) continue;
 
+					APawn* Spawned = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation());
 					if (Spawned)
 					{
 						PlayerController->Possess(Spawned);
-						Spawned->DisableInput(PlayerController);
+						/*Spawned->DisableInput(PlayerController);*/
+						Spawned->EnableInput(PlayerController);
+						
+						if (Spawned->GetController() == PlayerController)
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Pawn is successfully possessed by controller."));
+						}
+						else
+						{
+							UE_LOG(LogTemp, Error, TEXT("Pawn is NOT possessed!"));
+						}
 					}
 				}
 			}
+		}
+	}
+}
+
+void ACSGameModeBase::RestorePlayerLobbyData()
+{
+	if (!CSGameInstance) return;
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		{
+			FPlayerLobbyData Data = CSGameInstance->GetPlayerLobbyData(CSPlayerState->GetPlayerName());
+
+			CSPlayerState->SelectedJob = Data.SelectedJob;
+			CSPlayerState->TeamID = Data.TeamID;
+			CSPlayerState->PlayerIndex = Data.PlayerIndex;
 		}
 	}
 }

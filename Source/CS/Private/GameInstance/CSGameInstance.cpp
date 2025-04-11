@@ -286,20 +286,25 @@ void UCSGameInstance::OpenLevelByID(FName LevelID)
 	else { UE_LOG(LogTemp, Error, TEXT("OpenLevelByID: LevelID %s not found in LevelData."), *LevelID.ToString()); }
 }
 
-void UCSGameInstance::ResetLobbySettings() { ExpectedPlayerCount = 0; }
+void UCSGameInstance::ResetLobbySettings() 
+{ 
+	ExpectedPlayerCount = 0; 
+	PlayerLobbyDataMap.Empty();
+}
 
 const FCharacterRow* UCSGameInstance::FindCharacterRowByJob(EJobTypes Job) const
 {
 	if (!CharacterData) return nullptr;
 	const UEnum* EnumPtr = StaticEnum<EJobTypes>();
 	if (!EnumPtr) return nullptr;
-	// Enum 값에서 직접 FName 생성 시도 (Enum 이름과 Row 이름이 같다고 가정)
-	FString EnumString = EnumPtr->GetNameByValue((int64)Job).ToString();
-	// "EJT_" 접두사 제거 (데이터 테이블 행 이름에 접두사가 없다면)
+
+	FString EnumString = EnumPtr->GetNameStringByValue(static_cast<int64>(Job)); // ✅ 핵심
 	EnumString.RemoveFromStart(TEXT("EJT_"));
+	EnumString.TrimStartAndEndInline(); // 혹시 모를 공백 제거
+
 	FName RowName = FName(*EnumString);
-	// FString RowNameString = EnumPtr->GetNameStringByValue((int64)Job); // 이 방식도 유효
-	// FName RowName(*RowNameString);
+	UE_LOG(LogTemp, Warning, TEXT("Final RowName: %s"), *RowName.ToString());
+
 	return CharacterData->FindRow<FCharacterRow>(RowName, TEXT("FindCharacterRowByJob"));
 }
 
@@ -309,4 +314,18 @@ const FLevelRow* UCSGameInstance::FindLevelRow(FName RowName) const
 	const FString Context = TEXT("FineLevelRow");
 
 	return LevelData->FindRow<FLevelRow>(RowName, Context);
+}
+
+void UCSGameInstance::SetPlayerLobbyData(const FString& PlayerName, const FPlayerLobbyData& Data)
+{
+	PlayerLobbyDataMap.Add(PlayerName, Data);
+}
+
+FPlayerLobbyData UCSGameInstance::GetPlayerLobbyData(const FString& PlayerName) const
+{
+	if (const FPlayerLobbyData* Found = PlayerLobbyDataMap.Find(PlayerName))
+	{
+		return *Found;
+	}
+	return FPlayerLobbyData();
 }

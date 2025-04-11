@@ -32,8 +32,6 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	UE_LOG(LogTemp, Warning, TEXT("PostLogin called for: %s"), *NewPlayer->GetName());
-
 	if (MatchType == EMatchType::EMT_None)
 	{
 		if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
@@ -47,15 +45,12 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		CSPlayerController->Client_ShowLobbyUI();
 	}
 
-	if (MatchType == EMatchType::EMT_Versus)
+	if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(NewPlayer->PlayerState))
 	{
-		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(NewPlayer->PlayerState))
-		{
-			int32 Num = GameState.Get()->PlayerArray.Num();
+		int32 Num = GameState.Get()->PlayerArray.Num();
 
-			CSPlayerState->PlayerIndex = Num;
-			CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
-		}
+		CSPlayerState->PlayerIndex = Num;
+		CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
 	}
 
 	FTimerHandle DelayHandle;
@@ -65,7 +60,7 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 			PositionLobbyCharacters();
 			SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
 
-		}, 1.5f, false);
+		}, 1.0f, false);
 }
 
 void ACSLobbyGameMode::StartMatchIfReady()
@@ -210,8 +205,8 @@ TMap<int32, TArray<ESpawnSlotType>> ACSLobbyGameMode::GetSlotPriorityForMatchTyp
 	switch (MatchType)
 	{
 	case EMatchType::EMT_Versus:
-		Result.Add(0, { ESpawnSlotType::Versus_Team0_Slot0, ESpawnSlotType::Versus_Team0_Slot1 });
-		Result.Add(1, { ESpawnSlotType::Versus_Team1_Slot0, ESpawnSlotType::Versus_Team1_Slot1 });
+		Result.Add(0, { ESpawnSlotType::Versus_Team0_Slot0, ESpawnSlotType::Versus_Team0_Slot1, ESpawnSlotType::Versus_Team0_Slot2 });
+		Result.Add(1, { ESpawnSlotType::Versus_Team1_Slot0, ESpawnSlotType::Versus_Team1_Slot1, ESpawnSlotType::Versus_Team1_Slot2 });
 		break;
 
 	case EMatchType::EMT_Coop:
@@ -295,6 +290,16 @@ void ACSLobbyGameMode::SetSelectedPlayerJob(APlayerController* Player, EJobTypes
 	if (ACSPlayerState* CSPlayerState = Player->GetPlayerState<ACSPlayerState>())
 	{
 		CSPlayerState->SelectedJob = NewJob;
+
+		FPlayerLobbyData LobbyData;
+		LobbyData.SelectedJob = CSPlayerState->SelectedJob;
+		LobbyData.PlayerIndex = CSPlayerState->PlayerIndex;
+		LobbyData.TeamID = CSPlayerState->TeamID;
+
+		if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+		{
+			CSGameInstance->SetPlayerLobbyData(CSPlayerState->GetPlayerName(), LobbyData);
+		}
 
 		if (ACSLobbyCharacter* LobbyCharacter = LobbyCharacterMap.FindRef(Player))
 		{

@@ -35,7 +35,6 @@ void ACSSingleGameMode::BeginPlay()
 
 void ACSSingleGameMode::InitGameLogic()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SingleGameMode: InitGameLogic 호출됨"));
 	CountInitialAI();
 	UpdateGameStateAIStatus();
 

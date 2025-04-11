@@ -6,6 +6,7 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "Data/CSCharacterRow.h"
 #include "Data/CSLevelRow.h"
+#include "Data/CSPlayerLobbyData.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"      // 필수
 #include "FindSessionsCallbackProxy.h"  // FOnlineSessionSearchResult 사용 위해 추가
@@ -26,8 +27,6 @@ public:
 	/** 세션 관련 함수 */
 	UFUNCTION(BlueprintCallable, Category = "Session")
 	void HostSession(EMatchType TypeToHost);
-
-	// FindOrCreateSession 제거
 
 	UFUNCTION(BlueprintCallable, Category = "Session")
 	void FindSessions();
@@ -59,6 +58,9 @@ public:
 
 	bool bIsSessionCreated;
 
+	void SetPlayerLobbyData(const FString& PlayerName, const FPlayerLobbyData& Data);
+	FPlayerLobbyData GetPlayerLobbyData(const FString& PlayerName) const;
+
 private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
@@ -87,4 +89,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTables")
 	TObjectPtr<UDataTable> LevelData;
+
+	UPROPERTY()
+	TMap<FString, FPlayerLobbyData> PlayerLobbyDataMap;
 };

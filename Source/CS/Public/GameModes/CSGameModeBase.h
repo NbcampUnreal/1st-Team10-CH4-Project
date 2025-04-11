@@ -51,6 +51,9 @@ protected:
 	/** 플레이어 스폰 처리 */
 	void SpawnAllPlayers();
 
+	/** 플레이어 로비 데이터 불러와 저장 */
+	void RestorePlayerLobbyData();
+	
 	/** 월드의 모든 스폰매니저를 타입별로 Map에 저장 */
 	TMap<ESpawnSlotType, class ACSSpawnManager*> FindAllSpawnManager() const;
 

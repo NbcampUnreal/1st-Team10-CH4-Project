@@ -15,7 +15,7 @@ public:
 	ACSPlayerState();
 
     virtual void BeginPlay() override;
-
+   
     UFUNCTION(BlueprintCallable)
     void SetIsReady(bool bNewReady);
     UFUNCTION(BlueprintCallable)
