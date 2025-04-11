@@ -18,7 +18,8 @@
 #include "UI/CSInGameHUD.h" // HUD 베이스 클래스 예시
 #include "Kismet/GameplayStatics.h"
 
-ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr) {}
+ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr), bIsHostPlayer(false) {}
+
 
 void ACSPlayerController::BeginPlay()
 {
@@ -38,8 +39,6 @@ void ACSPlayerController::InitializeCurrentUI()
 
     FName CurrentLevelName = FName(*World->GetName());
     EMatchType CurrentMatchType = GI->GetMatchType();
-
-    UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Checking Level=%s, MatchType=%d"), *CurrentLevelName.ToString(), (int32)CurrentMatchType);
 
     // --- 로비 레벨 예외 처리 추가 ---
     if (CurrentLevelName == FName("LobbyLevel")) // 레벨 이름 확인
@@ -216,6 +215,26 @@ void ACSPlayerController::Client_OnSuddenDeath_Implementation()
 {
     if (IsLocalController() && CurrentActiveUI) {
         // CurrentActiveUI->TriggerSuddenDeathUI(); // 위젯 함수 호출
+    }
+}
+
+void ACSPlayerController::RequestEnterMultiplayerMode(EMatchType NewMatchType)
+{
+    if (UCSGameInstance* GameInstance = GetGameInstance<UCSGameInstance>())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("🟩 RequestEnterMultiplayerMode | Player: %s | NetMode: %d | IsHost: %d"),
+            *GetName(), (int32)GetNetMode(), bIsHostPlayer);
+
+        if (bIsHostPlayer) // Listen Server
+        {
+            GameInstance->SetMatchType(NewMatchType);
+            GameInstance->HostSession(NewMatchType);
+        }
+        else // Client
+        {
+            GameInstance->SetMatchType(NewMatchType);
+            GameInstance->FindSessions();
+        }
     }
 }
 

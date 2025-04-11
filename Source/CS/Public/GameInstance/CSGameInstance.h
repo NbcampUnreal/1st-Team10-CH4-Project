@@ -57,6 +57,8 @@ public:
 	const FCharacterRow* FindCharacterRowByJob(EJobTypes Job) const;
 	const FLevelRow* FindLevelRow(FName RowName) const;
 
+	bool bIsSessionCreated;
+
 private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);

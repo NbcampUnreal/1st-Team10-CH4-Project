@@ -4,6 +4,7 @@
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
 #include "Characters/CSBaseCharacter.h"
+#include "Characters/CSPlayerCharacter.h"
 #include "Managers/CSSpawnManager.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -100,7 +101,7 @@ void ACSVersusGameMode::TriggerSuddenDeath()
 			{
 				if (APawn* Pawn = PlayerController->GetPawn())
 				{
-					if (ACSBaseCharacter* Character = Cast<ACSBaseCharacter>(Pawn))
+					if (ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(Pawn))
 					{
 						/*Character->ActivateSuddenDeathMode();*/ // 캐릭터 공격력 증가하는 함수 필요.
 					}

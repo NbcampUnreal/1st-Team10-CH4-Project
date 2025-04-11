@@ -19,13 +19,15 @@ UCSGameInstance::UCSGameInstance() :
 	ExpectedPlayerCount(0),
 	CharacterData(nullptr),
 	AIData(nullptr),
-	LevelData(nullptr)
+	LevelData(nullptr),
+	bIsSessionCreated(false)
 {
 }
 
 void UCSGameInstance::Init()
 {
 	Super::Init();
+
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem) {
 		SessionInterface = Subsystem->GetSessionInterface();
@@ -36,9 +38,7 @@ void UCSGameInstance::Init()
 			// 세션 파괴 완료 콜백 등록 추가
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UCSGameInstance::OnDestroySessionComplete);
 		}
-		else { UE_LOG(LogTemp, Error, TEXT("Session Interface is invalid!")); }
 	}
-	else { UE_LOG(LogTemp, Error, TEXT("Online Subsystem not found!")); }
 }
 
 // Shutdown 함수 구현 추가
@@ -85,77 +85,61 @@ void UCSGameInstance::SetMatchType(EMatchType NewType)
 	UE_LOG(LogTemp, Log, TEXT("GameInstance MatchType set to: %d"), (int32)MatchType);
 }
 
-// HostSession 수정: MatchType 파라미터 받고 설정에 추가
 void UCSGameInstance::HostSession(EMatchType TypeToHost)
 {
-	if (!SessionInterface.IsValid()) { /* ... */ return; }
+	if (!SessionInterface.IsValid()) return;
 
-	// 기존 세션 확인
 	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
-	if (ExistingSession != nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("HostSession: Found existing session. Destroying it first..."));
-		// 세션 파괴 완료 시 다시 HostSession 을 호출하도록 플래그 설정 또는 람다 사용 등 필요
-		// 여기서는 간단히 파괴만 호출하고 리턴 (비동기 처리)
+	if (ExistingSession != nullptr)
+	{
 		DestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(
-			// 파괴 성공 시 다시 HostSession 시도 (주의: 무한 루프 가능성 고려)
-			FOnDestroySessionCompleteDelegate::CreateWeakLambda(this, [this, TypeToHost](FName SessionName, bool bWasSuccessful) {
-				if (SessionInterface.IsValid()) SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
-				if (bWasSuccessful) {
-					UE_LOG(LogTemp, Log, TEXT("Previous session destroyed successfully. Retrying HostSession..."));
-					// 약간의 딜레이 후 재시도 권장
-					FTimerHandle RetryHandle;
-					GetTimerManager().SetTimer(RetryHandle, [this, TypeToHost]() { HostSession(TypeToHost); }, 0.2f, false);
-				}
-				else {
-					UE_LOG(LogTemp, Error, TEXT("Failed to destroy existing session. Cannot host."));
-					ACSPlayerController* PC = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-					if (PC) { PC->Client_ShowNoSessionPopup(); }
+			FOnDestroySessionCompleteDelegate::CreateWeakLambda(this, [this, TypeToHost](FName, bool bWasSuccessful) {
+				SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
+				if (bWasSuccessful) 
+				{
+					HostSession(TypeToHost); // 재시도
 				}
 				})
 		);
+
 		if (!SessionInterface->DestroySession(NAME_GameSession))
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to start DestroySession call in HostSession."));
-			if (SessionInterface.IsValid()) SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
-			// 파괴 호출 실패 시 즉시 팝업 알림
-			ACSPlayerController* PC = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-			if (PC) { PC->Client_ShowNoSessionPopup(); }
+			SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
 		}
-		return; // 파괴 콜백 기다림
+		return;
 	}
 
-	// --- 기존 세션 없을 경우 바로 생성 시도 ---
 	SetMatchType(TypeToHost);
-	// PendingMatchType = EMatchType::EMT_None; // 이 변수 제거됨
 
 	FOnlineSessionSettings SessionSettings;
-	// ... (세션 설정은 이전과 동일, MatchType 제거됨) ...
 	SessionSettings.bIsLANMatch = true;
-	SessionSettings.NumPublicConnections = (TypeToHost == EMatchType::EMT_Versus) ? 2 : 4;
+	SessionSettings.NumPublicConnections = 4;
 	SessionSettings.bShouldAdvertise = true;
-	SessionSettings.bAllowJoinInProgress = false;
-	SessionSettings.bUsesPresence = false;
-	// SessionSettings.Set(FName("MATCH_TYPE"), ...); // 제거됨
+	SessionSettings.bAllowJoinInProgress = true;
+	SessionSettings.bUsesPresence = true;
 
-	UE_LOG(LogTemp, Log, TEXT("Attempting to host session (MatchType %d stored locally)..."), (int32)TypeToHost);
-	if (!SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings)) { /* ... 실패 처리 ... */ }
-	else { UE_LOG(LogTemp, Log, TEXT("CreateSession call initiated via GameInstance.")); }
+	SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings);
 }
 
 // 세션 생성 완료 콜백
 void UCSGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	UE_LOG(LogTemp, Log, TEXT("GameInstance - OnCreateSessionComplete: Success=%d"), bWasSuccessful);
-	if (bWasSuccessful) {
-		UE_LOG(LogTemp, Log, TEXT("Session created successfully! Opening LobbyLevel as listen server..."));
-		UWorld* World = GetWorld();
-		if (World) World->ServerTravel(TEXT("/Game/Blueprints/Hud/Maps/LobbyLevel?listen")); // 경로 확인
+	UE_LOG(LogTemp, Log, TEXT("Session created: %s | Success: %d"), *SessionName.ToString(), bWasSuccessful);
+
+	if (bWasSuccessful)
+	{
+		FString TravelURL = TEXT("/Game/Blueprints/Hud/Maps/LobbyLevel?listen");
+
+		APlayerController* HostPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (HostPC)
+		{
+			HostPC->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("[GameInstance] Failed to create session: %s"), *SessionName.ToString());
-		ACSPlayerController* PC = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		if (PC) { PC->Client_ShowNoSessionPopup(); }
-	}
+	//if (bWasSuccessful)
+	//{
+	//	bIsSessionCreated = true; // GameMode에서 ServerTravel 호출용으로 상태 저장
+	//}
 }
 
 // FindOrCreateSession 제거
@@ -164,14 +148,13 @@ void UCSGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 void UCSGameInstance::FindSessions()
 {
 	UE_LOG(LogTemp, Log, TEXT("Finding sessions..."));
+	/*UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Finding sessions...")), true, false, FLinearColor(1.0, 0.0, 0.0, 1), 30.0f);*/
+
 	if (!SessionInterface.IsValid()) return;
 
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	SessionSearch->bIsLanQuery = true;
 	SessionSearch->MaxSearchResults = 20;
-	SessionSearch->QuerySettings.Set(FName(TEXT("PRESENCESEARCH")), false, EOnlineComparisonOp::Equals);
-	// MatchType 필터링 제거!
-	// SessionSearch->QuerySettings.Set(FName("MATCH_TYPE"), ..., EOnlineComparisonOp::Equals);
 
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 	UE_LOG(LogTemp, Log, TEXT("FindSessions call initiated."));
@@ -181,6 +164,15 @@ void UCSGameInstance::FindSessions()
 void UCSGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	UE_LOG(LogTemp, Log, TEXT("GameInstance - OnFindSessionsComplete: Success=%d"), bWasSuccessful);
+	
+	if (!SessionSearch.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("세션 서치 유효하지않음"));
+	}
+	else if (SessionSearch->SearchResults.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("세션 서치 결과가 없음"));
+	}
 
 	bool bFoundSession = false;
 	if (bWasSuccessful && SessionSearch.IsValid() && SessionSearch->SearchResults.Num() > 0) {
@@ -226,18 +218,25 @@ void UCSGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 	if (!SessionInterface.IsValid()) return;
 
 	FString ConnectString;
-	if (Result == EOnJoinSessionCompleteResult::Success && SessionInterface->GetResolvedConnectString(SessionName, ConnectString)) {
-		UE_LOG(LogTemp, Log, TEXT("Join successful! Traveling to server: %s"), *ConnectString);
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0); // GetWorld() 사용 확인
-		if (PlayerController) {
-			PlayerController->ClientTravel(ConnectString, TRAVEL_Absolute);
+	if (Result == EOnJoinSessionCompleteResult::Success &&
+		SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
+	{
+		FString HostIP;
+		FString Port;
+		if (ConnectString.Split(":", &HostIP, &Port) && Port == "0")
+		{
+			ConnectString = HostIP + TEXT(":7777");
+			UE_LOG(LogTemp, Warning, TEXT("Port was 0. Overriding to 7777: %s"), *ConnectString);
 		}
-		else { UE_LOG(LogTemp, Error, TEXT("Failed to get PlayerController for ClientTravel!")); }
+
+		if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+		{
+			PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
+		}
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("[GameInstance] Failed to join session %s, Result: %d"), *SessionName.ToString(), (int32)Result);
-		ACSPlayerController* PC = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		if (PC) { PC->Client_ShowNoSessionPopup(); } // 실패 시 "세션 없음" 알림
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to JoinSession or resolve connect string."));
 	}
 }
 

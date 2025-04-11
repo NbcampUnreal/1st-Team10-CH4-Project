@@ -19,6 +19,8 @@ void UCSMainMenu::NativeConstruct()
 	if (ExitButton) ExitButton->OnClicked.AddDynamic(this, &UCSMainMenu::OnExitClicked);
 
 	if (NotificationText) NotificationText->SetVisibility(ESlateVisibility::Collapsed); // 처음엔 숨김
+
+	UE_LOG(LogTemp, Warning, TEXT("✅ NativeConstruct CALLED on: %s"), *GetName());
 }
 
 void UCSMainMenu::NativeDestruct()
@@ -48,14 +50,21 @@ void UCSMainMenu::OnArcadeModeClicked()
 
 void UCSMainMenu::OnVersusModeClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("Versus Mode Clicked"));
-	HandleMultiplayerButtonClick(EMatchType::EMT_Versus); // 공통 핸들러 호출
+	UE_LOG(LogTemp, Error, TEXT("🟧 OnVersusModeClicked CALLED!!"));
+
+	APlayerController* PlayerController = GetOwningPlayer();
+	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(PlayerController))
+	{
+		CSPlayerController->RequestEnterMultiplayerMode(EMatchType::EMT_Versus); // ← 이 함수가 서버 또는 클라 판단 후 적절히 실행
+	}
 }
 
 void UCSMainMenu::OnCoopModeClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("Coop Mode Clicked"));
-	HandleMultiplayerButtonClick(EMatchType::EMT_Coop); // 공통 핸들러 호출
+	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(this, 0)))
+	{
+		CSPlayerController->RequestEnterMultiplayerMode(EMatchType::EMT_Coop); // ← 이 함수가 서버 또는 클라 판단 후 적절히 실행
+	}
 }
 
 // 멀티플레이 버튼 공통 처리 함수
@@ -78,18 +87,18 @@ void UCSMainMenu::HandleMultiplayerButtonClick(EMatchType MatchType)
 	// 버튼 비활성화
 	SetMultiplayerButtonsEnabled(false);
 
-	if (NetMode == NM_Standalone || NetMode == NM_ListenServer) // 독립 실행 또는 이미 리슨 서버 = 호스트 역할
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	const bool bIsHost = PC && PC->HasAuthority() && PC->IsLocalController() && PC == GetGameInstance()->GetFirstLocalPlayerController();
+
+	if (bIsHost)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Acting as HOST. Calling HostSession..."));
-		ShowNotification(FText::FromString(TEXT("Creating session...")), 0.0f); // 무기한 표시
-		// GameInstance의 호스트 함수 호출
+		UE_LOG(LogTemp, Log, TEXT("✅ I'm the true HOST (verified by GetFirstLocalPlayerController)."));
 		GI->HostSession(MatchType);
 	}
-	else // NM_Client = 클라이언트 역할
+	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("Acting as CLIENT. Calling FindSessions..."));
-		ShowNotification(FText::FromString(TEXT("Searching for sessions...")), 0.0f); // 무기한 표시
-		// GameInstance의 세션 검색 함수 호출
+		UE_LOG(LogTemp, Log, TEXT("🟢 I'm a CLIENT. FindSessions called."));
 		GI->FindSessions();
 	}
 	// 버튼 재활성화 및 알림 숨기기는 GameInstance의 콜백에서 처리되어야 함

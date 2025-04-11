@@ -10,6 +10,11 @@ class CS_API ACSMainMenuGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
+	ACSMainMenuGameMode() : bHasServerTraveld(false) {}
+
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-	
+
+	bool CheackShouldStartTravel();
+
+	bool bHasServerTraveld;
 };

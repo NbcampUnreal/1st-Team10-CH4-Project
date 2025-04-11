@@ -65,8 +65,15 @@ public:
 	void Client_OnSuddenDeath();
 	virtual void Client_OnSuddenDeath_Implementation();
 
+	void RequestEnterMultiplayerMode(EMatchType NewMatchType);
+
+	bool bIsHostPlayer;
+
 protected:
 	virtual void BeginPlay() override;
+
+	bool bHasInitializedUI = false;
+
 	// 현재 상태 맞는 기본 UI 로드
 	void InitializeCurrentUI();
 
