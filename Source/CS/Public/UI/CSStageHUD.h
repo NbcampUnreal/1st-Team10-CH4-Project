@@ -13,21 +13,20 @@ class CS_API UCSStageHUD : public UCSInGameHUD
 	GENERATED_BODY()
 
 public:
-	// GameState 등에서 호출하여 남은 적 정보 업데이트 (BP 구현)
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "HUD | Stage")
-	void UpdateRemainingAI(int32 RemainingAI, int32 TotalAI); // 총 AI 수도 받도록 수정
-
-	// GameState 등에서 호출하여 현재 스테이지 정보 업데이트 (BP 구현)
+	void UpdateRemainingAI(int32 RemainingAI, int32 TotalAI);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "HUD | Stage")
 	void UpdateStageInfo(const FText& StageName);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "HUD | Stage")
+	void TriggerBossAppearSequence(); // 이전 추가된 함수;
 
 protected:
-	// UMG 디자이너에서 연결할 위젯들
-	UPROPERTY(meta = (BindWidgetOptional))
+	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
 	TObjectPtr<UTextBlock> RemainingAIText;
-
-	UPROPERTY(meta = (BindWidgetOptional))
+	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
 	TObjectPtr<UTextBlock> StageInfoText;
+	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
+	TObjectPtr<UTextBlock> BossAppearText; // 추가 예시
 
 	// virtual void NativeConstruct() override; // 필요 시 오버라이드
 };
