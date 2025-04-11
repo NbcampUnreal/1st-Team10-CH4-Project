@@ -55,17 +55,17 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 		// Stand Up Anim -> Not Damaged
 		if (OwningPlayerCharacter->GetStandUpState() == EStandUpType::EST_StandUp) return;
 
-		FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(OwningPlayerCharacter->GetActorLocation(), DamageCauser->GetActorLocation());
+		FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(DamageCauser->GetActorLocation(), OwningPlayerCharacter->GetActorLocation());
 		bool bLookMinus = UKismetMathLibrary::InRange_FloatFloat(LookRot.Yaw, -180, -90);
 		bool bLookPlus = UKismetMathLibrary::InRange_FloatFloat(LookRot.Yaw, 90, 180);
 
 		if (bLookMinus || bLookPlus) // Front
 		{
-			if (OwningPlayerCharacter->GetActionState() == ECharacterTypes::ECT_Defending) return;
+			//if (OwningPlayerCharacter->GetActionState() == ECharacterTypes::ECT_Defending) return;
 		}
 		else // Back(Test)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Back Hit!!!")));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Back Hit!!!")));
 		}
 	}
 
