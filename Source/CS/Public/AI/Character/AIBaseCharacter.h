@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AI/PatrolPath.h"
+#include "AI/DamageType/ComboAttackData.h"
 #include "Characters/CSBaseCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AI/Interface/CombatInterface.h"
@@ -24,16 +25,16 @@ public:
 	UBehaviorTree* GetBehaviorTree() const;
 	APatrolPath* GetPatrolPath() const;
 
-	virtual FName GetfirstAttackName() const;
-	virtual FName GetsecondAttackName() const;
-	virtual FName GetLowComboAttackName() const;
-	virtual FName GetRangeComboAttackName() const;
+	virtual FComboAttackData GetFirstAttackData() const;
+	virtual FComboAttackData GetSecondAttackData() const;
+	virtual FComboAttackData GetLowComboAttackData() const;
+	virtual FComboAttackData GetRangeComboAttackData() const;
 	FName GetJumpName() const;
 	FName GetCrouchName() const;
 	
 	UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
-	UAnimMontage* GetfirstAttackMontage() const { return firstAttackMontage; }
-	UAnimMontage* GetsecondAttackMontage() const { return secondAttackMontage; }
+	UAnimMontage* GetFirstAttackMontage() const { return firstAttackMontage; }
+	UAnimMontage* GetSecondAttackMontage() const { return secondAttackMontage; }
 	UAnimMontage* GetLowComboAttackMontage() const { return LowComboAttackMontage; }
 	UAnimMontage* GetRangeComboAttackMontage() const { return RangeComboAttackMontage; }
 	UAnimMontage* GetBlockMontage() const { return BlockMontage; }
@@ -43,8 +44,8 @@ public:
 	UAnimMontage* GetJumpRunMontage() const { return JumpRunMontage;}
 	UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
 	
-	virtual int firstAttack_Implementation() override;
-	virtual int secondAttack_Implementation() override;
+	virtual int FirstAttack_Implementation() override;
+	virtual int SecondAttack_Implementation() override;
 	virtual int LowComboAttack_Implementation() override;
 	virtual int RangeComboAttack_Implementation() override;
 	virtual int Block_Implementation() override;
@@ -53,7 +54,7 @@ public:
 	virtual void Dodge_StartDash(AActor* Attacker);
 	virtual void Dodge_MoveToSafeZone(AActor* Attacker);
 
-	virtual int AI_Attack(UAnimMontage* SelectedMontage, FName SectionName);
+	virtual int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData);
 	
 	virtual void StopBlock();
 	virtual void StopMovement() override;

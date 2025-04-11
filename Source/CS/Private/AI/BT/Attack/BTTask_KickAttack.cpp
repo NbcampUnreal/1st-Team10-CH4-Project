@@ -41,7 +41,7 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 				{
 					BB->SetValueAsBool(FName("IsBusy"), true);
 
-					Combat->Execute_secondAttack(NPC);
+					Combat->Execute_SecondAttack(NPC);
 					
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
@@ -90,8 +90,8 @@ void UBTTask_KickAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp
 
 bool UBTTask_KickAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {
-	if (!AI || !AI->GetMesh() || !AI->GetsecondAttackMontage()) return true;
+	if (!AI || !AI->GetMesh() || !AI->GetSecondAttackMontage()) return true;
 
 	auto* AnimInstance = AI->GetMesh()->GetAnimInstance();
-	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetsecondAttackMontage());
+	return AnimInstance && AnimInstance->Montage_GetIsStopped(AI->GetSecondAttackMontage());
 }

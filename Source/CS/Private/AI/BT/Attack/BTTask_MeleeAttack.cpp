@@ -41,7 +41,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 
 					BB->SetValueAsBool(FName("IsBusy"), true);
 
-					Combat->Execute_firstAttack(NPC);
+					Combat->Execute_FirstAttack(NPC);
 
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
@@ -98,7 +98,7 @@ bool UBTTask_MeleeAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 	{
 		return true;
 	}
-	if (!AI->GetfirstAttackMontage())
+	if (!AI->GetFirstAttackMontage())
 	{
 		return true;
 	}
@@ -107,6 +107,6 @@ bool UBTTask_MeleeAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 	{
 		return true;
 	}
-	const bool bStopped = AnimInstance->Montage_GetIsStopped(AI->GetfirstAttackMontage());
+	const bool bStopped = AnimInstance->Montage_GetIsStopped(AI->GetFirstAttackMontage());
 	return bStopped;
 }

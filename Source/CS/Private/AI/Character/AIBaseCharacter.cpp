@@ -2,6 +2,7 @@
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "AI/Character/AIBossCharacter.h"
+#include "AI/DamageType/ComboAttackData.h"
 #include "AI/UI/Consts.h"
 #include "AI/UI/HealthBarWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -13,6 +14,7 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "GameModes/CSGameModeBase.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "AI/DamageType/ComboAttackData.h"
 #include "Net/UnrealNetwork.h"
 
 AAIBaseCharacter::AAIBaseCharacter()
@@ -64,7 +66,7 @@ void AAIBaseCharacter::SetupPlayerInputComponent(class UInputComponent* AIInputC
 UBehaviorTree* AAIBaseCharacter::GetBehaviorTree() const { return Tree; }
 APatrolPath* AAIBaseCharacter::GetPatrolPath() const { return PatrolPath; }
 
-FName AAIBaseCharacter::GetfirstAttackName() const
+FComboAttackData AAIBaseCharacter::GetFirstAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
@@ -76,52 +78,103 @@ FName AAIBaseCharacter::GetfirstAttackName() const
 	{
 		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
 	}
-
 	LastPunchTime = CurrentTime;
+
+	FComboAttackData AttackData;
 
 	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Punch1");
-	case 1: return FName("Punch2");
-	case 2: return FName("Punch3");
+	case 0:
+		AttackData.SectionName = FName("Punch1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Punch2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
+	case 2:
+		AttackData.SectionName = FName("Punch3");
+		AttackData.Damage = 15.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
+	default:
+		AttackData.SectionName = FName("Punch1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
 	}
-	
-	return FName("Punch1");
+
+	return AttackData;
 }
 
-FName AAIBaseCharacter::GetsecondAttackName() const
+FComboAttackData AAIBaseCharacter::GetSecondAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
-	if (CurrentTime - LastKickTime > ComboResetCooldown)
+	if (CurrentTime - LastPunchTime > ComboResetCooldown)
 	{
-		CurrentKickIndex = 0;
+		CurrentPunchIndex = 0;
 	}
 	else
 	{
-		CurrentKickIndex = (CurrentKickIndex + 1) % 3;
+		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
 	}
+	LastPunchTime = CurrentTime;
 
-	LastKickTime = CurrentTime;
+	FComboAttackData AttackData;
 
-	switch (CurrentKickIndex)
+	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Kick1");
-	case 1: return FName("Kick2");
-	case 2: return FName("Kick3");
+	case 0:
+		AttackData.SectionName = FName("Kick1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Kick2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
+	case 2:
+		AttackData.SectionName = FName("Kick3");
+		AttackData.Damage = 15.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
+	default:
+		AttackData.SectionName = FName("Kick1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = EDamageType::EDT_Nomal;
+		break;
 	}
 
-	return FName("Kick1");
+	return AttackData;
 }
 
-FName AAIBaseCharacter::GetLowComboAttackName() const
+FComboAttackData AAIBaseCharacter::GetLowComboAttackData() const
 {
-	return FName("Default");
+	FComboAttackData AttackData;
+
+	AttackData.SectionName = FName("Default");
+	AttackData.Damage = 20.f;
+	AttackData.DType = EDamageType::EDT_Launch;
+	
+	
+	return AttackData;
 }
-FName AAIBaseCharacter::GetRangeComboAttackName() const
+
+FComboAttackData AAIBaseCharacter::GetRangeComboAttackData() const
 {
-	return FName("Default");
+	FComboAttackData AttackData;
+
+	AttackData.SectionName = FName("Default");
+	AttackData.Damage = 20.f;
+	AttackData.DType = EDamageType::EDT_Launch;
+	
+	return AttackData;
 }
+
 FName AAIBaseCharacter::GetJumpName() const
 {
 	return FName("Default");
@@ -131,31 +184,45 @@ FName AAIBaseCharacter::GetCrouchName() const
 	return FName("Default");
 }
 
-int AAIBaseCharacter::firstAttack_Implementation()
+int AAIBaseCharacter::FirstAttack_Implementation()
 {
-	AI_Attack(GetfirstAttackMontage(), GetfirstAttackName());
+	FComboAttackData AttackData = GetFirstAttackData();
+	AI_Attack(GetFirstAttackMontage(), AttackData);
 	return 1;
 }
-int AAIBaseCharacter::secondAttack_Implementation()
+
+int AAIBaseCharacter::SecondAttack_Implementation()
 {
-	AI_Attack(GetsecondAttackMontage(), GetsecondAttackName());
+	FComboAttackData AttackData = GetSecondAttackData();
+	AI_Attack(GetSecondAttackMontage(), AttackData);
+	
 	return 1;
 }
 int AAIBaseCharacter::LowComboAttack_Implementation()
 {
-	AI_Attack(GetLowComboAttackMontage(), GetLowComboAttackName());
+	FComboAttackData AttackData = GetLowComboAttackData();
+	AI_Attack(GetLowComboAttackMontage(), AttackData);
+	
 	return 1;
 }
 int AAIBaseCharacter::RangeComboAttack_Implementation()
 {
-	AI_Attack(GetRangeComboAttackMontage(), GetRangeComboAttackName());
+	FComboAttackData AttackData = GetRangeComboAttackData();
+	AI_Attack(GetRangeComboAttackMontage(), AttackData);
+	
 	return 1;
 }
 
 
-int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, FName SectionName)
+int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData)
 {
-	CombatComponent->PerformAttack(SelectedMontage, SectionName);
+	CombatComponent->MultiSetMontageData_Implementation(SelectedMontage, AttackData.SectionName);
+	
+	FName TraceStart = FName("RightFistSocket");
+	FName TraceEnd = FName("RightFistSocketEnd");
+
+	CombatComponent->Server_PerformHitCheck_Implementation(TraceStart, TraceEnd, AttackData.Damage, AttackData.DType);
+
 	return 1;
 }
 
