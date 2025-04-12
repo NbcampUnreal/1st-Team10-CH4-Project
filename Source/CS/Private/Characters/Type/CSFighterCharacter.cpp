@@ -17,6 +17,19 @@ void ACSFighterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
+}
+
+void ACSFighterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 	if (!CombatComponent)
 	{
 		CombatComponent = FindComponentByClass<UCSCombatComponent>();
@@ -30,17 +43,6 @@ void ACSFighterCharacter::BeginPlay()
 			Subsystem->AddMappingContext(FighterMappingContext, 1);
 		}
 	}
-}
-
-void ACSFighterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-void ACSFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{

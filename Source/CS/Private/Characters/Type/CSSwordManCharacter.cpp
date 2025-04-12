@@ -18,6 +18,18 @@ void ACSSwordManCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Initialize the CombatComponent if not already set
+	
+}
+
+void ACSSwordManCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ACSSwordManCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 	if (!CombatComponent)
 	{
 		CombatComponent = FindComponentByClass<UCSCombatComponent>();
@@ -31,16 +43,6 @@ void ACSSwordManCharacter::BeginPlay()
 			Subsystem->AddMappingContext(SwordManMappingContext, 1);
 		}
 	}
-}
-
-void ACSSwordManCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void ACSSwordManCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{

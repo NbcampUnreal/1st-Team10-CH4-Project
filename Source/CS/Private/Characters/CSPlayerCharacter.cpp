@@ -50,14 +50,6 @@ void ACSPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(MappingContext, 0);
-		}
-	}
 }
 
 void ACSPlayerCharacter::ComboCheck()
@@ -76,6 +68,21 @@ void ACSPlayerCharacter::Tick(float DeltaTime)
 void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (ULocalPlayer* LocalPlayer = PC->GetLocalPlayer())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
+			{
+				if (MappingContext)
+				{
+					Subsystem->ClearAllMappings();
+					Subsystem->AddMappingContext(MappingContext, 0);
+				}
+			}
+		}
+	}
 
 	// --- 함수 호출 로그 추가 ---
 	UE_LOG(LogTemp, Warning, TEXT("ACSPlayerCharacter::SetupPlayerInputComponent --- Called for %s"), *GetName());

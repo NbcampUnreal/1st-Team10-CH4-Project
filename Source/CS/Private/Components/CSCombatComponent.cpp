@@ -61,7 +61,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
     }
 
     // Debug Lines
-    const bool bDrawDebug = true;
+    const bool bDrawDebug = false;
     const FColor TraceColor = FColor::Red;
     const FColor HitColor = FColor::Green;
     const float DebugDrawDuration = 2.0f;
