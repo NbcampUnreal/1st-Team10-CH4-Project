@@ -44,6 +44,9 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+
+	SetNetUpdateFrequency(500.f);			// 초당 최대 업데이트 횟수
+	SetMinNetUpdateFrequency(100.f);		// 최소 보장 횟수
 }
 
 void ACSPlayerCharacter::BeginPlay()
