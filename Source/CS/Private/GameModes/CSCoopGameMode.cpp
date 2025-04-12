@@ -85,9 +85,8 @@ TSubclassOf<APawn> ACSCoopGameMode::SelectRandomAIClass()
 	if (RowNames.IsEmpty()) return nullptr;
 
 	const FName SelectedRow = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
-	const FAIRow* Row = CSGameInstance->AIData->FindRow<FAIRow>(SelectedRow, TEXT("SelectRandomAIClass"));
-
-	if (!Row || !Row->AICharacterClass.IsValid()) return nullptr;
+	const FAIRow* Row = CSGameInstance->AIData->FindRow<FAIRow>(SelectedRow, TEXT("SpawnAIEnemies: SelectRandomAIClass"));
+	if (!Row) return nullptr;
 
 	return Row->AICharacterClass.LoadSynchronous();
 }
