@@ -89,18 +89,25 @@ void ACSPlayerController::InitializeCurrentUI()
         if (CurrentActiveUI) {
             CurrentActiveUI->AddToViewport();
             UE_LOG(LogTemp, Log, TEXT("Initialized UI: %s"), *UIClassToCreate->GetName());
-            // 입력 모드 설정 (MainMenu는 UI, 나머지는 Game)
+
             bool bIsUIInputMode = (CurrentLevelName == FName("MainMenuLevel"));
             if (bIsUIInputMode) {
                 FInputModeUIOnly InputModeData;
                 InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget());
                 SetInputMode(InputModeData);
                 bShowMouseCursor = true;
+                 UE_LOG(LogTemp, Log, TEXT(">>> Input Mode SET TO UI ONLY for Level: %s <<<"), *CurrentLevelName.ToString());
             }
             else { // Game HUDs
                 FInputModeGameOnly InputModeData;
-                SetInputMode(InputModeData);
-                bShowMouseCursor = false; // 게임 플레이 중에는 커서 숨김
+                SetInputMode(InputModeData); // 게임 모드 설정
+                bShowMouseCursor = false;   // 커서 숨김
+                UE_LOG(LogTemp, Warning, TEXT(">>> Input Mode SET TO GAME ONLY for Level: %s <<<"), *CurrentLevelName.ToString()); // 로그 추가!
+
+                // --- 게임 뷰포트 포커스 설정 추가 ---
+                FSlateApplication::Get().SetUserFocusToGameViewport(0); // 로컬 플레이어 0번 뷰포트에 포커스
+                UE_LOG(LogTemp, Log, TEXT(">>> Set Focus to Game Viewport <<<"));
+                // ---------------------------------
             }
         }
         else { UE_LOG(LogTemp, Error, TEXT("Failed to create widget for class %s"), *UIClassToCreate->GetName()); }
