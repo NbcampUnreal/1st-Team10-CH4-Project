@@ -64,8 +64,6 @@ void ACSPlayerCharacter::ComboCheck()
 void ACSPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Verbose, TEXT("ACSPlayerCharacter::Tick - MaxWalkSpeed: %f"), GetCharacterMovement()->MaxWalkSpeed);
-
 }
 
 void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -87,58 +85,32 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		}
 	}
 
-	// --- 함수 호출 로그 추가 ---
-	UE_LOG(LogTemp, Warning, TEXT("ACSPlayerCharacter::SetupPlayerInputComponent --- Called for %s"), *GetName());
-	// ------------------------
-
-	// CastChecked 대신 Cast 를 사용하여 실패 시 로그 남기기
-	// if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// --- 캐스팅 성공 로그 ---
-		UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent: Successfully cast PlayerInputComponent to UEnhancedInputComponent. Binding actions..."));
-		// --------------------
+		if (MovementAction) EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Move);
+		else UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: MovementAction is NULL!"));
 
-		// --- 각 액션 바인딩 시도 및 로그 추가 ---
-		if (MovementAction) {
-			EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Move);
-			UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent: Bound MovementAction."));
-		}
-		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: MovementAction is NULL!")); }
-
-		if (JumpAction) {
-			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
-			UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent: Bound JumpAction."));
-		}
-		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: JumpAction is NULL!")); }
+		if (JumpAction) EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
+		else UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: JumpAction is NULL!"));
 
 		if (CrouchAction) {
 			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
 			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
-			UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent: Bound CrouchAction (Started/Completed)."));
 		}
 		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: CrouchAction is NULL!")); }
 
 		if (GuardAction) {
 			EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::GuardStart);
 			EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::GuardEnd);
-			UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent: Bound GuardAction (Triggered/Completed)."));
 		}
 		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: GuardAction is NULL!")); }
 
 		if (DodgeAction) {
 			EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::DodgeStart);
-			UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent: Bound DodgeAction."));
 		}
 		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: DodgeAction is NULL!")); }
-		// -----------------------------------
 	}
-	else
-	{
-		// --- 캐스팅 실패 로그 ---
-		UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: Failed to cast PlayerInputComponent to UEnhancedInputComponent! Input bindings will fail."));
-		// --------------------
-	}
+	else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: Failed to cast PlayerInputComponent to UEnhancedInputComponent!")); }
 }
 
 void ACSPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -171,8 +143,6 @@ void ACSPlayerCharacter::CrouchEnd(const FInputActionValue& Value)
 
 void ACSPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACSPlayerCharacter::Move - Current ActionState: %d"), (int32)ActionState); // 로그 추가
-
 	if (ActionState == ECharacterTypes::ECT_Launch && !GetCharacterMovement()->IsFalling())
 	{
 		CombatComponent->CanComboChange(false);
