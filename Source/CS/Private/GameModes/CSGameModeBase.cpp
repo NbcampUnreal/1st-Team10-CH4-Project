@@ -92,20 +92,6 @@ void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
 	}
 }
 
-void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
-{
-	for (APawn* AIPawn : InAIPawns)
-	{
-		if (AIPawn && AIPawn->GetController())
-		{
-			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController()))
-			{
-				AIController->StartLogicAI();
-			}
-		}
-	}
-}
-
 void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
 	MatchPhase = NewPhase;
