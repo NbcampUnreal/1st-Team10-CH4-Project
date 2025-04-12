@@ -56,16 +56,16 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 		if (OwningPlayerCharacter->GetStandUpState() == EStandUpType::EST_StandUp) return;
 
 		FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(DamageCauser->GetActorLocation(), OwningPlayerCharacter->GetActorLocation());
-		bool bLookMinus = UKismetMathLibrary::InRange_FloatFloat(LookRot.Yaw, -180, -90);
-		bool bLookPlus = UKismetMathLibrary::InRange_FloatFloat(LookRot.Yaw, 90, 180);
+		bool LookCheck = UKismetMathLibrary::InRange_FloatFloat(OwningPlayerCharacter->GetActorRotation().Yaw, LookRot.Yaw - 90.0f, LookRot.Yaw + 90.0f);
 
-		if (bLookMinus || bLookPlus) // Front
+		if (!LookCheck) // Front
 		{
-			//if (OwningPlayerCharacter->GetActionState() == ECharacterTypes::ECT_Defending) return;
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Front Hit!!!")));
+			if (OwningPlayerCharacter->GetActionState() == ECharacterTypes::ECT_Defending) return;
 		}
 		else // Back(Test)
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Back Hit!!!")));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Back Hit!!!")));
 		}
 	}
 
