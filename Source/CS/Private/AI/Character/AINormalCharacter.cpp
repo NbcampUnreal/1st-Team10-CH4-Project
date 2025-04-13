@@ -32,7 +32,7 @@ FComboAttackData AAINormalCharacter::GetFirstAttackData() const
 
 	const int32 RandomIndex = FMath::RandRange(0, 2);
 
-	if (CurrentTime - LastPunchTime > ComboResetCooldown)
+	switch (RandomIndex)
 	{
 	case 0:
 		AttackData.SectionName = FName("Punch1");
@@ -41,20 +41,16 @@ FComboAttackData AAINormalCharacter::GetFirstAttackData() const
 		break;
 	case 1:
 		AttackData.SectionName = FName("Punch2");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = 12.f;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 2:
 		AttackData.SectionName = FName("Punch3");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = 15.f;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
-	else
-	{
-		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
-	}
-	LastPunchTime = CurrentTime;
 
 	return AttackData;
 }
+
