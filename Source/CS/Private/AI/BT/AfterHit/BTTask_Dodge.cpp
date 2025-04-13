@@ -33,7 +33,7 @@ EBTNodeResult::Type UBTTask_Dodge::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 		if (Result > 0)
 		{
-			
+			FTimerHandle DodgeTimerHandle;
 			NPC->GetWorldTimerManager().SetTimer(
 				DodgeTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_Dodge::FinishDodge, &OwnerComp),

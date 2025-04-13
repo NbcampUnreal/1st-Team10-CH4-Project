@@ -43,6 +43,7 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 		if (ICombat->Execute_Block(NPC))
 		{
+			FTimerHandle BlockTimerHandle;
 			NPC->GetWorldTimerManager().SetTimer(
 				BlockTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, &OwnerComp),
@@ -85,6 +86,7 @@ void UBTTask_Block::FinishBlock(UBehaviorTreeComponent* OwnerComp)
 
 		if (FMath::FRand() < 0.7f)
 		{
+			FTimerHandle BlockTimerHandle;
 			OwnerComp->GetWorld()->GetTimerManager().SetTimer(
 				BlockTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, OwnerComp),

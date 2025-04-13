@@ -24,5 +24,4 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
 
-	FTimerHandle DodgeTimerHandle;
 };

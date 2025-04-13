@@ -34,15 +34,13 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		{
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
-				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
-				
 				if (MontageHasfinished(NPC))
 				{
 
 					BB->SetValueAsBool(FName("IsBusy"), true);
 
 					Combat->Execute_FirstAttack(NPC);
-
+					FTimerHandle AttackCooldownTimerHandle;
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::FinishLatentTaskEarly, &OwnerComp),
@@ -81,7 +79,7 @@ void UBTTask_MeleeAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerCom
 			else
 			{
 				
-
+				FTimerHandle AttackCooldownTimerHandle;
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
 					FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::FinishLatentTaskEarly, OwnerComp),

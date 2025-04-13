@@ -35,8 +35,7 @@ public:
 	virtual bool IsBlocking();
 	virtual bool IsInHitReact();
 	bool bIsBlocking = false;
-
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCSAttributeComponent* Attributes;
 protected:

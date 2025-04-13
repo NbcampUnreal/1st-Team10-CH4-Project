@@ -16,5 +16,5 @@ struct FComboAttackData
 	float Damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EDamageType DType;
+	ELaunchTypes DType;
 };

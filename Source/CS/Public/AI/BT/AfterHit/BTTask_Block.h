@@ -26,8 +26,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector IsPlayerAttackingKey;
-
-	FTimerHandle BlockTimerHandle;
+	
 	int BlockCount;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	int Count;

@@ -26,6 +26,4 @@ protected:
 	float RunDistance = 200.f;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorKey;
-private:
-	FTimerHandle RunAwayTimerHandle;
 };

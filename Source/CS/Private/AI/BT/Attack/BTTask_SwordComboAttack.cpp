@@ -34,16 +34,14 @@ EBTNodeResult::Type UBTTask_SwordComboAttack::ExecuteTask(UBehaviorTreeComponent
 		{
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
-				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
-
-			
+				
 				if (MontageHasfinished(NPC))
 				{
 					BB->SetValueAsBool(FName("IsBusy"), true);
 					NPC->StopMovement();
 					Combat->Execute_RangeComboAttack(NPC);
 
-					
+					FTimerHandle AttackCooldownTimerHandle;
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_SwordComboAttack::FinishLatentTaskEarly, &OwnerComp),
@@ -80,6 +78,7 @@ void UBTTask_SwordComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Own
 			}
 			else
 			{
+				FTimerHandle AttackCooldownTimerHandle;
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
 					FTimerDelegate::CreateUObject(this, &UBTTask_SwordComboAttack::FinishLatentTaskEarly, OwnerComp),

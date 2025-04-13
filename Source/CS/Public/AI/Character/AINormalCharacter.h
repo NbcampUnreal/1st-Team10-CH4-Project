@@ -11,6 +11,12 @@ class CS_API AAINormalCharacter : public AAIBaseCharacter
 
 public:
 	AAINormalCharacter();
+	
+protected:
+	virtual void BeginPlay() override;
+
+public:
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual FComboAttackData GetFirstAttackData() const override;
-	int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData);
 };

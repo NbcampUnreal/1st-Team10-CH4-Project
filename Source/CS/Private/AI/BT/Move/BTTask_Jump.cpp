@@ -32,7 +32,7 @@ EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	BB->SetValueAsBool(FName("IsBusy"), true);
 
 	AIPawn->Jump();
-
+	FTimerHandle JumpFinishHandle;
 	AIPawn->GetWorldTimerManager().SetTimer(
 		JumpFinishHandle,
 		FTimerDelegate::CreateUObject(this, &UBTTask_Jump::FinishJump, &OwnerComp),

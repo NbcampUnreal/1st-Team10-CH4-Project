@@ -33,6 +33,7 @@ EBTNodeResult::Type UBTTask_RunAway::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 
 		if (Result > 0)
 		{
+			FTimerHandle RunAwayTimerHandle;
 			NPC->GetWorldTimerManager().SetTimer(
 				RunAwayTimerHandle,
 				FTimerDelegate::CreateUObject(this, &UBTTask_RunAway::FinishRunAway, &OwnerComp),
