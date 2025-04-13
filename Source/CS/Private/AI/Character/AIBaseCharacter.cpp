@@ -223,6 +223,7 @@ int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, const FComboAttac
 
 	CombatComponent->Server_PerformHitCheck_Implementation(TraceStart, TraceEnd, AttackData.Damage, AttackData.DType);
 
+	CombatComponent->ServerStartAttack();
 	return 1;
 }
 
