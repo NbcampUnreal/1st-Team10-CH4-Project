@@ -27,9 +27,11 @@ void UCSGameInstance::Init()
 	Super::Init();
 
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if (Subsystem) {
+	if (Subsystem) 
+	{
 		SessionInterface = Subsystem->GetSessionInterface();
-		if (SessionInterface.IsValid()) {
+		if (SessionInterface.IsValid()) 
+		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCSGameInstance::OnCreateSessionComplete);
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UCSGameInstance::OnFindSessionsComplete);
 			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UCSGameInstance::OnJoinSessionComplete);
@@ -114,10 +116,11 @@ void UCSGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 	{
 		FString TravelURL = TEXT("/Game/Blueprints/Hud/Maps/LobbyLevel?listen");
 
-		APlayerController* HostPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		if (HostPC)
+		if (!GetWorld()) return;
+		
+		if (GEngine && GEngine->GetWorldContextFromWorldChecked(GetWorld()).World()->GetNetMode() != NM_Client)
 		{
-			HostPC->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+			GetWorld()->ServerTravel(TravelURL, true);
 		}
 	}
 }
