@@ -45,7 +45,7 @@ enum class EJobTypes : uint8
 };
 
 UENUM(BlueprintType)
-enum class EDamageType : uint8
+enum class ELaunchTypes : uint8
 {
 	EDT_Nomal UMETA(DisplayName = "Nomal"),
 	EDT_Launch UMETA(DisplayName = "Launch")

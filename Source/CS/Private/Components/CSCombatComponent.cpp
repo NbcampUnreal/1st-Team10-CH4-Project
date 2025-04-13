@@ -12,7 +12,7 @@
 UCSCombatComponent::UCSCombatComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-    SetIsReplicated(true);
+    SetIsReplicatedByDefault(true);
 
     // Reset Combo Data
     iCombo_1_Cnt = 0;
@@ -36,7 +36,7 @@ void UCSCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(UCSCombatComponent, bIsSuddenDeathActive);
 }
 
-void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage, EDamageType DType)
+void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartName, FName TraceEndName, float AttackDamage, ELaunchTypes DType)
 {
     ACharacter* Owner = Cast<ACharacter>(GetOwner());
     if (!Owner) return;

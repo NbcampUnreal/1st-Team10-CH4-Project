@@ -49,7 +49,7 @@ void ACSProjectileBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 		UCSAttributeComponent* VictimAttributes = OtherActor->FindComponentByClass<UCSAttributeComponent>();
 		if (VictimAttributes)
 		{
-			VictimAttributes->ReceiveDamage(25.0f, SpawnActor->GetInstigatorController(), SpawnActor, EDamageType::EDT_Nomal, SweepResult);
+			VictimAttributes->ReceiveDamage(25.0f, SpawnActor->GetInstigatorController(), SpawnActor, ELaunchTypes::EDT_Nomal, SweepResult);
 		}
 	}
 }
