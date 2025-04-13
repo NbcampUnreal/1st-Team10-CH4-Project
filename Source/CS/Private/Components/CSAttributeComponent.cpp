@@ -13,7 +13,9 @@
 UCSAttributeComponent::UCSAttributeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	SetIsReplicated(true);
+	//bReplicates = true; 
+	SetIsReplicatedByDefault(true);
+	
 
 	MaxHealth = 100.f;
 	Health = MaxHealth;
@@ -43,7 +45,7 @@ void UCSAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(UCSAttributeComponent, MaxHealth);
 }
 
-void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, EDamageType DType, FHitResult HitResult)
+void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, ELaunchTypes DType, FHitResult HitResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server: %s - ReceiveDamage Called. Damage: %.1f"), *GetOwner()->GetName(), DamageAmount);
 	if (!GetOwner()->HasAuthority()) return;
@@ -83,7 +85,7 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 		HandleDeath();
 	}
 
-	if (DType == EDamageType::EDT_Launch)
+	if (DType == ELaunchTypes::EDT_Launch)
 	{
 		CharacterLaunch(DamageCauser);
 	}
