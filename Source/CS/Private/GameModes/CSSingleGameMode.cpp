@@ -92,7 +92,7 @@ void ACSSingleGameMode::HandleAIDeath(AActor* DeadAI)
 	}
 }
 
-ESpawnSlotType ACSSingleGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState) const
+ESpawnSlotType ACSSingleGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState)
 {
 	return ESpawnSlotType::Single_Player_Slot0;
 }

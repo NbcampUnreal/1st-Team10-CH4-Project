@@ -25,7 +25,7 @@ protected:
 	virtual void UpdateMatchTimer() override;
 
 	/** 플레이어별 스폰 슬롯 타입 반환 */
-	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) const override;;
+	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) override;;
 
 	/** 매치 승리 조건 확인 */
 	void CheckWinCondition();
@@ -43,5 +43,6 @@ private:
 	class ACSVersusGameState* VersusGameState;
 
 	FIntPoint AlivePlayersPerTeam;
+	FIntPoint SlotCursor;
 };
 

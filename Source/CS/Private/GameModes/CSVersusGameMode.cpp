@@ -17,6 +17,7 @@ ACSVersusGameMode::ACSVersusGameMode()
 
     MatchTimeLimit = 90.0f;
 	AlivePlayersPerTeam = { 0,0 };
+	SlotCursor = { 0,0 };
 
     GameStateClass = ACSVersusGameState::StaticClass();
 }
@@ -103,7 +104,7 @@ void ACSVersusGameMode::TriggerSuddenDeath()
 				{
 					if (ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(Pawn))
 					{
-						/*Character->ActivateSuddenDeathMode();*/ // 캐릭터 공격력 증가하는 함수 필요.
+						Character->ActivateSuddenDeathMode();
 					}
 				}
 			}
@@ -138,19 +139,18 @@ void ACSVersusGameMode::FinishMatch(int32 WinningTeamID)
 	GetWorld()->GetTimerManager().SetTimer(ReturnToLobbyHandle, this, &ACSVersusGameMode::ReturnToLobby, 10.0f, false);
 }
 
-ESpawnSlotType ACSVersusGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState) const
+ESpawnSlotType ACSVersusGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState)
 {
 	if (!PlayerState) return ESpawnSlotType::None;
 
 	int32 TeamID = PlayerState->TeamID;
-	int32 Index = PlayerState->PlayerIndex;
+	int32 Index = (TeamID == 0) ? SlotCursor.X++ : SlotCursor.Y++;
 
-	if (TeamID == 0)
-	{
-		return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Versus_Team0_Slot0) + Index - 1);
-	}
-	else
-	{
-		return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Versus_Team1_Slot0) + Index - 1);
-	}
+	const int32 Base = (TeamID == 0)
+		? static_cast<int32>(ESpawnSlotType::Versus_Team0_Slot0)
+		: static_cast<int32>(ESpawnSlotType::Versus_Team1_Slot0);
+
+	ESpawnSlotType Result = static_cast<ESpawnSlotType>(Base + Index);
+
+	return Result;
 }

@@ -34,7 +34,7 @@ protected:
 	virtual void HandleAIDeath(AActor* DeadAI) override;
 
 	/** 플레이어 스폰 슬롯 타입 반환 */
-	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) const override;
+	virtual ESpawnSlotType GetSpawnSlotForPlayer(const class ACSPlayerState* PlayerState) override;
 
 	/** 플레이어 Tag 추가 */
 	void InitTagPlayer();

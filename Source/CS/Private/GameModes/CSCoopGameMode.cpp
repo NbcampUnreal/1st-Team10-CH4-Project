@@ -143,7 +143,7 @@ void ACSCoopGameMode::FinishMatch(bool bPlayersWin)
 	GetWorldTimerManager().SetTimer(ReturnToLobbyHandle, this, &ACSCoopGameMode::ReturnToLobby, 10.0f, false);
 }
 
-ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState) const
+ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* PlayerState)
 {
 	if (!PlayerState) return ESpawnSlotType::None;
 

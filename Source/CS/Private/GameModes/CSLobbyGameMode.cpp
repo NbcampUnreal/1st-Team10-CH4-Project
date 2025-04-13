@@ -50,7 +50,15 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		int32 Num = GameState.Get()->PlayerArray.Num();
 
 		CSPlayerState->PlayerIndex = Num;
-		CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
+
+		if (MatchType == EMatchType::EMT_Versus)
+		{
+			CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
+		}
+		else if (MatchType == EMatchType::EMT_Coop)
+		{
+			CSPlayerState->TeamID = 0;
+		}
 	}
 
 	FTimerHandle DelayHandle;

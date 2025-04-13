@@ -7,9 +7,9 @@
 #include "Data/CSLevelRow.h"
 #include "Data/CSCharacterRow.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/PlayerController.h" // APlayerController 사용 위해 포함
-#include "GameFramework/Pawn.h"            // APawn 사용 위해 포함
-#include "TimerManager.h"                // FTimerManager 사용 위해 포함
+#include "GameFramework/PlayerController.h" 
+#include "GameFramework/Pawn.h"           
+#include "TimerManager.h"               
 
 ACSGameModeBase::ACSGameModeBase()
 {
@@ -60,21 +60,26 @@ void ACSGameModeBase::HandleEndGame()
 {
 	SetMatchPhase(EMatchPhase::EMP_Finished);
 	SetAllPlayerInputEnabled(false);
+	
+	GetWorldTimerManager().ClearTimer(MatchTimerHandle);
 }
 
 void ACSGameModeBase::SetAllPlayerInputEnabled(bool bEnabled)
 {
 	if (!BaseGameState) return;
 
-	for (APlayerState* PlayerState : BaseGameState->PlayerArray) {
+	for (APlayerState* PlayerState : BaseGameState->PlayerArray) 
+	{
 		if (!PlayerState) continue;
 
 		APlayerController* PlayerController = PlayerState->GetPlayerController();
 		if (!PlayerController) PlayerController = Cast<APlayerController>(PlayerState->GetOwner());
 
-		if (PlayerController) {
+		if (PlayerController) 
+		{
 			APawn* Pawn = PlayerController->GetPawn();
-			if (Pawn) {
+			if (Pawn) 
+			{
 				bEnabled ? Pawn->EnableInput(PlayerController) : Pawn->DisableInput(PlayerController);
 			}
 		}
@@ -83,9 +88,12 @@ void ACSGameModeBase::SetAllPlayerInputEnabled(bool bEnabled)
 
 void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
 {
-	for (APawn* AIPawn : InAIPawns) {
-		if (AIPawn && AIPawn->GetController()) {
-			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController())) {
+	for (APawn* AIPawn : InAIPawns) 
+	{
+		if (AIPawn && AIPawn->GetController()) 
+		{
+			if (AAIBaseController* AIController = Cast<AAIBaseController>(AIPawn->GetController())) 
+			{
 				AIController->StartLogicAI();
 			}
 		}
@@ -111,25 +119,34 @@ void ACSGameModeBase::SpawnAllPlayers()
 
 	if (!GameState) return;
 
-	for (APlayerState* PlayerState : GameState->PlayerArray) {
+	for (APlayerState* PlayerState : GameState->PlayerArray) 
+	{
 		if (!PlayerState) continue;
 		ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState);
-		if (CSPlayerState) {
+
+		if (CSPlayerState) 
+		{
 			ESpawnSlotType SlotType = GetSpawnSlotForPlayer(CSPlayerState);
 			ACSSpawnManager* SpawnPoint = SlotMap.FindRef(SlotType);
-			if (SpawnPoint) {
+			
+			if (SpawnPoint) 
+			{
 				APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner());
-				if (PlayerController) {
+				if (PlayerController) 
+				{
 					if (!CSGameInstance) continue;
 					const FCharacterRow* Row = CSGameInstance->FindCharacterRowByJob(CSPlayerState->SelectedJob);
 					if (!Row) continue;
+
 					TSubclassOf<APawn> CharacterClass = Row->CharacterClass.LoadSynchronous();
 					if (!CharacterClass) continue;
 
 					FVector SpawnLoc = SpawnPoint->GetActorLocation();
 					FRotator SpawnRot = SpawnPoint->GetActorRotation();
+
 					APawn* Spawned = GetWorld()->SpawnActor<APawn>(CharacterClass, SpawnLoc, SpawnRot);
-					if (Spawned) {
+					if (Spawned) 
+					{
 						PlayerController->Possess(Spawned);
 						Spawned->EnableInput(PlayerController);
 					}
