@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AI/PatrolPath.h"
+#include "AI/DamageType/ComboAttackData.h"
 #include "Characters/CSBaseCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "AI/Interface/CombatInterface.h"
@@ -20,31 +21,29 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* AIInputComponent) override;
-	
-	UBehaviorTree* GetBehaviorTree() const;
-	APatrolPath* GetPatrolPath() const;
 
-	virtual FName GetfirstAttackName() const;
-	virtual FName GetsecondAttackName() const;
-	virtual FName GetLowComboAttackName() const;
-	virtual FName GetRangeComboAttackName() const;
-	FName GetJumpName() const;
-	FName GetCrouchName() const;
+	virtual UBehaviorTree* GetBehaviorTree() const;
+	virtual APatrolPath* GetPatrolPath() const;
+
+	virtual FComboAttackData GetFirstAttackData() const;
+	virtual FComboAttackData GetSecondAttackData() const;
+	virtual FComboAttackData GetLowComboAttackData() const;
+	virtual FComboAttackData GetRangeComboAttackData() const;
+
+	virtual UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
+	virtual UAnimMontage* GetFirstAttackMontage() const { return FirstAttackMontage; }
+	virtual UAnimMontage* GetSecondAttackMontage() const { return SecondAttackMontage; }
+	virtual UAnimMontage* GetLowComboAttackMontage() const { return LowComboAttackMontage; }
+	virtual UAnimMontage* GetRangeComboAttackMontage() const { return RangeComboAttackMontage; }
+	virtual UAnimMontage* GetBlockMontage() const { return BlockMontage; }
+	virtual UAnimMontage* GetStunMontageMontage() const { return StunMontage; }
+	virtual UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
+	virtual UAnimMontage* GetSitMontage() const { return SitMontage; }
+	virtual UAnimMontage* GetJumpRunMontage() const { return JumpRunMontage;}
+	virtual UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
 	
-	UAnimMontage* GetHitReactMontage() const { return HitReactMontage; }
-	UAnimMontage* GetfirstAttackMontage() const { return firstAttackMontage; }
-	UAnimMontage* GetsecondAttackMontage() const { return secondAttackMontage; }
-	UAnimMontage* GetLowComboAttackMontage() const { return LowComboAttackMontage; }
-	UAnimMontage* GetRangeComboAttackMontage() const { return RangeComboAttackMontage; }
-	UAnimMontage* GetBlockMontage() const { return BlockMontage; }
-	UAnimMontage* GetJumpAttackMontage() const { return JumpAttackMontage; }
-	UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
-	UAnimMontage* GetSitMontage() const { return SitMontage; }
-	UAnimMontage* GetJumpRunMontage() const { return JumpRunMontage;}
-	UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
-	
-	virtual int firstAttack_Implementation() override;
-	virtual int secondAttack_Implementation() override;
+	virtual int FirstAttack_Implementation() override;
+	virtual int SecondAttack_Implementation() override;
 	virtual int LowComboAttack_Implementation() override;
 	virtual int RangeComboAttack_Implementation() override;
 	virtual int Block_Implementation() override;
@@ -53,7 +52,7 @@ public:
 	virtual void Dodge_StartDash(AActor* Attacker);
 	virtual void Dodge_MoveToSafeZone(AActor* Attacker);
 
-	virtual int AI_Attack(UAnimMontage* SelectedMontage, FName SectionName);
+	virtual int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData, FName tracestart, FName traceend);
 	
 	virtual void StopBlock();
 	virtual void StopMovement() override;
@@ -79,13 +78,13 @@ protected:
 	class UCSCombatComponent* CombatComponent;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* firstAttackMontage;
+	UAnimMontage* FirstAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* secondAttackMontage;
+	UAnimMontage* SecondAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* BlockMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* JumpAttackMontage;
+	UAnimMontage* StunMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* CrouchAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -121,4 +120,8 @@ protected:
 	FTimerHandle ComboResetTimerHandle;
 	FTimerHandle HitReactTimerHandle;
 	FTimerHandle BlockTimerHandle;
+	
+	UPROPERTY(EditAnywhere, Category = "Phase2|Weapon")
+	TSubclassOf<AActor> SwordActorClass;
+
 };

@@ -20,8 +20,6 @@ protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
-	FTimerHandle AttackCooldownTimerHandle;
-
 
 	void FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp);
 	bool MontageHasfinished(class AAIBaseCharacter* const AI);

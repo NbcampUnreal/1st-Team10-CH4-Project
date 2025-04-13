@@ -17,7 +17,7 @@ EBTNodeResult::Type UBTTask_CounterAttack::ExecuteTask(UBehaviorTreeComponent& O
 	if (auto* ICombat = Cast<ICombatInterface>(NPC))
 	{
 		NPC->GetWorldTimerManager().ClearTimer(CounterTimerHandle);
-		ICombat->Execute_firstAttack(NPC);
+		ICombat->Execute_FirstAttack(NPC);
 
 		NPC->GetWorldTimerManager().SetTimer(
 			CounterTimerHandle,

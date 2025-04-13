@@ -1,10 +1,12 @@
 #include "AI/Character/AIFighterCharacter.h"
 
+#include "AI/Controller/AIFighterController.h"
+
 
 AAIFighterCharacter::AAIFighterCharacter()
 {
-	
-	PrimaryActorTick.bCanEverTick = true;
+	AIControllerClass = AAIFighterController::StaticClass();
+	Tags.Add(FName("Fighter"));
 }
 
 

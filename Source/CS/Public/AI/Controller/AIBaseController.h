@@ -27,7 +27,5 @@ private:
 
     UFUNCTION()
     void OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus);
-
-    UPROPERTY(EditAnywhere)
-    UBehaviorTreeComponent* BehaviorTreeComponent;
+    
 };

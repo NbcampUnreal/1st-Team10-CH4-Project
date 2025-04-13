@@ -38,14 +38,13 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
 				BB->SetValueAsBool(FName("IsBusy"), true);
-	
-				NPC->GetWorldTimerManager().ClearTimer(AttackCooldownTimerHandle);
+				;
 				NPC->StopMovement();
 			
 				if (MontageHasfinished(NPC))
 				{
 					Combat->Execute_LowComboAttack(NPC);
-					
+					FTimerHandle AttackCooldownTimerHandle;
 					NPC->GetWorldTimerManager().SetTimer(
 						AttackCooldownTimerHandle,
 						FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, &OwnerComp),
@@ -82,6 +81,7 @@ void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* Owner
 			}
 			else
 			{
+				FTimerHandle AttackCooldownTimerHandle;
 				NPC->GetWorldTimerManager().SetTimer(
 					AttackCooldownTimerHandle,
 					FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, OwnerComp),

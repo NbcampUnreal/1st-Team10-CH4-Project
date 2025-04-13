@@ -20,6 +20,4 @@ public:
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	void FinishJump(UBehaviorTreeComponent* OwnerComp);
-private:
-	FTimerHandle JumpFinishHandle;
 };

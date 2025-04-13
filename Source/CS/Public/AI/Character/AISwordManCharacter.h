@@ -11,11 +11,16 @@ class CS_API AAISwordManCharacter : public AAIBaseCharacter
 
 public:
 	AAISwordManCharacter();
+
+	virtual FComboAttackData GetFirstAttackData() const override;
+	virtual FComboAttackData GetSecondAttackData() const override;
+	virtual FComboAttackData GetLowComboAttackData() const override;
+	virtual FComboAttackData GetRangeComboAttackData() const override;
+	virtual int FirstAttack_Implementation() override;
+	virtual int SecondAttack_Implementation() override;
+	virtual int LowComboAttack_Implementation() override;
+	virtual int RangeComboAttack_Implementation() override;
 	
-	FName GetfirstAttackName() const;
-	FName GetsecondAttackName() const;
-	FName GetLowComboAttackName() const;
-	FName GetRangeComboAttackName() const;
 protected:
 	virtual void BeginPlay() override;
 

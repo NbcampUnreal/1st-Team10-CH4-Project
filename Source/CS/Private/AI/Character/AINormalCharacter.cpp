@@ -8,22 +8,53 @@ AAINormalCharacter::AAINormalCharacter()
 	Tags.Add(FName("Normal"));
 }
 
-FName AAINormalCharacter::GetPunchName() const
+void AAINormalCharacter::BeginPlay()
 {
-	const int32 RandomIndex = FMath::RandRange(0, 2);
-
-	switch (RandomIndex)
-	{
-	case 0: return FName("Punch1");
-	case 1: return FName("Punch2");
-	case 2: return FName("Punch3");
-	}
-
-	return FName("Punch1");
+	Super::BeginPlay();
+	
 }
 
-int AAINormalCharacter::AI_Attack(UAnimMontage* SelectedMontage, FName SectionName)
+
+void AAINormalCharacter::Tick(float DeltaTime)
 {
-	CombatComponent->PerformAttack(SelectedMontage, SectionName);
-	return 1;
+	Super::Tick(DeltaTime);
+}
+
+
+void AAINormalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+FComboAttackData AAINormalCharacter::GetFirstAttackData() const
+{
+	FComboAttackData AttackData;
+
+	const int32 RandomIndex = FMath::RandRange(0, 2);
+
+	if (CurrentTime - LastPunchTime > ComboResetCooldown)
+	{
+	case 0:
+		AttackData.SectionName = FName("Punch1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Punch2");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 2:
+		AttackData.SectionName = FName("Punch3");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	}
+	else
+	{
+		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
+	}
+	LastPunchTime = CurrentTime;
+
+	return AttackData;
 }

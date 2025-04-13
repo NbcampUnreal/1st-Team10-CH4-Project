@@ -1,8 +1,11 @@
 #include "AI/Character/AISwordManCharacter.h"
 
+#include "AI/Controller/AISwordManController.h"
+
 AAISwordManCharacter::AAISwordManCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	AIControllerClass = AAISwordManController::StaticClass();
+	Tags.Add(FName("SwordMan"));
 }
 
 
@@ -23,8 +26,7 @@ void AAISwordManCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-
-FName AAISwordManCharacter::GetfirstAttackName() const
+FComboAttackData AAISwordManCharacter::GetFirstAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
@@ -36,68 +38,157 @@ FName AAISwordManCharacter::GetfirstAttackName() const
 	{
 		CurrentPunchIndex = (CurrentPunchIndex + 1) % 2;
 	}
-
 	LastPunchTime = CurrentTime;
+
+	FComboAttackData AttackData;
 
 	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Light1");
-	case 1: return FName("Light2");
-	
+	case 0:
+		AttackData.SectionName = FName("Light1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Light2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	default:
+		AttackData.SectionName = FName("Light1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
 	}
-	
-	return FName("Light1");
+
+	return AttackData;
 }
 
-FName AAISwordManCharacter::GetsecondAttackName() const
+
+FComboAttackData AAISwordManCharacter::GetSecondAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
-	if (CurrentTime - LastKickTime > ComboResetCooldown)
+	if (CurrentTime - LastPunchTime > ComboResetCooldown)
 	{
-		CurrentKickIndex = 0;
+		CurrentPunchIndex = 0;
 	}
 	else
 	{
-		CurrentKickIndex = (CurrentKickIndex + 1) % 2;
+		CurrentPunchIndex = (CurrentPunchIndex + 1) % 2;
 	}
+	LastPunchTime = CurrentTime;
 
-	LastKickTime = CurrentTime;
+	FComboAttackData AttackData;
 
-	switch (CurrentKickIndex)
+	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Attack1");
-	case 1: return FName("Attack2");
+	case 0:
+		AttackData.SectionName = FName("Attack1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Attack2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	default:
+		AttackData.SectionName = FName("Attack1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
 	}
 
-	return FName("Attack1");
+	return AttackData;
 }
 
-FName AAISwordManCharacter::GetLowComboAttackName() const
+FComboAttackData AAISwordManCharacter::GetLowComboAttackData() const
 {
-	return FName("Counter");
+	FComboAttackData AttackData;
+
+	AttackData.SectionName = FName("Counter");
+	AttackData.Damage = 20.f;
+	AttackData.DType = ELaunchTypes::EDT_Launch;
+	
+	return AttackData;
 }
-FName AAISwordManCharacter::GetRangeComboAttackName() const
+FComboAttackData AAISwordManCharacter::GetRangeComboAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
-	if (CurrentTime - LastKickTime > ComboResetCooldown)
+	if (CurrentTime - LastPunchTime > ComboResetCooldown)
 	{
-		CurrentKickIndex = 0;
+		CurrentPunchIndex = 0;
 	}
 	else
 	{
-		CurrentKickIndex = (CurrentKickIndex + 1) % 3;
+		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
 	}
+	LastPunchTime = CurrentTime;
 
-	LastKickTime = CurrentTime;
+	FComboAttackData AttackData;
 
-	switch (CurrentKickIndex)
+	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Attack1");
-	case 1: return FName("Attack2");
-	case 2: return FName("Attack3");
+	case 0:
+		AttackData.SectionName = FName("Attack1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Launch;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Attack2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = ELaunchTypes::EDT_Launch;
+		break;
+	case 2:
+		AttackData.SectionName = FName("Attack3");
+		AttackData.Damage = 15.f;
+		AttackData.DType = ELaunchTypes::EDT_Launch;
+		break;
+	default:
+		AttackData.SectionName = FName("Attack1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Launch;
+		break;
 	}
 
-	return FName("Attack1");
+	return AttackData;
+}
+
+int AAISwordManCharacter::FirstAttack_Implementation()
+{
+	FComboAttackData AttackData = GetFirstAttackData();
+	FName tracestart = "hand_r_socket";
+	FName traceend = "hand_r_trace";
+	AI_Attack(GetFirstAttackMontage(), AttackData, tracestart, traceend);
+	return 1;
+}
+
+int AAISwordManCharacter::SecondAttack_Implementation()
+{
+	FComboAttackData AttackData = GetSecondAttackData();
+	FName tracestart = "hand_r_socket";
+	FName traceend = "hand_r_trace";
+	AI_Attack(GetSecondAttackMontage(), AttackData, tracestart, traceend);
+	
+	return 1;
+}
+int AAISwordManCharacter::LowComboAttack_Implementation()
+{
+	FComboAttackData AttackData = GetLowComboAttackData();
+	FName tracestart = "hand_r_socket";
+	FName traceend = "hand_r_trace";
+	AI_Attack(GetLowComboAttackMontage(), AttackData, tracestart, traceend);
+	
+	return 1;
+}
+int AAISwordManCharacter::RangeComboAttack_Implementation()
+{
+	FComboAttackData AttackData = GetRangeComboAttackData();
+	FName tracestart = FName("hand_r_socket");
+	FName traceend = FName("hand_r_trace");
+	AI_Attack(GetRangeComboAttackMontage(), AttackData, tracestart, traceend);
+	
+	return 1;
 }

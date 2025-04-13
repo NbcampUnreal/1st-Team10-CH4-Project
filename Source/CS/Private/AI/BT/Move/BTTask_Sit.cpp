@@ -36,7 +36,7 @@ EBTNodeResult::Type UBTTask_Sit::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 		AIPawn->StopMovement();
 
 		AIPawn->PlayAnimMontage(SitMontage);
-
+		FTimerHandle SitFinishHandle;
 		AIPawn->GetWorldTimerManager().SetTimer(
 			SitFinishHandle,
 			FTimerDelegate::CreateUObject(this, &UBTTask_Sit::FinishSit, &OwnerComp),

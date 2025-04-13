@@ -2,6 +2,7 @@
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "AI/Character/AIBossCharacter.h"
+#include "AI/DamageType/ComboAttackData.h"
 #include "AI/UI/Consts.h"
 #include "AI/UI/HealthBarWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -13,6 +14,7 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "GameModes/CSGameModeBase.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "AI/DamageType/ComboAttackData.h"
 #include "Net/UnrealNetwork.h"
 
 AAIBaseCharacter::AAIBaseCharacter()
@@ -36,6 +38,15 @@ AAIBaseCharacter::AAIBaseCharacter()
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_GameTraceChannel1);
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);   
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	
+	GetCharacterMovement()->bUseRVOAvoidance = false;
 }
 
 void AAIBaseCharacter::BeginPlay()
@@ -64,7 +75,7 @@ void AAIBaseCharacter::SetupPlayerInputComponent(class UInputComponent* AIInputC
 UBehaviorTree* AAIBaseCharacter::GetBehaviorTree() const { return Tree; }
 APatrolPath* AAIBaseCharacter::GetPatrolPath() const { return PatrolPath; }
 
-FName AAIBaseCharacter::GetfirstAttackName() const
+FComboAttackData AAIBaseCharacter::GetFirstAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
@@ -76,86 +87,152 @@ FName AAIBaseCharacter::GetfirstAttackName() const
 	{
 		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
 	}
-
 	LastPunchTime = CurrentTime;
+
+	FComboAttackData AttackData;
 
 	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Punch1");
-	case 1: return FName("Punch2");
-	case 2: return FName("Punch3");
+	case 0:
+		AttackData.SectionName = FName("Punch1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Punch2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 2:
+		AttackData.SectionName = FName("Punch3");
+		AttackData.Damage = 15.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	default:
+		AttackData.SectionName = FName("Punch1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
 	}
-	
-	return FName("Punch1");
+
+	return AttackData;
 }
 
-FName AAIBaseCharacter::GetsecondAttackName() const
+FComboAttackData AAIBaseCharacter::GetSecondAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 
-	if (CurrentTime - LastKickTime > ComboResetCooldown)
+	if (CurrentTime - LastPunchTime > ComboResetCooldown)
 	{
-		CurrentKickIndex = 0;
+		CurrentPunchIndex = 0;
 	}
 	else
 	{
-		CurrentKickIndex = (CurrentKickIndex + 1) % 3;
+		CurrentPunchIndex = (CurrentPunchIndex + 1) % 3;
 	}
+	LastPunchTime = CurrentTime;
 
-	LastKickTime = CurrentTime;
+	FComboAttackData AttackData;
 
-	switch (CurrentKickIndex)
+	switch (CurrentPunchIndex)
 	{
-	case 0: return FName("Kick1");
-	case 1: return FName("Kick2");
-	case 2: return FName("Kick3");
+	case 0:
+		AttackData.SectionName = FName("Kick1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 1:
+		AttackData.SectionName = FName("Kick2");
+		AttackData.Damage = 12.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	case 2:
+		AttackData.SectionName = FName("Kick3");
+		AttackData.Damage = 15.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
+	default:
+		AttackData.SectionName = FName("Kick1");
+		AttackData.Damage = 10.f;
+		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		break;
 	}
 
-	return FName("Kick1");
+	return AttackData;
 }
 
-FName AAIBaseCharacter::GetLowComboAttackName() const
+FComboAttackData AAIBaseCharacter::GetLowComboAttackData() const
 {
-	return FName("Default");
-}
-FName AAIBaseCharacter::GetRangeComboAttackName() const
-{
-	return FName("Default");
-}
-FName AAIBaseCharacter::GetJumpName() const
-{
-	return FName("Default");
-}
-FName AAIBaseCharacter::GetCrouchName() const
-{
-	return FName("Default");
+	FComboAttackData AttackData;
+
+	AttackData.SectionName = FName("Default");
+	AttackData.Damage = 20.f;
+	AttackData.DType = ELaunchTypes::EDT_Launch;
+	
+	
+	return AttackData;
 }
 
-int AAIBaseCharacter::firstAttack_Implementation()
+FComboAttackData AAIBaseCharacter::GetRangeComboAttackData() const
 {
-	AI_Attack(GetfirstAttackMontage(), GetfirstAttackName());
+	FComboAttackData AttackData;
+
+	AttackData.SectionName = FName("Default");
+	AttackData.Damage = 20.f;
+	AttackData.DType = ELaunchTypes::EDT_Launch;
+	
+	return AttackData;
+}
+
+
+int AAIBaseCharacter::FirstAttack_Implementation()
+{
+	FComboAttackData AttackData = GetFirstAttackData();
+	FName tracestart = "hand_r";
+	FName traceend = "hand_l";
+	AI_Attack(GetFirstAttackMontage(), AttackData, tracestart, traceend);
 	return 1;
 }
-int AAIBaseCharacter::secondAttack_Implementation()
+
+int AAIBaseCharacter::SecondAttack_Implementation()
 {
-	AI_Attack(GetsecondAttackMontage(), GetsecondAttackName());
+	FComboAttackData AttackData = GetSecondAttackData();
+	FName tracestart = "foot_l";
+	FName traceend = "foot_r";
+	AI_Attack(GetSecondAttackMontage(), AttackData, tracestart, traceend);
+	
 	return 1;
 }
 int AAIBaseCharacter::LowComboAttack_Implementation()
 {
-	AI_Attack(GetLowComboAttackMontage(), GetLowComboAttackName());
+	FComboAttackData AttackData = GetLowComboAttackData();
+	FName tracestart = "foot_l";
+	FName traceend = "foot_r";
+	AI_Attack(GetLowComboAttackMontage(), AttackData, tracestart, traceend);
+	
 	return 1;
 }
 int AAIBaseCharacter::RangeComboAttack_Implementation()
 {
-	AI_Attack(GetRangeComboAttackMontage(), GetRangeComboAttackName());
+	FComboAttackData AttackData = GetRangeComboAttackData();
+	FName tracestart = FName("RightFistSocket");
+	FName traceend = FName("RightFistSocketEnd");
+	AI_Attack(GetRangeComboAttackMontage(), AttackData, tracestart, traceend);
+	
 	return 1;
 }
 
 
-int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, FName SectionName)
+int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData, FName tracestart, FName traceend )
 {
-	CombatComponent->PerformAttack(SelectedMontage, SectionName);
+	CombatComponent->MultiSetMontageData_Implementation(SelectedMontage, AttackData.SectionName);
+	
+	FName TraceStart = tracestart;
+	FName TraceEnd = traceend;
+
+	CombatComponent->Server_PerformHitCheck_Implementation(TraceStart, TraceEnd, AttackData.Damage, AttackData.DType);
+
+	CombatComponent->ServerStartAttack();
 	return 1;
 }
 
@@ -364,59 +441,26 @@ int AAIBaseCharacter::RunAway_Implementation(AActor* Attacker)
 	ResumeMovement();
 	if (!Attacker) return 0;
 
-	AAIController* AIController = Cast<AAIController>(GetController());
-	if (!AIController) return 0;
-
-	// 👉 현재 몽타주 중지
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
 		if (AnimInstance->IsAnyMontagePlaying())
 		{
 			AnimInstance->StopAllMontages(0.1f);
-			UE_LOG(LogTemp, Warning, TEXT("▶ RunAway: 몽타주 중단"));
 		}
 	}
 
 	FVector MyLocation = GetActorLocation();
 	FVector AttackerLocation = Attacker->GetActorLocation();
-	FVector RunDirection = (MyLocation - AttackerLocation).GetSafeNormal2D(); // 👉 정확한 반대 방향
+	
+	FVector RunDirection = (MyLocation - AttackerLocation).GetSafeNormal2D();
+	
+	FVector LaunchVelocity = RunDirection * 600.f + FVector(0.f, 0.f, 350.f); // 거리 조정 (200~300 사이), 높이도 조정 가능
 
-	FVector TargetLocation = MyLocation + RunDirection * 300.f;
+	LaunchCharacter(LaunchVelocity, true, true);
 
-	// 👉 네비게이션 위치 보정
-	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-	if (!NavSys) return 0;
+	UE_LOG(LogTemp, Warning, TEXT("RunAway Jump! Direction: %s"), *LaunchVelocity.ToString());
 
-	FNavLocation ProjectedLocation;
-	bool bProjected = NavSys->ProjectPointToNavigation(TargetLocation, ProjectedLocation, FVector(100.f));
-
-	if (!bProjected)
-	{
-		UE_LOG(LogTemp, Error, TEXT("❌ RunAway 실패: 유효한 NavMesh 위치 없음"));
-		return 0;
-	}
-
-	// 👉 이동 요청
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalLocation(ProjectedLocation.Location);
-	MoveRequest.SetAcceptanceRadius(5.f);
-
-	EPathFollowingRequestResult::Type Result = AIController->MoveTo(MoveRequest);
-
-	switch (Result)
-	{
-	case EPathFollowingRequestResult::RequestSuccessful:
-		UE_LOG(LogTemp, Warning, TEXT("✅ RunAway 시작 위치: %s"), *ProjectedLocation.Location.ToString());
-		return 1;
-
-	case EPathFollowingRequestResult::AlreadyAtGoal:
-		UE_LOG(LogTemp, Warning, TEXT("⚠️ 이미 목표 위치에 있음"));
-		return 1;
-
-	case EPathFollowingRequestResult::Failed:
-	default:
-		UE_LOG(LogTemp, Error, TEXT("❌ RunAway 실패: MoveTo 실패"));
-		return 0;
-	}
+	return 1;
 }
+
 
