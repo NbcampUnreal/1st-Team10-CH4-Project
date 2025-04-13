@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Characters/CSPlayerCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "PlayerStates/CSPlayerState.h"
 #include "Components/CSAttributeComponent.h"
 
 UCSCombatComponent::UCSCombatComponent()
@@ -95,6 +96,15 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             HitActorsThisAttack.AddUnique(HitActor);
 
             ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(HitActor);
+            ACSBaseCharacter* Attacker = Cast<ACSBaseCharacter>(Owner);
+            if (Attacker && VictimCharacter)
+            {
+                ACSPlayerState* AttackerState = Cast<ACSPlayerState>(Attacker->GetPlayerState());
+                ACSPlayerState* VictimState = Cast<ACSPlayerState>(VictimCharacter->GetPlayerState());
+
+                if (AttackerState && VictimState && AttackerState->TeamID == VictimState->TeamID) return;
+            }
+
             if (VictimCharacter && VictimCharacter->IsBlocking())
             {
                 return;
