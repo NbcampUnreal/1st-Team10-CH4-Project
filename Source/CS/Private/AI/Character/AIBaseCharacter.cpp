@@ -378,8 +378,8 @@ void AAIBaseCharacter::Dodge_StartDash(AActor* Attacker)
 	float YDir = FMath::Sign(MyLocation.Y - AttackerLocation.Y);
 	FVector AwayDir = FVector(0.f, YDir, 0.f);
 
-	float DashStrength = 900.f;
-	LaunchCharacter(AwayDir * DashStrength + FVector(0.f, 0.f, 300.f), true, true); 
+	float DashStrength = 450.f;
+	LaunchCharacter(AwayDir * DashStrength + FVector(0.f, 0.f, 150.f), true, true); 
 	
 	bPendingDodgeMove = true;
 	PendingDodgeAttacker = Attacker;
