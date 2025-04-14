@@ -54,8 +54,11 @@ void ACSPlayerCharacter::BeginPlay()
 
 void ACSPlayerCharacter::ComboCheck()
 {
-	CombatComponent->CanComboChange(true);
-	DuringAttack();
+	if (CombatComponent)
+	{
+		CombatComponent->CanComboChange(true);
+		DuringAttack();
+	}
 }
 
 void ACSPlayerCharacter::Tick(float DeltaTime)
