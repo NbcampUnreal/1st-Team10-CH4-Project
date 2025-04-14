@@ -236,8 +236,6 @@ int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, const FComboAttac
 }
 
 
-
-
 void AAIBaseCharacter::StopMovement()
 {
 	GetCharacterMovement()->StopMovementImmediately();
@@ -293,12 +291,6 @@ void AAIBaseCharacter::ResumeMovement()
 		{
 			BB->SetValueAsBool(FName("IsHitReacting"), false);
 			BB->SetValueAsBool(FName("IsBusy"), false);
-			
-			const float BlockChance = 0.4f;
-			if (FMath::FRand() < BlockChance)
-			{
-				BB->SetValueAsBool(FName("ShouldBlock"), true);
-			}
 		}
 	}
 }
@@ -363,7 +355,7 @@ int AAIBaseCharacter::Dodge_Implementation(AActor* Attacker)
 void AAIBaseCharacter::Dodge_StartDash(AActor* Attacker)
 {
 	if (!Attacker) return;
-
+	StopMovement();
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
 		if (AnimInstance->IsAnyMontagePlaying())
@@ -511,3 +503,14 @@ int AAIBaseCharacter::Rolling_Implementation()
 	return 1;
 }
 
+void AAIBaseCharacter::OnNotify_EndBusy()
+{
+	if (AAIController* AICon = Cast<AAIController>(GetController()))
+	{
+		if (UBlackboardComponent* BB = AICon->GetBlackboardComponent())
+		{
+			BB->SetValueAsBool(FName("IsBusy"), false);
+			BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+		}
+	}
+}

@@ -22,7 +22,10 @@ EBTNodeResult::Type UBTTask_RunAway::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	if (!NPC) return EBTNodeResult::Failed;
 	
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
 	AActor* Attacker = Cast<AActor>(BB->GetValueAsObject(TargetActorKey.SelectedKeyName));
 	if (!Attacker) return EBTNodeResult::Failed;
 

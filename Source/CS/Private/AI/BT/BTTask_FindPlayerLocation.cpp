@@ -16,7 +16,11 @@ UBTTask_BlackboardBase{ObjectInitializer}
 EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	APawn* ControlledPawn = OwnerComp.GetAIOwner()->GetPawn();
-	if (!ControlledPawn) return EBTNodeResult::Failed;
+	if (!ControlledPawn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[BTTask] No controlled pawn found."));
+		return EBTNodeResult::Failed;
+	}
 
 	TArray<AActor*> Players;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACSPlayerCharacter::StaticClass(), Players);
@@ -36,32 +40,34 @@ EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeCompone
 		}
 	}
 
-	if (ClosestPlayer)
+	if (!ClosestPlayer)
 	{
-		const FVector PlayerLocation = ClosestPlayer->GetActorLocation();
-		
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("TargetActor"), ClosestPlayer);
-
-		if (SearchRandom)
-		{
-			FNavLocation Loc;
-			if (UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
-			{
-				if (NavSys->GetRandomPointInNavigableRadius(PlayerLocation, SearchRadius, Loc))
-				{
-					OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), Loc.Location);
-					FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-					return EBTNodeResult::Succeeded;
-				}
-			}
-		}
-		else
-		{
-			OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), PlayerLocation);
-			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-			return EBTNodeResult::Succeeded;
-		}
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		return EBTNodeResult::Succeeded;
 	}
 
+	const FVector PlayerLocation = ClosestPlayer->GetActorLocation();
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName("TargetActor"), ClosestPlayer);
+	
+	if (SearchRandom)
+	{
+		FNavLocation Loc;
+		if (UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
+		{
+			if (NavSys->GetRandomPointInNavigableRadius(PlayerLocation, SearchRadius, Loc))
+			{
+				OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), Loc.Location);
+				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+				return EBTNodeResult::Succeeded;
+			}
+		}
+	}
+	else
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), PlayerLocation);
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		return EBTNodeResult::Succeeded;
+	}
+	
 	return EBTNodeResult::Failed;
 }

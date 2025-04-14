@@ -23,7 +23,7 @@ void AAIBossController::SetupPerceptionSystem()
 		SenseConfig->SightRadius = 1500.0f;
 		SenseConfig->LoseSightRadius = SenseConfig->SightRadius + 100.0f;
 		SenseConfig->PeripheralVisionAngleDegrees = 360.0f;
-		SenseConfig->SetMaxAge(2.0f);
+		SenseConfig->SetMaxAge(5.0f);
 		SenseConfig->AutoSuccessRangeFromLastSeenLocation = 1600.0f;
 
 		SenseConfig->DetectionByAffiliation.bDetectEnemies = true;

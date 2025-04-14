@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
 #include "BTTask_LowComboAttack.generated.h"
 
@@ -22,5 +23,6 @@ protected:
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 	bool MontageHasfinished(AAIBaseCharacter* AI);
+
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
 };

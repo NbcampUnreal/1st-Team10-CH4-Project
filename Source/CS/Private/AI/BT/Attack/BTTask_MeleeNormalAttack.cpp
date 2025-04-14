@@ -25,18 +25,20 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 	FTimerHandle AttackCooldownTimerHandle;
 	if (!Combat) return EBTNodeResult::Failed;
 	
-	if (MontageHasfinished(NPC))
+	if (BB && Combat)
 	{
 
 		BB->SetValueAsBool(FName("IsBusy"), true);
 		CachedOwnerComp = &OwnerComp;
 
-		Combat->Execute_SecondAttack(NPC);
+		Combat->Execute_FirstAttack(NPC);
 
-		if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
-		{
-			AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_MeleeNormalAttack::OnMontageEnded);
-		}
+		FTimerHandle MeleeTimerHandle;
+		NPC->GetWorldTimerManager().SetTimer(
+				MeleeTimerHandle,
+				FTimerDelegate::CreateUObject(this, &UBTTask_MeleeNormalAttack::FinishAttack),
+				1.0f, false
+			);
 
 		return EBTNodeResult::InProgress;;
 	}
@@ -44,7 +46,7 @@ EBTNodeResult::Type UBTTask_MeleeNormalAttack::ExecuteTask(UBehaviorTreeComponen
 }
 
 
-void UBTTask_MeleeNormalAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void UBTTask_MeleeNormalAttack::FinishAttack()
 {
 	if (!CachedOwnerComp.IsValid()) return;
 
@@ -53,28 +55,6 @@ void UBTTask_MeleeNormalAttack::OnMontageEnded(UAnimMontage* Montage, bool bInte
 		BB->SetValueAsBool(FName("IsBusy"), false);
 		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
 	}
-
 	FinishLatentTask(*CachedOwnerComp.Get(), EBTNodeResult::Succeeded);
 }
 
-
-
-
-bool UBTTask_MeleeNormalAttack::MontageHasfinished(AAIBaseCharacter* const AI)
-{
-	if (!AI || !AI->GetMesh())
-	{
-		return true;
-	}
-	if (!AI->GetFirstAttackMontage())
-	{
-		return true;
-	}
-	auto* AnimInstance = AI->GetMesh()->GetAnimInstance();
-	if (!AnimInstance)
-	{
-		return true;
-	}
-	const bool bStopped = AnimInstance->Montage_GetIsStopped(AI->GetFirstAttackMontage());
-	return bStopped;
-}
