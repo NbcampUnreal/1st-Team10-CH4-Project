@@ -116,4 +116,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Phase2|Weapon")
 	TSubclassOf<AActor> SwordActorClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float NomalAIDamage = 8.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float NomalDamage = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float ComboDamage = 20.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float SwoardComboDamage = 15.0f;
 };

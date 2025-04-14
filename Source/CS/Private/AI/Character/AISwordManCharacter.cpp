@@ -46,17 +46,17 @@ FComboAttackData AAISwordManCharacter::GetFirstAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Light1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 1:
 		AttackData.SectionName = FName("Light2");
-		AttackData.Damage = 12.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	default:
 		AttackData.SectionName = FName("Light1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
@@ -85,17 +85,17 @@ FComboAttackData AAISwordManCharacter::GetSecondAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 1:
 		AttackData.SectionName = FName("Attack2");
-		AttackData.Damage = 12.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	default:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
@@ -108,7 +108,7 @@ FComboAttackData AAISwordManCharacter::GetRangeComboAttackData() const
 	FComboAttackData AttackData;
 
 	AttackData.SectionName = FName("Counter");
-	AttackData.Damage = 20.f;
+	AttackData.Damage = ComboDamage;
 	AttackData.DType = ELaunchTypes::EDT_Launch;
 	
 	return AttackData;
@@ -133,22 +133,22 @@ FComboAttackData AAISwordManCharacter::GetLowComboAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = SwoardComboDamage;
 		AttackData.DType = ELaunchTypes::EDT_Launch;
 		break;
 	case 1:
 		AttackData.SectionName = FName("Attack2");
-		AttackData.Damage = 12.f;
+		AttackData.Damage = SwoardComboDamage;
 		AttackData.DType = ELaunchTypes::EDT_Launch;
 		break;
 	case 2:
 		AttackData.SectionName = FName("Attack3");
-		AttackData.Damage = 15.f;
+		AttackData.Damage = SwoardComboDamage;
 		AttackData.DType = ELaunchTypes::EDT_Launch;
 		break;
 	default:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = SwoardComboDamage;
 		AttackData.DType = ELaunchTypes::EDT_Launch;
 		break;
 	}
