@@ -10,7 +10,7 @@ void UCSSpawnProjectileNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 	if (ActorCheck) 
 	{
-		ACSPlayerCharacter* Player = Cast<ACSPlayerCharacter>(ActorCheck);
+		ACSBaseCharacter* Player = Cast<ACSBaseCharacter>(ActorCheck);
 		if (Player)
 		{
 			Player->ServerSpawnProjectile(Player);

@@ -454,7 +454,7 @@ int AAIBaseCharacter::RunAway_Implementation(AActor* Attacker)
 	
 	FVector RunDirection = (MyLocation - AttackerLocation).GetSafeNormal2D();
 	
-	FVector LaunchVelocity = RunDirection * 600.f + FVector(0.f, 0.f, 350.f); // 거리 조정 (200~300 사이), 높이도 조정 가능
+	FVector LaunchVelocity = RunDirection * 600.f + FVector(0.f, 0.f, 350.f); 
 
 	LaunchCharacter(LaunchVelocity, true, true);
 

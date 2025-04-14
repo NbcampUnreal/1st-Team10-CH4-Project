@@ -37,9 +37,7 @@ public:
 	virtual UAnimMontage* GetRangeComboAttackMontage() const { return RangeComboAttackMontage; }
 	virtual UAnimMontage* GetBlockMontage() const { return BlockMontage; }
 	virtual UAnimMontage* GetStunMontageMontage() const { return StunMontage; }
-	virtual UAnimMontage* GetCrouchAttackMontage() const { return CrouchAttackMontage; }
 	virtual UAnimMontage* GetSitMontage() const { return SitMontage; }
-	virtual UAnimMontage* GetJumpRunMontage() const { return JumpRunMontage;}
 	virtual UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
 	
 	virtual int FirstAttack_Implementation() override;
@@ -86,21 +84,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* StunMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* CrouchAttackMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* LowComboAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* RangeComboAttackMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* JumpRunMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* DodgeMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* SitMontage;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
-	TSubclassOf<AActor> CastProjectile;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StunTime", meta = (AllowPrivateAccess = true))
 	float HitStunDuration = 0.5f;

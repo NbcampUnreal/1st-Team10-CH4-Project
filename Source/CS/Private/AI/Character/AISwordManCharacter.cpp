@@ -103,7 +103,7 @@ FComboAttackData AAISwordManCharacter::GetSecondAttackData() const
 	return AttackData;
 }
 
-FComboAttackData AAISwordManCharacter::GetLowComboAttackData() const
+FComboAttackData AAISwordManCharacter::GetRangeComboAttackData() const
 {
 	FComboAttackData AttackData;
 
@@ -113,7 +113,7 @@ FComboAttackData AAISwordManCharacter::GetLowComboAttackData() const
 	
 	return AttackData;
 }
-FComboAttackData AAISwordManCharacter::GetRangeComboAttackData() const
+FComboAttackData AAISwordManCharacter::GetLowComboAttackData() const
 {
 	const float CurrentTime = GetWorld()->TimeSeconds;
 

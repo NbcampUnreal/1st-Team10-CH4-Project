@@ -39,7 +39,7 @@ EBTNodeResult::Type UBTTask_SwordComboAttack::ExecuteTask(UBehaviorTreeComponent
 				{
 					BB->SetValueAsBool(FName("IsBusy"), true);
 					NPC->StopMovement();
-					Combat->Execute_RangeComboAttack(NPC);
+					Combat->Execute_LowComboAttack(NPC);
 
 					FTimerHandle AttackCooldownTimerHandle;
 					NPC->GetWorldTimerManager().SetTimer(

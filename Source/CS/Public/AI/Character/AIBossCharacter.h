@@ -29,9 +29,7 @@ protected:
 	UAnimMontage* GetRangeComboAttackMontage2() const { return RangeComboAttackMontage2; }
 	UAnimMontage* GetBlockMontage2() const { return BlockMontage2; }
 	UAnimMontage* GetStunMontageMontage2() const { return StunMontage2; }
-	UAnimMontage* GetCrouchAttackMontage2() const { return CrouchAttackMontage2; }
 	UAnimMontage* GetSitMontage2() const { return SitMontage2; }
-	UAnimMontage* GetJumpRunMontage2() const { return JumpRunMontage2;}
 	UAnimMontage* GetDodgeMontage2() const { return DodgeMontage2; }
 	
 	virtual int FirstAttack_Implementation() override;
@@ -45,6 +43,7 @@ protected:
 protected:
 	// 스워드맨 모드
 
+	
 	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* FirstAttackMontage2;
 	UPROPERTY(EditAnywhere, Category = "Combat2")
@@ -54,17 +53,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* StunMontage2;
 	UPROPERTY(EditAnywhere, Category = "Combat2")
-	UAnimMontage* CrouchAttackMontage2;
-	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* LowComboAttackMontage2;
 	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* RangeComboAttackMontage2;
 	UPROPERTY(EditAnywhere, Category = "Combat2")
-	UAnimMontage* JumpRunMontage2;
-	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* DodgeMontage2;
 	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* SitMontage2;
+	
 	
 	
 	bool bUseSwordManStyle = false;

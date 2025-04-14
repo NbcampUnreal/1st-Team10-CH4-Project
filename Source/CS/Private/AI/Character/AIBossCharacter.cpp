@@ -162,24 +162,6 @@ FComboAttackData AAIBossCharacter::GetLowComboAttackData() const
 	FComboAttackData AttackData;
 	if (bUseSwordManStyle)
 	{
-		AttackData.SectionName = FName("Counter");
-		AttackData.Damage = 20.f;
-	}
-	else
-	{
-		AttackData.SectionName = FName("Default");
-		AttackData.Damage = 20.f;
-	}
-	
-	AttackData.DType = ELaunchTypes::EDT_Launch;
-	return AttackData;
-}
-
-FComboAttackData AAIBossCharacter::GetRangeComboAttackData() const
-{
-	FComboAttackData AttackData;
-	if (bUseSwordManStyle)
-	{
 		const float CurrentTime = GetWorld()->TimeSeconds;
 
 		if (CurrentTime - LastPunchTime > ComboResetCooldown)
@@ -211,6 +193,24 @@ FComboAttackData AAIBossCharacter::GetRangeComboAttackData() const
 			AttackData.Damage = 10.f;
 			break;
 		}
+	}
+	else
+	{
+		AttackData.SectionName = FName("Default");
+		AttackData.Damage = 20.f;
+	}
+	
+	AttackData.DType = ELaunchTypes::EDT_Launch;
+	return AttackData;
+}
+
+FComboAttackData AAIBossCharacter::GetRangeComboAttackData() const
+{
+	FComboAttackData AttackData;
+	if (bUseSwordManStyle)
+	{
+		AttackData.SectionName = FName("Counter");
+		AttackData.Damage = 20.f;
 	}
 	else
 	{
@@ -293,7 +293,7 @@ int AAIBossCharacter::RangeComboAttack_Implementation()
 	FComboAttackData AttackData = GetRangeComboAttackData();
 	FName tracestart;
 	FName traceend;
-	
+	StopMovement();
 	if (bUseSwordManStyle)
 	{
 		tracestart = "hand_r_socket";

@@ -52,14 +52,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void StopMovement() override;
 	virtual void StopMovement_Implementation() override;
-
-	UFUNCTION(Server, Reliable)
-	void ServerSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
-	void ServerSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MultiSpawnProjectile(ACSPlayerCharacter* SpawnPlayer);
-	void MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer);
 	
 	UFUNCTION(Server, Reliable)
 	void Server_PerformDodge();
@@ -110,9 +102,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCSCombatComponent* CombatComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
-	TSubclassOf<AActor> CastProjectile;
+	
 
 	// Montage animation server connect function "DuringAttack" Check
 	UFUNCTION(BlueprintCallable, Category = "Combo")
@@ -137,6 +127,4 @@ private:
 	UCameraComponent* ViewCamera;
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* SceneComp;
 };

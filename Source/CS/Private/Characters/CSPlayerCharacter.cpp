@@ -37,9 +37,6 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
 
-	SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
-	SceneComp->SetupAttachment(RootComponent);
-
 	AttributeComponent = CreateDefaultSubobject<UCSAttributeComponent>(TEXT("AttributeComponent"));
 	CombatComponent = CreateDefaultSubobject<UCSCombatComponent>(TEXT("CombatComponent"));
 
@@ -214,24 +211,6 @@ void ACSPlayerCharacter::StopMovement_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = 0.f;
 }
 
-void ACSPlayerCharacter::ServerSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer)
-{
-	MultiSpawnProjectile(SpawnPlayer);
-}
-
-void ACSPlayerCharacter::MultiSpawnProjectile_Implementation(ACSPlayerCharacter* SpawnPlayer)
-{
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = SpawnPlayer;
-	SpawnParams.Instigator = SpawnPlayer;
-
-	GetWorld()->SpawnActor<AActor>(
-		CastProjectile,
-		SceneComp->GetComponentLocation(),
-		SceneComp->GetComponentRotation(),
-		SpawnParams
-	);
-}
 
 void ACSPlayerCharacter::Server_PerformDodge_Implementation()
 {
