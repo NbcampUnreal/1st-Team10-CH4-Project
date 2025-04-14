@@ -202,10 +202,10 @@ void ACSGameModeBase::SpawnAllPlayers()
 						{
 							UE_LOG(LogTemp, Warning, TEXT("Spawned Pawn IsLocallyControlled: FALSE"));
 						}
-						if(PlayerController->IsLocalController())
-						{
-							Spawned->AutoPossessPlayer = EAutoReceiveInput::Player0; // ★ 핵심 라인
-						}
+						//if(PlayerController->IsLocalController())
+						//{
+						//	Spawned->AutoPossessPlayer = EAutoReceiveInput::Player0; // ★ 핵심 라인
+						//}
 						if (PlayerController->IsLocalController())
 						{
 							Spawned->EnableInput(PlayerController);
