@@ -42,8 +42,8 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 
-	SetNetUpdateFrequency(500.f);			// 초당 최대 업데이트 횟수
-	SetMinNetUpdateFrequency(100.f);		// 최소 보장 횟수
+	SetNetUpdateFrequency(100.f);			// 초당 최대 업데이트 횟수
+	SetMinNetUpdateFrequency(30.f);		// 최소 보장 횟수
 }
 
 void ACSPlayerCharacter::BeginPlay()
@@ -320,9 +320,14 @@ void ACSPlayerCharacter::UpdateFacingDirection(float XInput)
 		CurrentDirection = EFacingDirection::EFD_FacingLeft;
 	}
 
-	if (CurrentDirection != FacingDirection && IsLocallyControlled())
+	if (CurrentDirection != FacingDirection)
 	{
-		ServerSetFacingDirection(CurrentDirection);
+		if (IsLocallyControlled())
+		{
+			FacingDirection = CurrentDirection;
+			UpdateRotation();
+			ServerSetFacingDirection(CurrentDirection);
+		}
 	}
 }
 
@@ -337,12 +342,9 @@ void ACSPlayerCharacter::ServerSetFacingDirection_Implementation(EFacingDirectio
 
 void ACSPlayerCharacter::UpdateRotation()
 {
-	if (ActionState == ECharacterTypes::ECT_Unoccupied)
-	{
-		float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
-		FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
-		SetActorRotation(NewRotation);
-	}
+	float TargetYaw = (FacingDirection == EFacingDirection::EFD_FacingRight) ? -90.f : 90.f;
+	FRotator NewRotation = FRotator(0.f, TargetYaw, 0.f);
+	SetActorRotation(NewRotation);
 }
 
 void ACSPlayerCharacter::OnRep_FacingDirection()
