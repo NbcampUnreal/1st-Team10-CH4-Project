@@ -24,6 +24,7 @@ protected:
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 	bool MontageHasfinished(AAIBaseCharacter* AI);
+
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
 
 

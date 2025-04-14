@@ -6,7 +6,8 @@
 #include "AI/Interface/CombatInterface.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTTask_Block::UBTTask_Block()
+UBTTask_Block::UBTTask_Block(FObjectInitializer const& ObjectInitializer) :
+UBTTask_BlackboardBase{ObjectInitializer}
 {
 	NodeName = TEXT("Block and Counter");
 	ShouldBlockKey.SelectedKeyName = "ShouldBlock";
@@ -49,16 +50,14 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		if (ICombat->Execute_Block(NPC))
 		{
 			BB->SetValueAsBool(FName("IsBusy"), true);
-
-			// 캐릭터 캐시
+			
 			CachedCharacter = NPC;
-
-			// 델리게이트 바인딩
+			
 			if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
 			{
-				MontageEndDelegate.BindUObject(this, &UBTTask_Block::OnBlockMontageEnded);
+				AnimInst->OnMontageEnded.RemoveDynamic(this, &UBTTask_Block::OnBlockMontageEnded);
+				
 				AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_Block::OnBlockMontageEnded);
-
 			}
 
 			return EBTNodeResult::InProgress;
@@ -71,10 +70,10 @@ void UBTTask_Block::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 {
 	if (!CachedCharacter.IsValid() || !CachedOwnerComp.IsValid()) return;
 
-	UBlackboardComponent* BB = CachedOwnerComp.Get()->GetBlackboardComponent();
+	UBlackboardComponent* BB = CachedOwnerComp->GetBlackboardComponent();
 	if (!BB) return;
 
-	bool bPlayerStillAttacking = BB->GetValueAsBool(IsPlayerAttackingKey.SelectedKeyName);
+	const bool bPlayerStillAttacking = BB->GetValueAsBool(IsPlayerAttackingKey.SelectedKeyName);
 	BlockCount = BB->GetValueAsInt(FName("BlockCount"));
 
 	if (bPlayerStillAttacking)
@@ -82,16 +81,24 @@ void UBTTask_Block::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		BlockCount++;
 		BB->SetValueAsInt(FName("BlockCount"), BlockCount);
 
+		UE_LOG(LogTemp, Warning, TEXT("[BlockTask] BlockCount = %d"), BlockCount);
+
 		if (BlockCount >= Count)
 		{
 			BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), true);
+			
+			BB->SetValueAsInt(FName("BlockCount"), 0);
 		}
+	}
+	else
+	{
+		BB->SetValueAsInt(FName("BlockCount"), 0);
 	}
 
 	CachedCharacter->StopBlock();
+
 	BB->SetValueAsBool(FName("ShouldBlock"), false);
 	BB->SetValueAsBool(FName("IsBusy"), false);
-	BB->SetValueAsInt(FName("BlockCount"), 0);
 
 	FinishLatentTask(*CachedOwnerComp.Get(), EBTNodeResult::Succeeded);
 }

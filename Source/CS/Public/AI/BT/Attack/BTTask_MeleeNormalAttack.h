@@ -18,11 +18,11 @@ public:
 	explicit UBTTask_MeleeNormalAttack(FObjectInitializer const& ObjectInitializer);
 
 protected:
+
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	UFUNCTION()
-	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	UFUNCTION()
-	bool MontageHasfinished(AAIBaseCharacter* AI);
+	void FinishAttack();
+
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
 };
 

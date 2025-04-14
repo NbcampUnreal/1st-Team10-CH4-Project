@@ -39,29 +39,48 @@ public:
 	virtual UAnimMontage* GetStunMontageMontage() const { return StunMontage; }
 	virtual UAnimMontage* GetSitMontage() const { return SitMontage; }
 	virtual UAnimMontage* GetDodgeMontage() const { return RollingMontage; }
-	
-	virtual int FirstAttack_Implementation() override;
-	virtual int SecondAttack_Implementation() override;
-	virtual int LowComboAttack_Implementation() override;
-	virtual int RangeComboAttack_Implementation() override;
-	virtual int Block_Implementation() override;
-	virtual int Dodge_Implementation(AActor* Attacker) override;
-	virtual int RunAway_Implementation(AActor* Attacker) override;
-	virtual int Rolling_Implementation() override;
-	virtual void Dodge_StartDash(AActor* Attacker);
-	virtual void Dodge_MoveToSafeZone(AActor* Attacker);
 
-	virtual int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData);
-	
-	virtual void StopBlock();
-	virtual void StopMovement() override;
-	virtual void ResumeMovement();
-	
-	virtual void Die() override;
 	virtual void PlayHitReactMontage() override;
+	
+	UFUNCTION()
+	virtual int FirstAttack_Implementation() override;
+	UFUNCTION()
+	virtual int SecondAttack_Implementation() override;
+	UFUNCTION()
+	virtual int LowComboAttack_Implementation() override;
+	UFUNCTION()
+	virtual int RangeComboAttack_Implementation() override;
+	UFUNCTION()
+	virtual int Block_Implementation() override;
+	UFUNCTION()
+	virtual int Dodge_Implementation(AActor* Attacker) override;
+	UFUNCTION()
+	virtual int RunAway_Implementation(AActor* Attacker) override;
+	UFUNCTION()
+	virtual int Rolling_Implementation() override;
 
+	
+	UFUNCTION()
+	virtual void Dodge_StartDash(AActor* Attacker);
+	UFUNCTION()
+	virtual void Dodge_MoveToSafeZone(AActor* Attacker);
+	UFUNCTION()
+	virtual int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData);
+
+
+	UFUNCTION()
+	virtual void StopBlock();
+	UFUNCTION()
+	virtual void StopMovement() override;
+	UFUNCTION()
+	virtual void ResumeMovement();
+	UFUNCTION()
+	virtual void Die() override;
+	UFUNCTION()
 	virtual void Landed(const FHitResult& Hit) override;
-
+	UFUNCTION()
+	virtual void OnNotify_EndBusy();
+	
 protected:
 	virtual void BeginPlay() override;
 	

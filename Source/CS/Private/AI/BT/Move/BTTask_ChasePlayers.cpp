@@ -30,17 +30,14 @@ EBTNodeResult::Type UBTTask_ChasePlayers::ExecuteTask(UBehaviorTreeComponent& Ow
 		FVector TargetLocation = TargetActor->GetActorLocation();
 		
 		float Direction = FMath::Sign(TargetLocation.Y - MyLocation.Y);
-		const float StopDistance = 80.f;
+		
 		
 		FVector DesiredLocation = TargetLocation - FVector(0.f, Direction * StopDistance, 0.f);
 		DesiredLocation.X = MyLocation.X;
 		DesiredLocation.Z = MyLocation.Z; 
-
-		BB->SetValueAsBool(FName("IsBusy"), true);
-
+		
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(Cont, DesiredLocation);
-
-		BB->SetValueAsBool(FName("IsBusy"), false);
+		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}

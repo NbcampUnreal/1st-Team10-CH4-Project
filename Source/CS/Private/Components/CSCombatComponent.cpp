@@ -98,10 +98,17 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             ACSBaseCharacter* Attacker = Cast<ACSBaseCharacter>(Owner);
             if (Attacker && VictimCharacter)
             {
+                if (Attacker->IsA(AAIBaseCharacter::StaticClass()) && VictimCharacter->IsA(AAIBaseCharacter::StaticClass()))
+                {
+                    return;
+                }
+                
                 ACSPlayerState* AttackerState = Cast<ACSPlayerState>(Attacker->GetPlayerState());
                 ACSPlayerState* VictimState = Cast<ACSPlayerState>(VictimCharacter->GetPlayerState());
-
-                if (AttackerState && VictimState && AttackerState->TeamID == VictimState->TeamID) return;
+                if (AttackerState && VictimState && AttackerState->TeamID == VictimState->TeamID)
+                {
+                    return;
+                }
             }
 
             if (VictimCharacter && VictimCharacter->IsBlocking())
@@ -119,30 +126,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
             if (VictimAttributes)
             {
                 VictimAttributes->ReceiveDamage(DamageToApply, InstigatorController, DamageCauser, DType, HitResult);
-            }
-            if (VictimCharacter)
-            {
-                AAIBaseController* AIController = Cast<AAIBaseController>(VictimCharacter->GetController());
-                if (AIController)
-                {
-                    UBlackboardComponent* BB = AIController->GetBlackboardComponent();
-                    if (BB)
-                    {
-                        float RandomValue = FMath::FRand();
-                        if (RandomValue < 0.7f)
-                        {
-                            BB->SetValueAsBool("ShouldBlock", true);
-                            BB->SetValueAsBool("ShouldDodge", false);
-                        }
-                        else
-                        {
-                            BB->SetValueAsBool("ShouldBlock", false);
-                            BB->SetValueAsBool("ShouldDodge", true);
-                        }
-                    }
-                }
-
-                VictimCharacter->PlayHitReactMontage();
             }
         }
     }

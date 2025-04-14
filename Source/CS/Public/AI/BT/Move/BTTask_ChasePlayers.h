@@ -13,4 +13,6 @@ class CS_API UBTTask_ChasePlayers : public UBTTask_BlackboardBase
 public:
 	explicit UBTTask_ChasePlayers(FObjectInitializer const& ObjectInitializer);
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	UPROPERTY(EditAnywhere)
+	float StopDistance = 80.f;
 };

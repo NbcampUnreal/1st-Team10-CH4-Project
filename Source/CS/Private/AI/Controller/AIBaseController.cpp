@@ -41,9 +41,9 @@ void AAIBaseController::SetupPerceptionSystem()
 		SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(
 		TEXT("Perception Component")));
 		SenseConfig->SightRadius = 500.0f;
-		SenseConfig->LoseSightRadius = SenseConfig->SightRadius + 25.f;
-		SenseConfig->PeripheralVisionAngleDegrees = 90.0f;
-		SenseConfig->SetMaxAge(5.0f);
+		SenseConfig->LoseSightRadius = SenseConfig->SightRadius + 100.f;
+		SenseConfig->PeripheralVisionAngleDegrees = 270.0f;
+		SenseConfig->SetMaxAge(6.0f);
 		SenseConfig->AutoSuccessRangeFromLastSeenLocation = 520.0f;
 		SenseConfig->DetectionByAffiliation.bDetectEnemies = true;
 		SenseConfig->DetectionByAffiliation.bDetectFriendlies = true;

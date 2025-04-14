@@ -240,7 +240,7 @@ void ACSBaseCharacter::PlayLaunchMontage()
         PlayAnimMontage(LaunchMontage);
 
         FVector LaunchDirection = -GetActorForwardVector();
-        FVector LaunchVelocity = LaunchDirection * 300.f + FVector(0.f, 0.f, 200.f);
+        FVector LaunchVelocity = LaunchDirection * 200.f + FVector(0.f, 0.f, 200.f);
         LaunchCharacter(LaunchVelocity, true, true);
         
         AAIController* AICon = Cast<AAIController>(GetController());
@@ -255,7 +255,7 @@ void ACSBaseCharacter::PlayLaunchMontage()
         }
         
         FTimerHandle TimerHandle;
-        GetWorldTimerManager().SetTimer(TimerHandle, this, &ACSBaseCharacter::PlayGetUpMontage, 0.5f, false);
+        GetWorldTimerManager().SetTimer(TimerHandle, this, &ACSBaseCharacter::PlayGetUpMontage, 1.5f, false);
     }
 }
 
