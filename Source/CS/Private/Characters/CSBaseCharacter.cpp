@@ -13,6 +13,9 @@
 ACSBaseCharacter::ACSBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+    
+    SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
+    SceneComp->SetupAttachment(RootComponent);
 }
 
 void ACSBaseCharacter::BeginPlay()
@@ -206,4 +209,23 @@ bool ACSBaseCharacter::IsInHitReact()
     bool bPlaying = AnimInstance->Montage_IsPlaying(HitReactMontage);
 
     return bPlaying;
+}
+
+void ACSBaseCharacter::ServerSpawnProjectile_Implementation(ACSBaseCharacter* SpawnPlayer)
+{
+    MultiSpawnProjectile(SpawnPlayer);
+}
+
+void ACSBaseCharacter::MultiSpawnProjectile_Implementation(ACSBaseCharacter* SpawnPlayer)
+{
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = SpawnPlayer;
+    SpawnParams.Instigator = SpawnPlayer;
+
+    GetWorld()->SpawnActor<AActor>(
+        CastProjectile,
+        SceneComp->GetComponentLocation(),
+        SceneComp->GetComponentRotation(),
+        SpawnParams
+    );
 }

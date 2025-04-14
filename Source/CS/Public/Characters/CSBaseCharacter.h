@@ -104,4 +104,16 @@ public:
 	void MultiSetStandUpState(EStandUpType ESTState);
 	void MultiSetStandUpState_Implementation(EStandUpType ESTState);
 	FORCEINLINE EStandUpType GetStandUpState() const { return StandUpState; }
+
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnProjectile(ACSBaseCharacter* SpawnPlayer);
+	void ServerSpawnProjectile_Implementation(ACSBaseCharacter* SpawnPlayer);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSpawnProjectile(ACSBaseCharacter* SpawnPlayer);
+	void MultiSpawnProjectile_Implementation(ACSBaseCharacter* SpawnPlayer);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TSubclassOf<AActor> CastProjectile;
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* SceneComp;
 };

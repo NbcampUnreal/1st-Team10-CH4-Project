@@ -41,15 +41,16 @@ FComboAttackData AAINormalCharacter::GetFirstAttackData() const
 		break;
 	case 1:
 		AttackData.SectionName = FName("Punch2");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = 12.f;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 2:
 		AttackData.SectionName = FName("Punch3");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = 15.f;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
 
 	return AttackData;
 }
+
