@@ -24,10 +24,17 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	{
 		return EBTNodeResult::Failed;
 	}
-
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
+	
 	auto* AIController = OwnerComp.GetAIOwner();
 	auto* NPC = Cast<AAIBaseCharacter>(AIController->GetPawn());
 	if (!NPC) return EBTNodeResult::Failed;
+
+	CachedCharacter = NPC;
+	CachedOwnerComp = &OwnerComp;
 	
 	if (UAnimInstance* AnimInstance = NPC->GetMesh()->GetAnimInstance())
 	{
@@ -39,16 +46,20 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 
 	if (auto* ICombat = Cast<ICombatInterface>(NPC))
 	{
-		BB->SetValueAsBool(FName("IsBusy"), true);
-
 		if (ICombat->Execute_Block(NPC))
 		{
-			FTimerHandle BlockTimerHandle;
-			NPC->GetWorldTimerManager().SetTimer(
-				BlockTimerHandle,
-				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, &OwnerComp),
-				0.7f, false
-			);
+			BB->SetValueAsBool(FName("IsBusy"), true);
+
+			// 캐릭터 캐시
+			CachedCharacter = NPC;
+
+			// 델리게이트 바인딩
+			if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
+			{
+				MontageEndDelegate.BindUObject(this, &UBTTask_Block::OnBlockMontageEnded);
+				AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_Block::OnBlockMontageEnded);
+
+			}
 
 			return EBTNodeResult::InProgress;
 		}
@@ -56,15 +67,13 @@ EBTNodeResult::Type UBTTask_Block::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 	return EBTNodeResult::Failed;
 }
 
-
-void UBTTask_Block::FinishBlock(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_Block::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!OwnerComp) return;
+	if (!CachedCharacter.IsValid() || !CachedOwnerComp.IsValid()) return;
 
-	UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent();
+	UBlackboardComponent* BB = CachedOwnerComp.Get()->GetBlackboardComponent();
 	if (!BB) return;
-	auto* AIController = OwnerComp->GetAIOwner();
-	auto* NPC = Cast<AAIBaseCharacter>(AIController->GetPawn());
+
 	bool bPlayerStillAttacking = BB->GetValueAsBool(IsPlayerAttackingKey.SelectedKeyName);
 	BlockCount = BB->GetValueAsInt(FName("BlockCount"));
 
@@ -75,30 +84,14 @@ void UBTTask_Block::FinishBlock(UBehaviorTreeComponent* OwnerComp)
 
 		if (BlockCount >= Count)
 		{
-			NPC->StopBlock();
-			BB->SetValueAsInt(FName("BlockCount"), 0);
-			BB->SetValueAsBool(FName("ShouldBlock"), false);
-			BB->SetValueAsBool(FName("IsBusy"), false);
 			BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), true);
-			FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
-			return;
-		}
-
-		if (FMath::FRand() < 0.7f)
-		{
-			FTimerHandle BlockTimerHandle;
-			OwnerComp->GetWorld()->GetTimerManager().SetTimer(
-				BlockTimerHandle,
-				FTimerDelegate::CreateUObject(this, &UBTTask_Block::FinishBlock, OwnerComp),
-				0.6f, false
-			);
-			return;
 		}
 	}
-	NPC->StopBlock();
+
+	CachedCharacter->StopBlock();
 	BB->SetValueAsBool(FName("ShouldBlock"), false);
 	BB->SetValueAsBool(FName("IsBusy"), false);
 	BB->SetValueAsInt(FName("BlockCount"), 0);
-	FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
-}
 
+	FinishLatentTask(*CachedOwnerComp.Get(), EBTNodeResult::Succeeded);
+}

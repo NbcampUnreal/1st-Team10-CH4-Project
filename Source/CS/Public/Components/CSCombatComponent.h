@@ -91,7 +91,7 @@ protected:
 
     UFUNCTION()
     void OnRep_IsAttacking();
-
+    UPROPERTY()
     UAnimMontage* ServerPlayMontage;
     FName ServerSection;
 

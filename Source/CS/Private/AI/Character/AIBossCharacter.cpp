@@ -17,7 +17,25 @@ AAIBossCharacter::AAIBossCharacter()
 void AAIBossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!PatrolPath)
+	{
+		TArray<AActor*> FoundPaths;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPath::StaticClass(), FoundPaths);
+
+		for (AActor* Actor : FoundPaths)
+		{
+			if (Actor->ActorHasTag(FName("BossPatrol")))
+			{
+				PatrolPath = Cast<APatrolPath>(Actor);
+				break;
+			}
+		}
+	}
 }
+
+
+
 
 void AAIBossCharacter::Tick(float DeltaTime)
 {
@@ -54,15 +72,18 @@ FComboAttackData AAIBossCharacter::GetFirstAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = "Light1";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			break;
 		case 1:
 			AttackData.SectionName = "Light2";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			break;
 		default:
 			AttackData.SectionName = "Light1";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			break;
 		}
 	}
@@ -72,23 +93,31 @@ FComboAttackData AAIBossCharacter::GetFirstAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = "Punch1";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r");
+			AttackData.TraceEnd = FName("hand_l");
+			
 			break;
 		case 1:
 			AttackData.SectionName = "Punch2";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r");
+			AttackData.TraceEnd = FName("hand_l");
+			
 			break;
 		case 2:
 			AttackData.SectionName = "Punch3";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r");
+			AttackData.TraceEnd = FName("hand_l");
+			
 			break;
 		default:
 			AttackData.SectionName = "Punch1";
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r");
+			AttackData.TraceEnd = FName("hand_l");
+			
 			break;
 		}
 	}
-
+	AttackData.Damage = NomalDamage;
 	AttackData.DType = ELaunchTypes::EDT_Nomal;
 	return AttackData;
 }
@@ -107,7 +136,7 @@ FComboAttackData AAIBossCharacter::GetSecondAttackData() const
 	{
 		CurrentPunchIndex = bUseSwordManStyle
 			? (CurrentPunchIndex + 1) % 2
-			: (CurrentPunchIndex + 1) % 3;
+			: (CurrentPunchIndex + 1) % 4;
 	}
 
 	LastPunchTime = CurrentTime;
@@ -118,15 +147,18 @@ FComboAttackData AAIBossCharacter::GetSecondAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = FName("Attack1");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			break;
 		case 1:
 			AttackData.SectionName = FName("Attack2");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			break;
 		default:
 			AttackData.SectionName = FName("Attack1");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			break;
 		}
 	}
@@ -136,23 +168,32 @@ FComboAttackData AAIBossCharacter::GetSecondAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = FName("Kick1");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("thigh_r");
+			AttackData.TraceEnd = FName("foot_r");
 			break;
 		case 1:
 			AttackData.SectionName = FName("Kick2");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("thigh_l");
+			AttackData.TraceEnd = FName("foot_l");
 			break;
 		case 2:
 			AttackData.SectionName = FName("Kick3");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("foot_l");
+			AttackData.TraceEnd = FName("thigh_l");
+			break;
+		case 3:
+			AttackData.SectionName = FName("Kick4");
+			AttackData.TraceStart = FName("hand_r");
+			AttackData.TraceEnd = FName("hand_l");
 			break;
 		default:
 			AttackData.SectionName = FName("Kick1");
-			AttackData.Damage = NomalDamage;
+			AttackData.TraceStart = FName("foot_l");
+			AttackData.TraceEnd = FName("thigh_l");
 			break;
 		}
 	}
-
+	AttackData.Damage = NomalDamage;
 	AttackData.DType = ELaunchTypes::EDT_Nomal;
 	return AttackData;
 }
@@ -178,18 +219,26 @@ FComboAttackData AAIBossCharacter::GetLowComboAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = FName("Attack1");
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			AttackData.Damage = SwoardComboDamage;
 			break;
 		case 1:
 			AttackData.SectionName = FName("Attack2");
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			AttackData.Damage = SwoardComboDamage;
 			break;
 		case 2:
 			AttackData.SectionName = FName("Attack3");
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			AttackData.Damage = SwoardComboDamage;
 			break;
 		default:
 			AttackData.SectionName = FName("Attack1");
+			AttackData.TraceStart = FName("hand_r_socket");
+			AttackData.TraceEnd = FName("hand_r_trace");
 			AttackData.Damage = SwoardComboDamage;
 			break;
 		}
@@ -197,6 +246,8 @@ FComboAttackData AAIBossCharacter::GetLowComboAttackData() const
 	else
 	{
 		AttackData.SectionName = FName("Default");
+		AttackData.TraceStart = FName("foot_l");
+		AttackData.TraceEnd = FName("foot_r");
 		AttackData.Damage = ComboDamage;
 	}
 	
@@ -210,11 +261,15 @@ FComboAttackData AAIBossCharacter::GetRangeComboAttackData() const
 	if (bUseSwordManStyle)
 	{
 		AttackData.SectionName = FName("Counter");
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		AttackData.Damage = ComboDamage;
 	}
 	else
 	{
 		AttackData.SectionName = FName("Default");
+		AttackData.TraceStart = FName("RightFistSocket");
+		AttackData.TraceEnd = FName("RightFistSocketEnd");
 		AttackData.Damage = ComboDamage;
 	}
 
@@ -227,20 +282,13 @@ int AAIBossCharacter::FirstAttack_Implementation()
 {
 	FComboAttackData AttackData = GetFirstAttackData();
 	
-	FName tracestart;
-	FName traceend;
-	
 	if (bUseSwordManStyle)
 	{
-		tracestart = "hand_r_socket";
-		traceend = "hand_r_trace";
-		AI_Attack(GetFirstAttackMontage2(), AttackData, tracestart, traceend);
+		AI_Attack(GetFirstAttackMontage2(), AttackData);
 	}
 	else
 	{
-		tracestart = "hand_r";
-		traceend = "hand_l";
-		AI_Attack(GetFirstAttackMontage(), AttackData, tracestart, traceend);
+		AI_Attack(GetFirstAttackMontage(), AttackData);
 	}
 	return 1;
 }
@@ -248,20 +296,14 @@ int AAIBossCharacter::FirstAttack_Implementation()
 int AAIBossCharacter::SecondAttack_Implementation()
 {
 	FComboAttackData AttackData = GetSecondAttackData();
-	FName tracestart;
-	FName traceend;
 	
 	if (bUseSwordManStyle)
 	{
-		tracestart = "hand_r_socket";
-		traceend = "hand_r_trace";
-		AI_Attack(GetSecondAttackMontage2(), AttackData, tracestart, traceend);
+		AI_Attack(GetSecondAttackMontage2(), AttackData);
 	}
 	else
 	{
-		tracestart = "foot_l";
-		traceend = "foot_r";
-		AI_Attack(GetSecondAttackMontage(), AttackData, tracestart, traceend);
+		AI_Attack(GetSecondAttackMontage(), AttackData);
 	}
 	
 	return 1;
@@ -269,20 +311,14 @@ int AAIBossCharacter::SecondAttack_Implementation()
 int AAIBossCharacter::LowComboAttack_Implementation()
 {
 	FComboAttackData AttackData = GetLowComboAttackData();
-	FName tracestart;
-	FName traceend;
-	
+
 	if (bUseSwordManStyle)
 	{
-		tracestart = "hand_r_socket";
-		traceend = "hand_r_trace";
-		AI_Attack(GetLowComboAttackMontage2(), AttackData, tracestart, traceend);
+		AI_Attack(GetLowComboAttackMontage2(), AttackData);
 	}
 	else
 	{
-		tracestart = "foot_l";
-		traceend = "foot_r";
-		AI_Attack(GetLowComboAttackMontage(), AttackData, tracestart, traceend);
+		AI_Attack(GetLowComboAttackMontage(), AttackData);
 	}
 	
 	
@@ -291,20 +327,14 @@ int AAIBossCharacter::LowComboAttack_Implementation()
 int AAIBossCharacter::RangeComboAttack_Implementation()
 {
 	FComboAttackData AttackData = GetRangeComboAttackData();
-	FName tracestart;
-	FName traceend;
 	StopMovement();
 	if (bUseSwordManStyle)
 	{
-		tracestart = "hand_r_socket";
-		traceend = "hand_r_trace";
-		AI_Attack(GetRangeComboAttackMontage2(), AttackData, tracestart, traceend);
+		AI_Attack(GetRangeComboAttackMontage2(), AttackData);
 	}
 	else
 	{
-		tracestart = "RightFistSocket";
-		traceend = "RightFistSocketEnd";
-		AI_Attack(GetRangeComboAttackMontage(), AttackData, tracestart, traceend);
+		AI_Attack(GetRangeComboAttackMontage(), AttackData);
 	}
 	
 	return 1;
