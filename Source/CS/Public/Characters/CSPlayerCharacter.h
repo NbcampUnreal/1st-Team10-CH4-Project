@@ -57,10 +57,6 @@ public:
 	void Server_PerformDodge();
 	void Server_PerformDodge_Implementation();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayDodgeMontage();
-	void Multicast_PlayDodgeMontage_Implementation();
-
 	UFUNCTION(Server, Reliable)
 	void Server_FinishDodge();
 	void Server_FinishDodge_Implementation();
@@ -91,8 +87,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* DodgeMontage;
+	//UPROPERTY(EditAnywhere, Category = "Combat")
+	//UAnimMontage* DodgeMontage;
 
 protected:
 	virtual void BeginPlay() override;
