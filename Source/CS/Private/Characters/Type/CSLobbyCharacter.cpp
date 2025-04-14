@@ -26,7 +26,9 @@ void ACSLobbyCharacter::BeginPlay()
 
 void ACSLobbyCharacter::UpdateMeshFromJobType(EJobTypes JobType)
 {
-    FName RowName = *UEnum::GetDisplayValueAsText(JobType).ToString();
+    FString EnumName = StaticEnum<EJobTypes>()->GetNameStringByValue((int64)JobType);
+    EnumName.RemoveFromStart(TEXT("EJT_")); 
+    FName RowName = FName(*EnumName);
 
     static const FString ContextString(TEXT("CharacterLobbyData"));
     FCharacterLobbyData* RowData = CharacterLobbyDataTable->FindRow<FCharacterLobbyData>(RowName, ContextString);
