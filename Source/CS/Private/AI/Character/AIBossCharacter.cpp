@@ -54,15 +54,15 @@ FComboAttackData AAIBossCharacter::GetFirstAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = "Light1";
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		case 1:
 			AttackData.SectionName = "Light2";
-			AttackData.Damage = 12.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		default:
 			AttackData.SectionName = "Light1";
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		}
 	}
@@ -72,19 +72,19 @@ FComboAttackData AAIBossCharacter::GetFirstAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = "Punch1";
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		case 1:
 			AttackData.SectionName = "Punch2";
-			AttackData.Damage = 12.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		case 2:
 			AttackData.SectionName = "Punch3";
-			AttackData.Damage = 15.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		default:
 			AttackData.SectionName = "Punch1";
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		}
 	}
@@ -118,15 +118,15 @@ FComboAttackData AAIBossCharacter::GetSecondAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = FName("Attack1");
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		case 1:
 			AttackData.SectionName = FName("Attack2");
-			AttackData.Damage = 12.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		default:
 			AttackData.SectionName = FName("Attack1");
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		}
 	}
@@ -136,19 +136,19 @@ FComboAttackData AAIBossCharacter::GetSecondAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = FName("Kick1");
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		case 1:
 			AttackData.SectionName = FName("Kick2");
-			AttackData.Damage = 12.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		case 2:
 			AttackData.SectionName = FName("Kick3");
-			AttackData.Damage = 15.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		default:
 			AttackData.SectionName = FName("Kick1");
-			AttackData.Damage = 10.f;
+			AttackData.Damage = NomalDamage;
 			break;
 		}
 	}
@@ -178,26 +178,26 @@ FComboAttackData AAIBossCharacter::GetLowComboAttackData() const
 		{
 		case 0:
 			AttackData.SectionName = FName("Attack1");
-			AttackData.Damage = 10.f;
+			AttackData.Damage = SwoardComboDamage;
 			break;
 		case 1:
 			AttackData.SectionName = FName("Attack2");
-			AttackData.Damage = 12.f;
+			AttackData.Damage = SwoardComboDamage;
 			break;
 		case 2:
 			AttackData.SectionName = FName("Attack3");
-			AttackData.Damage = 15.f;
+			AttackData.Damage = SwoardComboDamage;
 			break;
 		default:
 			AttackData.SectionName = FName("Attack1");
-			AttackData.Damage = 10.f;
+			AttackData.Damage = SwoardComboDamage;
 			break;
 		}
 	}
 	else
 	{
 		AttackData.SectionName = FName("Default");
-		AttackData.Damage = 20.f;
+		AttackData.Damage = ComboDamage;
 	}
 	
 	AttackData.DType = ELaunchTypes::EDT_Launch;
@@ -210,12 +210,12 @@ FComboAttackData AAIBossCharacter::GetRangeComboAttackData() const
 	if (bUseSwordManStyle)
 	{
 		AttackData.SectionName = FName("Counter");
-		AttackData.Damage = 20.f;
+		AttackData.Damage = ComboDamage;
 	}
 	else
 	{
 		AttackData.SectionName = FName("Default");
-		AttackData.Damage = 20.f;
+		AttackData.Damage = ComboDamage;
 	}
 
 	AttackData.DType = ELaunchTypes::EDT_Launch;
