@@ -15,8 +15,7 @@ public:
 	
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
-
-private:
-	UPROPERTY()
-	UBehaviorTree* Tree;
+	virtual void SetupPerceptionSystem() override;
+	virtual void OnTargetDetected(AActor* Actor, FAIStimulus Stimulus) override;
+	
 };

@@ -17,4 +17,10 @@ struct FComboAttackData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ELaunchTypes DType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName TraceStart;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName TraceEnd;
 };

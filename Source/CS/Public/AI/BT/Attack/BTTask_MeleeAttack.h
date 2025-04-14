@@ -15,10 +15,9 @@ public:
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-private:
-
-
-	void FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp);
-	bool MontageHasfinished(class AAIBaseCharacter* const AI);
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+	bool MontageHasfinished(AAIBaseCharacter* AI);
+	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
 };

@@ -8,7 +8,7 @@
 
 AAIBaseController::AAIBaseController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
 {
-	SetupPerceptionSystem();
+	AAIBaseController::SetupPerceptionSystem();
 	/*bStartAILogicOnPossess = false;*/
 	bStartAILogicOnPossess = true;
 }

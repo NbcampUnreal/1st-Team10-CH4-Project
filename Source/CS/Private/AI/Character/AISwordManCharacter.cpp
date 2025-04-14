@@ -1,6 +1,7 @@
 #include "AI/Character/AISwordManCharacter.h"
 
 #include "AI/Controller/AISwordManController.h"
+#include "Kismet/GameplayStatics.h"
 
 AAISwordManCharacter::AAISwordManCharacter()
 {
@@ -12,7 +13,20 @@ AAISwordManCharacter::AAISwordManCharacter()
 void AAISwordManCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (!PatrolPath)
+	{
+		TArray<AActor*> FoundPaths;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPath::StaticClass(), FoundPaths);
+
+		for (AActor* Actor : FoundPaths)
+		{
+			if (Actor->ActorHasTag(FName("CoopPatrol")))
+			{
+				PatrolPath = Cast<APatrolPath>(Actor);
+				break;
+			}
+		}
+	}
 }
 
 
@@ -46,21 +60,22 @@ FComboAttackData AAISwordManCharacter::GetFirstAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Light1");
-		AttackData.Damage = NomalDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	case 1:
 		AttackData.SectionName = FName("Light2");
-		AttackData.Damage = NomalDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	default:
 		AttackData.SectionName = FName("Light1");
-		AttackData.Damage = NomalDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	}
-
+	AttackData.Damage = NomalDamage;
+	AttackData.DType = ELaunchTypes::EDT_Nomal;
 	return AttackData;
 }
 
@@ -85,21 +100,22 @@ FComboAttackData AAISwordManCharacter::GetSecondAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = NomalDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	case 1:
 		AttackData.SectionName = FName("Attack2");
-		AttackData.Damage = NomalDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	default:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = NomalDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	}
-
+	AttackData.Damage = NomalDamage;
+	AttackData.DType = ELaunchTypes::EDT_Nomal;
 	return AttackData;
 }
 
@@ -108,6 +124,8 @@ FComboAttackData AAISwordManCharacter::GetRangeComboAttackData() const
 	FComboAttackData AttackData;
 
 	AttackData.SectionName = FName("Counter");
+	AttackData.TraceStart = FName("hand_r_socket");
+	AttackData.TraceEnd = FName("hand_r_trace");
 	AttackData.Damage = ComboDamage;
 	AttackData.DType = ELaunchTypes::EDT_Launch;
 	
@@ -133,62 +151,26 @@ FComboAttackData AAISwordManCharacter::GetLowComboAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = SwoardComboDamage;
-		AttackData.DType = ELaunchTypes::EDT_Launch;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	case 1:
 		AttackData.SectionName = FName("Attack2");
-		AttackData.Damage = SwoardComboDamage;
-		AttackData.DType = ELaunchTypes::EDT_Launch;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	case 2:
 		AttackData.SectionName = FName("Attack3");
-		AttackData.Damage = SwoardComboDamage;
-		AttackData.DType = ELaunchTypes::EDT_Launch;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	default:
 		AttackData.SectionName = FName("Attack1");
-		AttackData.Damage = SwoardComboDamage;
-		AttackData.DType = ELaunchTypes::EDT_Launch;
+		AttackData.TraceStart = FName("hand_r_socket");
+		AttackData.TraceEnd = FName("hand_r_trace");
 		break;
 	}
-
+	AttackData.Damage = SwoardComboDamage;
+	AttackData.DType = ELaunchTypes::EDT_Launch;
 	return AttackData;
-}
-
-int AAISwordManCharacter::FirstAttack_Implementation()
-{
-	FComboAttackData AttackData = GetFirstAttackData();
-	FName tracestart = "hand_r_socket";
-	FName traceend = "hand_r_trace";
-	AI_Attack(GetFirstAttackMontage(), AttackData, tracestart, traceend);
-	return 1;
-}
-
-int AAISwordManCharacter::SecondAttack_Implementation()
-{
-	FComboAttackData AttackData = GetSecondAttackData();
-	FName tracestart = "hand_r_socket";
-	FName traceend = "hand_r_trace";
-	AI_Attack(GetSecondAttackMontage(), AttackData, tracestart, traceend);
-	
-	return 1;
-}
-int AAISwordManCharacter::LowComboAttack_Implementation()
-{
-	FComboAttackData AttackData = GetLowComboAttackData();
-	FName tracestart = "hand_r_socket";
-	FName traceend = "hand_r_trace";
-	AI_Attack(GetLowComboAttackMontage(), AttackData, tracestart, traceend);
-	
-	return 1;
-}
-int AAISwordManCharacter::RangeComboAttack_Implementation()
-{
-	FComboAttackData AttackData = GetRangeComboAttackData();
-	FName tracestart = FName("hand_r_socket");
-	FName traceend = FName("hand_r_trace");
-	AI_Attack(GetRangeComboAttackMontage(), AttackData, tracestart, traceend);
-	
-	return 1;
 }

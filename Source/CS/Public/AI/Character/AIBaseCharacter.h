@@ -38,7 +38,7 @@ public:
 	virtual UAnimMontage* GetBlockMontage() const { return BlockMontage; }
 	virtual UAnimMontage* GetStunMontageMontage() const { return StunMontage; }
 	virtual UAnimMontage* GetSitMontage() const { return SitMontage; }
-	virtual UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
+	virtual UAnimMontage* GetDodgeMontage() const { return RollingMontage; }
 	
 	virtual int FirstAttack_Implementation() override;
 	virtual int SecondAttack_Implementation() override;
@@ -47,10 +47,11 @@ public:
 	virtual int Block_Implementation() override;
 	virtual int Dodge_Implementation(AActor* Attacker) override;
 	virtual int RunAway_Implementation(AActor* Attacker) override;
+	virtual int Rolling_Implementation() override;
 	virtual void Dodge_StartDash(AActor* Attacker);
 	virtual void Dodge_MoveToSafeZone(AActor* Attacker);
 
-	virtual int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData, FName tracestart, FName traceend);
+	virtual int AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData);
 	
 	virtual void StopBlock();
 	virtual void StopMovement() override;
@@ -58,6 +59,8 @@ public:
 	
 	virtual void Die() override;
 	virtual void PlayHitReactMontage() override;
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -88,11 +91,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* RangeComboAttackMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	UAnimMontage* DodgeMontage;
+	UAnimMontage* RollingMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* SitMontage;
 	
+
+	bool bPendingDodgeMove = false;
+	UPROPERTY()
+	AActor* PendingDodgeAttacker = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StunTime", meta = (AllowPrivateAccess = true))
 	float HitStunDuration = 0.5f;

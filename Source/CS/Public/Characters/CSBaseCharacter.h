@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/CSCombatComponent.h"
 #include "GameFramework/Character.h"
 #include "CSTypes/CSCharacterTypes.h"
 #include "CSBaseCharacter.generated.h"
@@ -38,6 +39,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UCSAttributeComponent* Attributes;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
@@ -64,6 +66,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* DeathMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* LaunchMontage;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
+	UAnimMontage* GetUpMontage;
+	
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;
 	void SetupStimulusSource();
@@ -112,6 +120,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiSpawnProjectile(ACSBaseCharacter* SpawnPlayer);
 	void MultiSpawnProjectile_Implementation(ACSBaseCharacter* SpawnPlayer);
+	UFUNCTION()
+	void PlayLaunchMontage();
+	UFUNCTION()
+	void PlayGetUpMontage();
+	UFUNCTION()
+	void OnGetUpMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	TSubclassOf<AActor> CastProjectile;
 	UPROPERTY(VisibleAnywhere)

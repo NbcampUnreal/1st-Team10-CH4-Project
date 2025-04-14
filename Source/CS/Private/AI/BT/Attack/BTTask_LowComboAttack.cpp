@@ -37,59 +37,39 @@ EBTNodeResult::Type UBTTask_LowComboAttack::ExecuteTask(UBehaviorTreeComponent& 
 		{
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
-				BB->SetValueAsBool(FName("IsBusy"), true);
-				;
+				
 				NPC->StopMovement();
 			
-				if (MontageHasfinished(NPC))
+				BB->SetValueAsBool(FName("IsBusy"), true);
+				CachedOwnerComp = &OwnerComp;
+
+				Combat->Execute_LowComboAttack(NPC);
+
+				if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
 				{
-					Combat->Execute_LowComboAttack(NPC);
-					FTimerHandle AttackCooldownTimerHandle;
-					NPC->GetWorldTimerManager().SetTimer(
-						AttackCooldownTimerHandle,
-						FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, &OwnerComp),
-						2.0f, false
-					);
-					return EBTNodeResult::InProgress;
+					AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_LowComboAttack::OnMontageEnded);
 				}
+
+				return EBTNodeResult::InProgress;
+				
 			}
 		}
 	}
 	return EBTNodeResult::Failed;
 }
 
-
-void UBTTask_LowComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_LowComboAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!OwnerComp) return;
+	if (!CachedOwnerComp.IsValid()) return;
 
-	if (auto* Controller = OwnerComp->GetAIOwner())
+	if (UBlackboardComponent* BB = CachedOwnerComp.Get()->GetBlackboardComponent())
 	{
-		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
-		{
-			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
-			{
-				BBComp->SetValueAsBool(FName("IsBusy"), false);
-				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
-				BBComp->SetValueAsInt(FName("AttackType"), 1);
-			}
-
-			if (MontageHasfinished(NPC))
-			{
-				NPC->ResumeMovement();
-				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
-			}
-			else
-			{
-				FTimerHandle AttackCooldownTimerHandle;
-				NPC->GetWorldTimerManager().SetTimer(
-					AttackCooldownTimerHandle,
-					FTimerDelegate::CreateUObject(this, &UBTTask_LowComboAttack::FinishLatentTaskEarly, OwnerComp),
-					0.2f, false
-				);
-			}
-		}
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+		BB->SetValueAsInt(FName("AttackType"), 1);
 	}
+
+	FinishLatentTask(*CachedOwnerComp.Get(), EBTNodeResult::Succeeded);
 }
 
 

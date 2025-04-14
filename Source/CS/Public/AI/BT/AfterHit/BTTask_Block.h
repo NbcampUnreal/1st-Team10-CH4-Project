@@ -1,14 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "BTTask_Block.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class CS_API UBTTask_Block : public UBTTask_BlackboardBase
 {
@@ -19,7 +17,9 @@ public:
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	void FinishBlock(UBehaviorTreeComponent* OwnerComp);
+	UFUNCTION()
+	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector ShouldBlockKey;
@@ -30,4 +30,8 @@ protected:
 	int BlockCount;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	int Count;
+	
+	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
+	TWeakObjectPtr<AAIBaseCharacter> CachedCharacter;
+	FOnMontageEnded MontageEndDelegate;
 };

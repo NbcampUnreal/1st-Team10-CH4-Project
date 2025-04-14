@@ -2,6 +2,9 @@
 
 
 #include "Characters/CSBaseCharacter.h"
+
+#include "AIController.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameModes/CSGameModeBase.h"
 #include "Components/CSAttributeComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -228,4 +231,59 @@ void ACSBaseCharacter::MultiSpawnProjectile_Implementation(ACSBaseCharacter* Spa
         SceneComp->GetComponentRotation(),
         SpawnParams
     );
+}
+
+void ACSBaseCharacter::PlayLaunchMontage()
+{
+    if (LaunchMontage)
+    {
+        PlayAnimMontage(LaunchMontage);
+
+        FVector LaunchDirection = -GetActorForwardVector();
+        FVector LaunchVelocity = LaunchDirection * 300.f + FVector(0.f, 0.f, 200.f);
+        LaunchCharacter(LaunchVelocity, true, true);
+        
+        AAIController* AICon = Cast<AAIController>(GetController());
+        if (AICon)
+        {
+            AICon->StopMovement();
+            UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(AICon->BrainComponent);
+            if (BTComp)
+            {
+                BTComp->PauseLogic(TEXT("Launched"));
+            }
+        }
+        
+        FTimerHandle TimerHandle;
+        GetWorldTimerManager().SetTimer(TimerHandle, this, &ACSBaseCharacter::PlayGetUpMontage, 0.5f, false);
+    }
+}
+
+
+void ACSBaseCharacter::PlayGetUpMontage()
+{
+    if (GetUpMontage)
+    {
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            FOnMontageEnded EndDelegate;
+            EndDelegate.BindUObject(this, &ACSBaseCharacter::OnGetUpMontageEnded);
+            AnimInstance->Montage_Play(GetUpMontage);
+            AnimInstance->Montage_SetEndDelegate(EndDelegate, GetUpMontage);
+        }
+    }
+}
+
+void ACSBaseCharacter::OnGetUpMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    AAIController* AICon = Cast<AAIController>(GetController());
+    if (AICon)
+    {
+        UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(AICon->BrainComponent);
+        if (BTComp)
+        {
+            BTComp->ResumeLogic(TEXT("Recovered"));
+        }
+    }
 }
