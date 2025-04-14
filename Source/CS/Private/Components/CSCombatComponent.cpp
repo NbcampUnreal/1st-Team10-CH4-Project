@@ -50,6 +50,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
 
     // Sphere Trace for Objects
     TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1));
     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
     TArray<AActor*> ActorsToIgnore;
     ActorsToIgnore.Add(Owner);
