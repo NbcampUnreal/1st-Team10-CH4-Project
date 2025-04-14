@@ -28,16 +28,4 @@ void AAIFighterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-int AAIFighterCharacter::RangeComboAttack_Implementation()
-{
-	FComboAttackData AttackData = GetRangeComboAttackData();
-	FName tracestart;
-	FName traceend;
-	
-	tracestart = "RightFistSocket";
-	traceend = "RightFistSocketEnd";
-	AI_Attack(GetRangeComboAttackMontage(), AttackData, tracestart, traceend);
-		
-	
-	return 1;
-}
+

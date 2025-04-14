@@ -56,7 +56,6 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
     ActorsToIgnore.Add(Owner);
 
     FHitResult HitResult;
-
     if (bIsSuddenDeathActive)
     {
         AttackDamage = SuddenDeathDamage;
@@ -90,7 +89,7 @@ void UCSCombatComponent::Server_PerformHitCheck_Implementation(FName TraceStartN
         {
             return WeakPtr.Get() == HitActor;
         });
-
+       
         if (!bAlreadyHit)
         {
             HitActorsThisAttack.AddUnique(HitActor);
@@ -319,4 +318,14 @@ void UCSCombatComponent::ServerSetIsAttacking_Implementation(bool bAttacking)
 bool UCSCombatComponent::ServerSetIsAttacking_Validate(bool bAttacking)
 {
     return true;
+}
+
+
+void UCSCombatComponent::SetPendingHit(FName InTraceStart, FName InTraceEnd, float InDamage, ELaunchTypes InDType)
+{
+    PendingTraceStart = InTraceStart;
+    PendingTraceEnd = InTraceEnd;
+    PendingDamage = InDamage;
+    PendingDType = InDType;
+    bPendingHit = true;
 }
