@@ -40,10 +40,17 @@ void UBTService_CheckPlayerAttacking::TickNode(UBehaviorTreeComponent& OwnerComp
 
 	if (Combat->GetIsAttacking() && Distance <= BlockReactionDistance)
 	{
-		if (FMath::FRand() < 0.5f)
+		
+		BB->SetValueAsBool(FName("IsPlayerAttacking"), true);
+
+		if (FMath::FRand() < 0.65f)
 		{
 			BB->SetValueAsBool(FName("ShouldBlock"), true);
 			BB->SetValueAsBool(FName("ShouldDodge"), false);
 		}
+	}
+	else
+	{
+		BB->SetValueAsBool(FName("IsPlayerAttacking"), false);
 	}
 }

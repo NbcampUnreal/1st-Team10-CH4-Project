@@ -22,7 +22,10 @@ void UBTService_DecideRangeCombo::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	AActor* Target = Cast<AActor>(BB->GetValueAsObject(FName("TargetActor")));
 
 	if (!AIPawn || !Target || !BB) return;
-
+	if (BB->GetValueAsBool(FName("RangeCombo")))
+	{
+		return;
+	}
 	bool bIsBusy = BB->GetValueAsBool(FName("IsBusy"));
 	if (bIsBusy) return;
 

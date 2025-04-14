@@ -13,7 +13,7 @@ class CS_API UBTTask_Block : public UBTTask_BlackboardBase
 	GENERATED_BODY()
 	
 public:
-	UBTTask_Block();
+	UBTTask_Block(FObjectInitializer const& ObjectInitializer);
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
