@@ -65,8 +65,8 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Front Hit!!!")));
 			if (OwningPlayerCharacter->GetActionState() == ECharacterTypes::ECT_Defending)
 			{
-				FVector LuanchVector = DamageCauser->GetActorForwardVector();
-				OwningPlayerCharacter->ServerLaunchCharacter(LuanchVector * 250);
+				FVector LaunchVector = DamageCauser->GetActorForwardVector();
+				OwningPlayerCharacter->ServerLaunchCharacter(LaunchVector * 250);
 				return;
 			}
 		}
