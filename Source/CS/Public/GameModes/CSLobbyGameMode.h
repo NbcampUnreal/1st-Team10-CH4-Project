@@ -16,6 +16,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
 	UFUNCTION(BlueprintCallable)
 	void StartMatchIfReady();

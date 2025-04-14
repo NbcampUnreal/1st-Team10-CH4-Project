@@ -34,9 +34,9 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 
 	if (MatchType == EMatchType::EMT_None)
 	{
-		if (const UCSGameInstance* GI = GetGameInstance<UCSGameInstance>())
+		if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
 		{
-			MatchType = GI->GetMatchType();
+			MatchType = CSGameInstance->GetMatchType();
 		}
 	}
 
@@ -67,6 +67,49 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 			SetViewLobbyCam(NewPlayer);
 			PositionLobbyCharacters();
 			SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
+
+		}, 1.0f, false);
+}
+
+void ACSLobbyGameMode::HandleSeamlessTravelPlayer(AController*& C)
+{
+	Super::HandleSeamlessTravelPlayer(C);
+
+	if (MatchType == EMatchType::EMT_None)
+	{
+		if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+		{
+			MatchType = CSGameInstance->GetMatchType();
+		}
+	}
+
+	ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(C);
+	if (!CSPlayerController) return;
+
+	CSPlayerController->Client_ShowLobbyUI();
+
+	if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(C->PlayerState))
+	{
+		int32 Num = GameState.Get()->PlayerArray.Num();
+
+		CSPlayerState->PlayerIndex = Num;
+
+		if (MatchType == EMatchType::EMT_Versus)
+		{
+			CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
+		}
+		else if (MatchType == EMatchType::EMT_Coop)
+		{
+			CSPlayerState->TeamID = 0;
+		}
+	}
+
+	FTimerHandle DelayHandle;
+	GetWorld()->GetTimerManager().SetTimer(DelayHandle, [this, CSPlayerController]()
+		{
+			SetViewLobbyCam(CSPlayerController);
+			PositionLobbyCharacters();
+			SetSelectedPlayerJob(CSPlayerController, EJobTypes::EJT_Fighter);
 
 		}, 1.0f, false);
 }

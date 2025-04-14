@@ -22,6 +22,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
 	/** 플레이어 사망 처리 (각 MatchType별 정의 필요) */
 	virtual void HandlePlayerDeath(AController* DeadPlayer)  PURE_VIRTUAL(ACSGameModeBase::HandlePlayerDeath, );
