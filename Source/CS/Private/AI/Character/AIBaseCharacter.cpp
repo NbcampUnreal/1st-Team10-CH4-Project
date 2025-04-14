@@ -95,22 +95,22 @@ FComboAttackData AAIBaseCharacter::GetFirstAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Punch1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 1:
 		AttackData.SectionName = FName("Punch2");
-		AttackData.Damage = 12.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 2:
 		AttackData.SectionName = FName("Punch3");
-		AttackData.Damage = 15.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	default:
 		AttackData.SectionName = FName("Punch1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
@@ -138,22 +138,22 @@ FComboAttackData AAIBaseCharacter::GetSecondAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Kick1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 1:
 		AttackData.SectionName = FName("Kick2");
-		AttackData.Damage = 12.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 2:
 		AttackData.SectionName = FName("Kick3");
-		AttackData.Damage = 15.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	default:
 		AttackData.SectionName = FName("Kick1");
-		AttackData.Damage = 10.f;
+		AttackData.Damage = NomalDamage;
 		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
@@ -166,9 +166,8 @@ FComboAttackData AAIBaseCharacter::GetLowComboAttackData() const
 	FComboAttackData AttackData;
 
 	AttackData.SectionName = FName("Default");
-	AttackData.Damage = 20.f;
+	AttackData.Damage = ComboDamage;
 	AttackData.DType = ELaunchTypes::EDT_Launch;
-	
 	
 	return AttackData;
 }
@@ -178,7 +177,7 @@ FComboAttackData AAIBaseCharacter::GetRangeComboAttackData() const
 	FComboAttackData AttackData;
 
 	AttackData.SectionName = FName("Default");
-	AttackData.Damage = 20.f;
+	AttackData.Damage = ComboDamage;
 	AttackData.DType = ELaunchTypes::EDT_Launch;
 	
 	return AttackData;
@@ -225,16 +224,14 @@ int AAIBaseCharacter::RangeComboAttack_Implementation()
 
 int AAIBaseCharacter::AI_Attack(UAnimMontage* SelectedMontage, const FComboAttackData& AttackData, FName tracestart, FName traceend )
 {
-	CombatComponent->MultiSetMontageData_Implementation(SelectedMontage, AttackData.SectionName);
-	
-	FName TraceStart = tracestart;
-	FName TraceEnd = traceend;
-
-	CombatComponent->Server_PerformHitCheck_Implementation(TraceStart, TraceEnd, AttackData.Damage, AttackData.DType);
-
+	CombatComponent->MultiSetMontageData(SelectedMontage, AttackData.SectionName);
+	CombatComponent->SetPendingHit(tracestart, traceend, AttackData.Damage, AttackData.DType);
 	CombatComponent->ServerStartAttack();
+
 	return 1;
 }
+
+
 
 
 void AAIBaseCharacter::StopMovement()

@@ -68,6 +68,21 @@ public:
     UFUNCTION()
     void PerformAttack(UAnimMontage* Montage, FName SectionName);
 
+
+    UFUNCTION(BlueprintCallable)
+    bool IsPendingHit() const { return bPendingHit; }
+    UFUNCTION(BlueprintCallable)
+    FName GetPendingTraceStart() const { return PendingTraceStart; }
+    UFUNCTION(BlueprintCallable)
+    FName GetPendingTraceEnd() const { return PendingTraceEnd; }
+    UFUNCTION(BlueprintCallable)
+    float GetPendingDamage() const { return PendingDamage; }
+    UFUNCTION(BlueprintCallable)
+    ELaunchTypes GetPendingDType() const { return PendingDType; }
+    UFUNCTION(BlueprintCallable)
+    void ClearPendingHit() { bPendingHit = false; }
+    UFUNCTION(BlueprintCallable)
+    void SetPendingHit(FName InTraceStart, FName InTraceEnd, float InDamage, ELaunchTypes InDType);
 protected:
     virtual void BeginPlay() override;
 
@@ -95,8 +110,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
     float SuddenDeathDamage;
-
-
+    
+    
+    bool bPendingHit;
+    FName PendingTraceStart;
+    FName PendingTraceEnd;
+    float PendingDamage;
+    ELaunchTypes PendingDType;
 private:
 
     UFUNCTION(Server, Reliable, WithValidation)
