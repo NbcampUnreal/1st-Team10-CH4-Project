@@ -34,19 +34,17 @@ EBTNodeResult::Type UBTTask_SwordComboAttack::ExecuteTask(UBehaviorTreeComponent
 		{
 			if (auto* Combat = Cast<ICombatInterface>(NPC))
 			{
-				
 				if (MontageHasfinished(NPC))
 				{
 					BB->SetValueAsBool(FName("IsBusy"), true);
+					CachedOwnerComp = &OwnerComp;
 					NPC->StopMovement();
 					Combat->Execute_LowComboAttack(NPC);
 
-					FTimerHandle AttackCooldownTimerHandle;
-					NPC->GetWorldTimerManager().SetTimer(
-						AttackCooldownTimerHandle,
-						FTimerDelegate::CreateUObject(this, &UBTTask_SwordComboAttack::FinishLatentTaskEarly, &OwnerComp),
-						0.7f, false
-					);
+					if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
+					{
+						AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_SwordComboAttack::OnMontageEnded);
+					}
 
 					return EBTNodeResult::InProgress;
 				}
@@ -57,36 +55,28 @@ EBTNodeResult::Type UBTTask_SwordComboAttack::ExecuteTask(UBehaviorTreeComponent
 	return EBTNodeResult::Failed;
 }
 
-void UBTTask_SwordComboAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_SwordComboAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+	if (!CachedOwnerComp.IsValid()) return;
+
+	UBehaviorTreeComponent* OwnerComp = CachedOwnerComp.Get();
 	if (!OwnerComp) return;
 
-	if (auto* Controller = OwnerComp->GetAIOwner())
+	if (UBlackboardComponent* BB = OwnerComp->GetBlackboardComponent())
 	{
-		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
+	}
+	
+	if (AAIController* Controller = OwnerComp->GetAIOwner())
+	{
+		if (AAIBaseCharacter* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
 		{
-			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
-			{
-				
-				BBComp->SetValueAsBool(FName("IsBusy"), false);
-				BBComp->SetValueAsBool(FName("RangeCombo"), false);
-			}
-			if (MontageHasfinished(NPC))
-			{
-				NPC->ResumeMovement();
-				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
-			}
-			else
-			{
-				FTimerHandle AttackCooldownTimerHandle;
-				NPC->GetWorldTimerManager().SetTimer(
-					AttackCooldownTimerHandle,
-					FTimerDelegate::CreateUObject(this, &UBTTask_SwordComboAttack::FinishLatentTaskEarly, OwnerComp),
-					0.2f, false
-				);
-			}
+			NPC->ResumeMovement();
 		}
 	}
+
+	FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 }
 
 bool UBTTask_SwordComboAttack::MontageHasfinished(AAIBaseCharacter* const AI)

@@ -4,6 +4,8 @@
 #include "Components/CSAttributeComponent.h"
 
 #include "AI/Character/AIBaseCharacter.h"
+#include "AI/Controller/AIBaseController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Characters/CSBaseCharacter.h"
 #include "Characters/CSPlayerCharacter.h"
 #include "Controller/CSPlayerController.h"
@@ -48,71 +50,97 @@ void UCSAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, ELaunchTypes DType, FHitResult HitResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server: %s - ReceiveDamage Called. Damage: %.1f"), *GetOwner()->GetName(), DamageAmount);
+
 	if (!GetOwner()->HasAuthority()) return;
 	if (!IsAlive() || DamageAmount <= 0.f) return;
 
-	ACSBaseCharacter* OwningPlayerCharacter = Cast<ACSBaseCharacter>(GetOwner());
-	if (OwningPlayerCharacter)
+	ACSBaseCharacter* OwningCharacter = Cast<ACSBaseCharacter>(GetOwner());
+	if (!OwningCharacter) return;
+	
+	if (OwningCharacter->GetStandUpState() == EStandUpType::EST_StandUp) return;
+	
+	FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(DamageCauser->GetActorLocation(), OwningCharacter->GetActorLocation());
+	bool bIsFrontHit = !UKismetMathLibrary::InRange_FloatFloat(
+		OwningCharacter->GetActorRotation().Yaw,
+		LookRot.Yaw - 90.0f,
+		LookRot.Yaw + 90.0f
+	);
+
+	if (bIsFrontHit)
 	{
-		// Stand Up Anim -> Not Damaged
-		if (OwningPlayerCharacter->GetStandUpState() == EStandUpType::EST_StandUp) return;
-
-		FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(DamageCauser->GetActorLocation(), OwningPlayerCharacter->GetActorLocation());
-		bool LookCheck = UKismetMathLibrary::InRange_FloatFloat(OwningPlayerCharacter->GetActorRotation().Yaw, LookRot.Yaw - 90.0f, LookRot.Yaw + 90.0f);
-
-		if (!LookCheck) // Front
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Front Hit!!!"));
+		if (OwningCharacter->GetActionState() == ECharacterTypes::ECT_Defending)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Front Hit!!!")));
-			if (OwningPlayerCharacter->GetActionState() == ECharacterTypes::ECT_Defending)
-			{
-				FVector LaunchVector = DamageCauser->GetActorForwardVector();
-				OwningPlayerCharacter->ServerLaunchCharacter(LaunchVector * 250);
-				return;
-			}
-		}
-		else // Back(Test)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Back Hit!!!")));
+			FVector LaunchVector = DamageCauser->GetActorForwardVector();
+			OwningCharacter->ServerLaunchCharacter(LaunchVector * 250);
+			return;
 		}
 	}
-
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Back Hit!!!"));
+	}
+	
 	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
-
 	UE_LOG(LogTemp, Warning, TEXT("Server: %s - New Health: %.1f"), *GetOwner()->GetName(), Health);
 
 	if (!IsAlive())
 	{
 		HandleDeath();
+		return;
 	}
-
+	
 	if (DType == ELaunchTypes::EDT_Launch)
 	{
 		CharacterLaunch(DamageCauser);
 	}
 	else
 	{
-		if (OwningPlayerCharacter)
+		OwningCharacter->PlayHitReactMontage();
+		
+		if (AAIBaseController* AIController = Cast<AAIBaseController>(OwningCharacter->GetController()))
 		{
-			FVector LuanchVector = DamageCauser->GetActorForwardVector();
-			OwningPlayerCharacter->ServerLaunchCharacter(LuanchVector * 500);
+			if (UBlackboardComponent* BB = AIController->GetBlackboardComponent())
+			{
+				float RandomValue = FMath::FRand();
+				if (RandomValue < 0.7f)
+				{
+					BB->SetValueAsBool("ShouldBlock", true);
+					BB->SetValueAsBool("ShouldDodge", false);
+				}
+				else
+				{
+					BB->SetValueAsBool("ShouldBlock", false);
+					BB->SetValueAsBool("ShouldDodge", true);
+				}
+			}
 		}
+		
+		FVector LaunchVector = DamageCauser->GetActorForwardVector();
+		OwningCharacter->ServerLaunchCharacter(LaunchVector * 500);
 	}
 }
 
 void UCSAttributeComponent::CharacterLaunch(AActor* DamageCauser)
 {
-	if (!GetOwner()->HasAuthority()) return;
+	if (!GetOwner() || !GetOwner()->HasAuthority()) return;
 	if (!IsAlive()) return;
-	
-	ACSBaseCharacter* OwningPlayerCharacter = Cast<ACSBaseCharacter>(GetOwner());
-	if (OwningPlayerCharacter)
-	{
-		FVector LuanchVector = DamageCauser->GetActorForwardVector();
 
-		OwningPlayerCharacter->ServerSetActionState(ECharacterTypes::ECT_Launch);
-		OwningPlayerCharacter->ServerLaunchCharacter(LuanchVector * 150 + FVector(0, 0, 500));
+	FVector LaunchVector = DamageCauser->GetActorForwardVector();
+	
+	if (ACSPlayerCharacter* PlayerCharacter = Cast<ACSPlayerCharacter>(GetOwner()))
+	{
+		PlayerCharacter->ServerSetActionState(ECharacterTypes::ECT_Launch);
+		PlayerCharacter->ServerLaunchCharacter(LaunchVector * 150.f + FVector(0, 0, 500.f));
+	}
+	
+	else if (AAIBaseCharacter* AIC = Cast<AAIBaseCharacter>(GetOwner()))
+	{
+		AIC->PlayLaunchMontage();
 	}
 }
+
+
 
 void UCSAttributeComponent::HandleDeath()
 {

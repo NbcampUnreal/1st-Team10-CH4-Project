@@ -33,6 +33,9 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
 	int Block();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Combat")
+	int Rolling();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	int Dodge(AActor* Attacker);

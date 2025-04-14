@@ -38,16 +38,16 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 				{
 
 					BB->SetValueAsBool(FName("IsBusy"), true);
+					CachedOwnerComp = &OwnerComp;
 
 					Combat->Execute_FirstAttack(NPC);
-					FTimerHandle AttackCooldownTimerHandle;
-					NPC->GetWorldTimerManager().SetTimer(
-						AttackCooldownTimerHandle,
-						FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::FinishLatentTaskEarly, &OwnerComp),
-						0.25f, false
-					);
 
-					return EBTNodeResult::InProgress;
+					if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
+					{
+						AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_MeleeAttack::OnMontageEnded);
+					}
+
+					return EBTNodeResult::InProgress;;
 				}
 			}
 		}
@@ -56,39 +56,19 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 	return EBTNodeResult::Failed;
 }
 
-
-void UBTTask_MeleeAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_MeleeAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!OwnerComp) return;
+	if (!CachedOwnerComp.IsValid()) return;
 
-	if (auto* Controller = OwnerComp->GetAIOwner())
+	if (UBlackboardComponent* BB = CachedOwnerComp.Get()->GetBlackboardComponent())
 	{
-		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
-		{
-			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
-			{
-				
-				BBComp->SetValueAsBool(FName("IsBusy"), false);
-				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
-			}
-			if (MontageHasfinished(NPC))
-			{
-				
-				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
-			}
-			else
-			{
-				
-				FTimerHandle AttackCooldownTimerHandle;
-				NPC->GetWorldTimerManager().SetTimer(
-					AttackCooldownTimerHandle,
-					FTimerDelegate::CreateUObject(this, &UBTTask_MeleeAttack::FinishLatentTaskEarly, OwnerComp),
-					0.2f, false
-				);
-			}
-		}
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
 	}
+
+	FinishLatentTask(*CachedOwnerComp.Get(), EBTNodeResult::Succeeded);
 }
+
 
 bool UBTTask_MeleeAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {

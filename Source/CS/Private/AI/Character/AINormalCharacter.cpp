@@ -1,6 +1,7 @@
 #include "AI/Character/AINormalCharacter.h"
 #include "AI/Controller/AINormalController.h"
 #include "Components/CSCombatComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AAINormalCharacter::AAINormalCharacter()
 {
@@ -11,7 +12,20 @@ AAINormalCharacter::AAINormalCharacter()
 void AAINormalCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (!PatrolPath)
+	{
+		TArray<AActor*> FoundPaths;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPath::StaticClass(), FoundPaths);
+
+		for (AActor* Actor : FoundPaths)
+		{
+			if (Actor->ActorHasTag(FName("NomalPatrol")))
+			{
+				PatrolPath = Cast<APatrolPath>(Actor);
+				break;
+			}
+		}
+	}
 }
 
 
@@ -36,21 +50,18 @@ FComboAttackData AAINormalCharacter::GetFirstAttackData() const
 	{
 	case 0:
 		AttackData.SectionName = FName("Punch1");
-		AttackData.Damage = NomalAIDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 1:
 		AttackData.SectionName = FName("Punch2");
-		AttackData.Damage = NomalAIDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	case 2:
 		AttackData.SectionName = FName("Punch3");
-		AttackData.Damage = NomalAIDamage;
-		AttackData.DType = ELaunchTypes::EDT_Nomal;
 		break;
 	}
-
+	AttackData.TraceStart = FName("hand_r");
+	AttackData.TraceEnd = FName("hand_l");
+	AttackData.Damage = NomalAIDamage;
+	AttackData.DType = ELaunchTypes::EDT_Nomal;
 	return AttackData;
 }
 
