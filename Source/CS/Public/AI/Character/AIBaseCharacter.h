@@ -90,10 +90,6 @@ protected:
 	APatrolPath* PatrolPath;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* AttackMontage;
-	UPROPERTY(EditAnywhere, Category = "UI")
-	class UWidgetComponent* WidgetComponenet;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
-	class UCSAttributeComponent* AttributeComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
 	class UCSCombatComponent* CombatComponent;
 	

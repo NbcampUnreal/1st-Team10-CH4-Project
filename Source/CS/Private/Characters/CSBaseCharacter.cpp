@@ -12,6 +12,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
+#include "Components/WidgetComponent.h"
+#include "Components/CSAttributeComponent.h"
+#include "AI/UI/HealthBarWidget.h"
 
 ACSBaseCharacter::ACSBaseCharacter()
 {
@@ -19,6 +22,22 @@ ACSBaseCharacter::ACSBaseCharacter()
     
     SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
     SceneComp->SetupAttachment(RootComponent);
+    WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+    WidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WidgetComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+
+    if (WidgetComponent)
+    {
+        WidgetComponent->SetupAttachment(RootComponent);
+        WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+        static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprints/AI/UI/BP_AIHealthBar"));
+        if (WidgetClass.Succeeded())
+        {
+            WidgetComponent->SetWidgetClass(WidgetClass.Class);
+        }
+    }
+
 }
 
 void ACSBaseCharacter::BeginPlay()
@@ -106,6 +125,14 @@ bool ACSBaseCharacter::CanAttack()
 void ACSBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    if (WidgetComponent && AttributeComponent)
+    {
+        if (auto const Widget = Cast<UHealthBarWidget>(WidgetComponent->GetUserWidgetObject()))
+        {
+            Widget->SetBarValuePercent(AttributeComponent->GetHealthPercent());
+        }
+    }
 }
 
 void ACSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -128,7 +155,6 @@ void ACSBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(ACSBaseCharacter, ActionState);
 }
-
 
 void ACSBaseCharacter::OnRep_ActionState()
 {
