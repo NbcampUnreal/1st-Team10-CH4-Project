@@ -19,19 +19,18 @@
 #include "Net/UnrealNetwork.h"
 
 AAIBaseCharacter::AAIBaseCharacter()
-	: WidgetComponenet(CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthValue")))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	if (WidgetComponenet)
+	if (WidgetComponent)
 	{
-		WidgetComponenet->SetupAttachment(RootComponent);
-		WidgetComponenet->SetWidgetSpace(EWidgetSpace::Screen);
-		WidgetComponenet->SetRelativeLocation(defs::HealthBarZ);
+		WidgetComponent->SetupAttachment(RootComponent);
+		WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		WidgetComponent->SetRelativeLocation(defs::HealthBarZ);
 		static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprints/AI/UI/BP_AIHealthBar"));
 		if (WidgetClass.Succeeded())
 		{
-			WidgetComponenet->SetWidgetClass(WidgetClass.Class);
+			WidgetComponent->SetWidgetClass(WidgetClass.Class);
 		}
 	}
 
@@ -59,9 +58,9 @@ void AAIBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (WidgetComponenet && AttributeComponent)
+	if (WidgetComponent && AttributeComponent)
 	{
-		if (auto const Widget = Cast<UHealthBarWidget>(WidgetComponenet->GetUserWidgetObject()))
+		if (auto const Widget = Cast<UHealthBarWidget>(WidgetComponent->GetUserWidgetObject()))
 		{
 			Widget->SetBarValuePercent(AttributeComponent->GetHealthPercent());
 		}

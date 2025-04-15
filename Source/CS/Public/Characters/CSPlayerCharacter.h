@@ -93,9 +93,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	class UCSAttributeComponent* AttributeComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCSCombatComponent* CombatComponent;
 	
