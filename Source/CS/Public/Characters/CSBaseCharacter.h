@@ -130,4 +130,10 @@ public:
 	TSubclassOf<AActor> CastProjectile;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* SceneComp;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	class UWidgetComponent* WidgetComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes", meta = (AllowPrivateAccess = true))
+	class UCSAttributeComponent* AttributeComponent;
 };

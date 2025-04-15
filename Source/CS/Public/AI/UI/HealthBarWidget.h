@@ -16,5 +16,5 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = "UI")
 	UProgressBar* HealthProgressBar = nullptr;
-
+	
 };
