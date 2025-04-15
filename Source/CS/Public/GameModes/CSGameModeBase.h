@@ -84,7 +84,7 @@ protected:
 	int32 MatchTimeLimit;
 	
 	UPROPERTY()
-	class UCSGameInstance* CSGameInstance;
+	class UCSAdvancedGameInstance* CSGameInstance;
 	UPROPERTY()
 	class ACSGameStateBase* BaseGameState;
 

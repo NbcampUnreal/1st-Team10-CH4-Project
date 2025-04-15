@@ -1,5 +1,5 @@
 #include "GameModes/CSMainMenuGameMode.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "Controller/CSPlayerController.h"
 
 void ACSMainMenuGameMode::PostLogin(APlayerController* NewPlayer)
@@ -11,14 +11,4 @@ void ACSMainMenuGameMode::PostLogin(APlayerController* NewPlayer)
         const bool bIsListenServer = GetNetMode() == NM_ListenServer;
         CSPlayerController->bIsHostPlayer = bIsListenServer;
     }
-}
-
-bool ACSMainMenuGameMode::CheackShouldStartTravel()
-{
-    if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
-    {
-        return CSGameInstance->bIsSessionCreated;
-    }
-
-    return false;
 }

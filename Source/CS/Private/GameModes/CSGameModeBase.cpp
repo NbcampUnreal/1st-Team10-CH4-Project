@@ -1,6 +1,6 @@
 #include "GameModes/CSGameModeBase.h"
 #include "GameStates/CSGameStateBase.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "AI/Controller/AIBaseController.h"
 #include "Managers/CSSpawnManager.h"
@@ -30,7 +30,7 @@ void ACSGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CSGameInstance = GetGameInstance<UCSGameInstance>();
+	CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>();
 	BaseGameState = GetGameState<ACSGameStateBase>();
 
 	SetMatchPhase(EMatchPhase::EMP_Waiting);

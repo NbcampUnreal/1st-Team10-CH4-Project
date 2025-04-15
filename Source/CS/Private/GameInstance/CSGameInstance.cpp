@@ -2,8 +2,9 @@
 #include "Controller/CSPlayerController.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
-#include "OnlineSessionSettings.h"  
-#include "OnlineSubsystemUtils.h"    
+#include "OnlineSessionSettings.h"
+#include "Online/OnlineSessionNames.h"
+#include "OnlineSubsystemUtils.h"
 #include "Data/CSLevelRow.h"
 #include "Data/CSCharacterRow.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,7 +19,8 @@ UCSGameInstance::UCSGameInstance() :
 	CharacterData(nullptr),
 	AIData(nullptr),
 	LevelData(nullptr),
-	bIsSessionCreated(false)
+	bIsSessionCreated(false),
+	bAutoHostIfNoSession(false)
 {
 }
 
@@ -99,13 +101,24 @@ void UCSGameInstance::HostSession(EMatchType TypeToHost)
 	SetMatchType(TypeToHost);
 
 	FOnlineSessionSettings SessionSettings;
-	SessionSettings.bIsLANMatch = true;
+	SessionSettings.bIsLANMatch = false; //SteamOSS
 	SessionSettings.NumPublicConnections = 4;
 	SessionSettings.bShouldAdvertise = true;
 	SessionSettings.bAllowJoinInProgress = true;
 	SessionSettings.bUsesPresence = true;
+	SessionSettings.bUseLobbiesIfAvailable = true; //SteamOSS
+	SessionSettings.Set(FName("BUILDUNIQUEID"), 1, EOnlineDataAdvertisementType::ViaOnlineService);
 
-	SessionInterface->CreateSession(0, NAME_GameSession, SessionSettings);
+	FUniqueNetIdRepl ReplNetId = GetFirstGamePlayer()->GetPreferredUniqueNetId();
+	TSharedPtr<const FUniqueNetId> UserId = ReplNetId.GetUniqueNetId();
+
+	if (!UserId.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("HostSession: Invalid UniqueNetId"));
+		return;
+	}
+
+	SessionInterface->CreateSession(*UserId, NAME_GameSession, SessionSettings);
 }
 
 void UCSGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -114,14 +127,15 @@ void UCSGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucces
 
 	if (bWasSuccessful)
 	{
-		FString TravelURL = TEXT("/Game/Blueprints/Hud/Maps/LobbyLevel?listen");
+		SessionInterface->StartSession(NAME_GameSession);
 
-		if (!GetWorld()) return;
-		
-		if (GEngine && GEngine->GetWorldContextFromWorldChecked(GetWorld()).World()->GetNetMode() != NM_Client)
-		{
-			GetWorld()->ServerTravel(TravelURL, true);
-		}
+		// 로비로 이동
+		FTimerHandle DelayTravelHandle;
+		GetWorld()->GetTimerManager().SetTimer(DelayTravelHandle, FTimerDelegate::CreateLambda([this]()
+			{
+				FString TravelURL = TEXT("/Game/Blueprints/Hud/Maps/LobbyLevel?listen");
+				GetWorld()->ServerTravel(TravelURL);
+			}), 2.0f, false);
 	}
 }
 
@@ -132,41 +146,85 @@ void UCSGameInstance::FindSessions()
 	if (!SessionInterface.IsValid()) return;
 
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	SessionSearch->bIsLanQuery = true;
+	SessionSearch->bIsLanQuery = false; //SteamOSS
 	SessionSearch->MaxSearchResults = 20;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals); //SteamOSS
 
-	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	FUniqueNetIdRepl ReplNetId = GetFirstGamePlayer()->GetPreferredUniqueNetId();
+	TSharedPtr<const FUniqueNetId> UserId = ReplNetId.GetUniqueNetId();
+
+	if (!UserId.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("FindSessions: Invalid UniqueNetId"));
+		return;
+	}
+
+	SessionInterface->FindSessions(*UserId, SessionSearch.ToSharedRef());
 }
 
 void UCSGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
 	if (!SessionSearch.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("세션 서치 유효하지않음"));
+		UE_LOG(LogTemp, Warning, TEXT("세션 서치 유효하지 않음"));
+		return;
 	}
-	else if (SessionSearch->SearchResults.Num() == 0)
+
+	if (SessionSearch->SearchResults.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("세션 서치 결과가 없음"));
+		UE_LOG(LogTemp, Warning, TEXT("세션 서치 결과 없음"));
 	}
 
 	bool bFoundSession = false;
-	if (bWasSuccessful && SessionSearch.IsValid() && SessionSearch->SearchResults.Num() > 0) 
+
+	TSharedPtr<const FUniqueNetId> MyNetId;
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (Subsystem && Subsystem->GetIdentityInterface().IsValid())
 	{
-	
-		for (const FOnlineSessionSearchResult& Result : SessionSearch->SearchResults) {
-			if (Result.IsValid()) {
-				UE_LOG(LogTemp, Log, TEXT("Found valid session! Joining..."));
-				JoinFoundSession(Result); 
-				bFoundSession = true;
-				break;
-			}
-		}
+		MyNetId = Subsystem->GetIdentityInterface()->GetUniquePlayerId(0);
 	}
 
-	if (!bFoundSession) 
+	for (const FOnlineSessionSearchResult& Result : SessionSearch->SearchResults)
 	{
-		ACSPlayerController* PC = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		if (PC) { PC->Client_ShowNoSessionPopup(); }
+		if (!Result.IsValid()) continue;
+
+		// 🔒 자기 세션 필터링
+		if (MyNetId.IsValid() && Result.Session.OwningUserId.IsValid() &&
+			*Result.Session.OwningUserId == *MyNetId)
+		{
+			UE_LOG(LogTemp, Log, TEXT("🔄 Skipping self-hosted session"));
+			continue;
+		}
+
+		// 🔒 BUILDUNIQUEID 필터링
+		int32 BuildId = -1;
+		if (!Result.Session.SessionSettings.Get(FName("BUILDUNIQUEID"), BuildId) || BuildId != 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("⛔ Skipping session with incompatible BUILDUNIQUEID: %d"), BuildId);
+			continue;
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("✅ Found valid session! Attempting to join..."));
+		JoinFoundSession(Result);
+		bFoundSession = true;
+		break;
+	}
+
+	if (!bFoundSession)
+	{
+		if (bAutoHostIfNoSession)
+		{
+			bAutoHostIfNoSession = false;
+			UE_LOG(LogTemp, Log, TEXT("🛠 No valid session found. Hosting..."));
+			HostSession(MatchType);
+		}
+		else
+		{
+			if (ACSPlayerController* PC = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+			{
+				PC->Client_ShowNoSessionPopup();
+			}
+		}
 	}
 }
 
@@ -201,7 +259,7 @@ void UCSGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCom
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to JoinSession or resolve connect string."));
+		UE_LOG(LogTemp, Error, TEXT("Failed to JoinSession."));
 	}
 }
 

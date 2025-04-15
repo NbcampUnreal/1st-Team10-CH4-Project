@@ -1,5 +1,5 @@
 #include "GameModes/CSCoopGameMode.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSCoopGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Managers/CSSpawnManager.h"
