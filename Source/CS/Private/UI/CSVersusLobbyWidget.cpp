@@ -1,12 +1,12 @@
-#include "UI/CSVersusLobbyWidget.h" // 경로 확인
+#include "UI/CSVersusLobbyWidget.h"
 #include "Components/VerticalBox.h"
 #include "Components/Button.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "UI/CSPlayerEntry.h"
 #include "Controller/CSPlayerController.h"
-#include "Kismet/GameplayStatics.h" // 추가
-#include "GameStates/CSLobbyGameState.h" // 추가
-#include "GameModes/CSLobbyGameMode.h"   // IsTeamBalanced 사용 위해 추가
+#include "Kismet/GameplayStatics.h"
+#include "GameStates/CSLobbyGameState.h"
+#include "GameModes/CSLobbyGameMode.h"
 
 void UCSVersusLobbyWidget::NativeConstruct()
 {
@@ -45,24 +45,6 @@ void UCSVersusLobbyWidget::RefreshPlayerList(const TArray<APlayerState*>& Player
 				if (TargetList) TargetList->AddChildToVerticalBox(EntryWidget);
 			}
 		}
-	}
-
-	// 시작 버튼 활성화 조건 (호스트만)
-	APlayerController* PC = GetOwningPlayer();
-	if (StartButton && PC && PC->HasAuthority()) {
-		ACSLobbyGameState* LG = GetWorld() ? Cast<ACSLobbyGameState>(GetWorld()->GetGameState()) : nullptr;
-		// ACSLobbyGameMode* GM = GetWorld() ? GetWorld()->GetAuthGameMode<ACSLobbyGameMode>() : nullptr; // IsTeamBalanced 호출 안 하므로 GM 필요 없을 수 있음
-
-		bool bAllReady = LG ? LG->AreAllPlayerReady() : false;
-		// IsTeamBalanced() 호출 제거! GameMode에서 최종 확인하도록 함.
-		// bool bTeamBalanced = GM ? GM->IsTeamBalanced() : false;
-		bool bPlayerCountOk = PlayerArray.Num() >= 2 && PlayerArray.Num() % 2 == 0;
-
-		// 팀 밸런스 체크 제거하고 플레이어 수와 준비 상태만으로 버튼 활성화 결정
-		StartButton->SetIsEnabled(bPlayerCountOk && bAllReady);
-
-		// UE_LOG(LogTemp, Log, TEXT("Versus Start Button Enabled: %s (CountOK: %d, AllReady: %d)"), // 로그에서 Balanced 제거
-		//	StartButton->GetIsEnabled() ? TEXT("True") : TEXT("False"), bPlayerCountOk, bAllReady);
 	}
 }
 

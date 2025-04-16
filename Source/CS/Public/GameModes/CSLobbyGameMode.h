@@ -29,6 +29,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetSelectedPlayerJob(APlayerController* Player, EJobTypes NewJob);
+	UFUNCTION(BlueprintCallable)
+	void ReturnAllPlayersToMainMenu();
 
 protected:
 	/** 스폰할 로비 전용 캐릭터 */

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameStates/CSGameStateBase.h"
+#include "PlayerStates/CSPlayerState.h"
 #include "CSVersusGameState.generated.h"
 
 UCLASS()
@@ -15,11 +16,11 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_OnSuddenDeath, BlueprintReadOnly)
 	bool bIsSuddenDeath;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Versus State")
 	int32 WinningTeamID;
 
-	UPROPERTY(Replicated)
-	TArray<class ACSPlayerState*> WinningPlayers;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Versus State")
+	TArray<TObjectPtr<ACSPlayerState>> WinningPlayers;
 
 	UFUNCTION()
 	void OnRep_OnSuddenDeath();

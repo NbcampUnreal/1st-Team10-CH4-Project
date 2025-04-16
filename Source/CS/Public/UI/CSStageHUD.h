@@ -18,7 +18,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "HUD | Stage")
 	void UpdateStageInfo(const FText& StageName);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "HUD | Stage")
-	void TriggerBossAppearSequence(); // 이전 추가된 함수;
+	void TriggerBossAppearSequence();
 
 protected:
 	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
 	TObjectPtr<UTextBlock> StageInfoText;
 	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
-	TObjectPtr<UTextBlock> BossAppearText; // 추가 예시
+	TObjectPtr<UTextBlock> BossAppearText;
 
 	// virtual void NativeConstruct() override; // 필요 시 오버라이드
 };

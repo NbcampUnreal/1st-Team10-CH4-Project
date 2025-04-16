@@ -30,6 +30,16 @@ public:
 	/** AI 사망 처리 (각 MatchType별 정의 필요) */
 	virtual void HandleAIDeath(AActor* DeadAI) {}
 
+	/** 메인 메뉴로 복귀 */
+	UFUNCTION(BlueprintCallable)
+	void ReturnToMainMenu(AController* TargetPlayer);
+	UFUNCTION(BlueprintCallable)
+	void ReturnAllPlayersToMainMenu();
+
+	/** 로비로 복귀 */
+	UFUNCTION(BlueprintCallable)
+	void ReturnToLobby();
+
 protected:
 	/** 각 모드별 초기화 로직 */
 	virtual void InitGameLogic() PURE_VIRTUAL(ACSGameModeBase::InitGameLogic, );
@@ -46,15 +56,7 @@ protected:
 	/** 제한 시간 카운트다운 갱신 */
 	virtual void UpdateMatchTimer();
 
-	/** 메인 메뉴로 복귀 */
-	UFUNCTION(BlueprintCallable)
-	void ReturnToMainMenu(AController* TargetPlayer);
-	UFUNCTION(BlueprintCallable)
-	void ReturnAllPlayersToMainMenu();
-
-	/** 로비로 복귀 */
-	UFUNCTION(BlueprintCallable)
-	void ReturnToLobby();
+	
 
 	/** 플레이어 스폰 처리 */
 	void SpawnAllPlayers();

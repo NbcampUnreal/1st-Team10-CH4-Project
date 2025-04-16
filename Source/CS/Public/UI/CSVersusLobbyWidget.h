@@ -4,7 +4,6 @@
 #include "Components/Button.h"
 #include "CSVersusLobbyWidget.generated.h"
 
-// 전방 선언
 class UVerticalBox;
 
 UCLASS()

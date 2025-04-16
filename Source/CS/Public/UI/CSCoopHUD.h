@@ -1,10 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/CSInGameHUD.h" // 베이스 HUD 상속
+#include "UI/CSInGameHUD.h"
 #include "CSCoopHUD.generated.h"
 
-// 전방 선언
 class UTextBlock;
 
 UCLASS()

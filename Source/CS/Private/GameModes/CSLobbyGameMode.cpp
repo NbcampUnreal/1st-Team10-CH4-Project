@@ -11,6 +11,7 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystemUtils.h"
+#include "Interfaces/OnlineSessionInterface.h" // 세션 파괴 위해 추가
 
 ACSLobbyGameMode::ACSLobbyGameMode()
 {
@@ -101,6 +102,44 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 			SetSelectedPlayerJob(NewPlayer, EJobTypes::EJT_Fighter);
 
 		}, 1.0f, false);
+}
+
+// --- 메인 메뉴 복귀 함수 구현 추가! ---
+void ACSLobbyGameMode::ReturnAllPlayersToMainMenu()
+{
+	UE_LOG(LogTemp, Log, TEXT("ACSLobbyGameMode::ReturnAllPlayersToMainMenu called."));
+
+	UWorld* World = GetWorld();
+	UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>(); // GameInstance 타입 확인!
+	if (!World || !CSGameInstance) return;
+
+	// 1. 세션 파괴 (호스트만)
+	if (HasAuthority()) // GameMode는 서버에서만 실행되므로 항상 true (리슨서버)
+	{
+		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+		if (Subsystem)
+		{
+			IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+			if (SessionInterface.IsValid())
+			{
+				SessionInterface->DestroySession(NAME_GameSession);
+			}
+		}
+	}
+
+	// 2. 메인 메뉴 레벨 경로 찾기
+	const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("MainMenuLevel"));
+	if (!LevelRow || LevelRow->MapPath.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("ReturnAllPlayersToMainMenu: Cannot find MainMenuLevel path in LevelData!"));
+		return;
+	}
+
+	// 3. 모든 플레이어 이동 (ServerTravel 사용 - listen 옵션 없이)
+	const FString TravelURL = LevelRow->MapPath; // ?listen 없음!
+	UE_LOG(LogTemp, Log, TEXT("Returning all players to Main Menu: %s"), *TravelURL);
+	// bUseSeamlessTravel = false; // 로비->메뉴는 Seamless 불필요할 수 있음 (선택적)
+	World->ServerTravel(TravelURL);
 }
 
 void ACSLobbyGameMode::HandleSeamlessTravelPlayer(AController*& C)
