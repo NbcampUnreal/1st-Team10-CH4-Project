@@ -71,6 +71,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Animation")
 	UAnimMontage* GetUpMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	UAnimMontage* DodgeMontage;
 	
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;
@@ -80,6 +83,7 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerSetActionState(ECharacterTypes ECTState);
 	void ServerSetActionState_Implementation(ECharacterTypes ECTState);
+
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiSetActionState(ECharacterTypes ECTState);
 	void MultiSetActionState_Implementation(ECharacterTypes ECTState);
@@ -87,12 +91,14 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerLaunchCharacter(FVector LaunchVector);
 	void ServerLaunchCharacter_Implementation(FVector LaunchVector);
+
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiLaunchCharacter(FVector LaunchVector);
 	void MultiLaunchCharacter_Implementation(FVector LaunchVector);
 
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE ECharacterTypes GetActionState() const { return ActionState; }
+
 	UFUNCTION(BlueprintPure, Category = "Character State")
 	FORCEINLINE EJobTypes GetJobType() const { return JobState; }
 
