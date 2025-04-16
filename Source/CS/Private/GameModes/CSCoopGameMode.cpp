@@ -2,6 +2,7 @@
 #include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSCoopGameState.h"
 #include "PlayerStates/CSPlayerState.h"
+#include "Controller/CSPlayerController.h"
 #include "Managers/CSSpawnManager.h"
 #include "AI/Controller/AIBaseController.h"
 #include "Data/CSAIRow.h"
@@ -96,8 +97,17 @@ void ACSCoopGameMode::HandlePlayerDeath(AController* DeadPlayer)
 	if (ACSPlayerState* CSPlayerState = DeadPlayer ? DeadPlayer->GetPlayerState<ACSPlayerState>() : nullptr)
 	{
 		CSPlayerState->bIsAlive = false;
-
 		AlivePlayerCount--;
+
+		AController* Spectator = FindAliveTeammate(DeadPlayer);
+		if (Spectator)
+		{
+			if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(DeadPlayer))
+			{
+				APawn* AlivePawn = Spectator->GetPawn();
+				CSPlayerController->Client_SpectateTarget(AlivePawn);
+			}
+		}
 
 		if (AlivePlayerCount <= 0)
 		{
@@ -150,8 +160,6 @@ ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForPlayer(const ACSPlayerState* Play
 	int32 Index = PlayerState->PlayerIndex;
 	return static_cast<ESpawnSlotType>(static_cast<int32>(ESpawnSlotType::Coop_Player_Slot0) + Index - 1);
 }
-
-
 
 ESpawnSlotType ACSCoopGameMode::GetSpawnSlotForAI(int32 Index) const
 {

@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Engine/NetDriver.h" 
+#include "AdvancedSessionsLibrary.h"
 
 void UCSAdvancedGameInstance::Init()
 {
@@ -18,6 +19,47 @@ void UCSAdvancedGameInstance::Init()
 	MatchType = EMatchType::EMT_MainMenu;
 	ExpectedPlayerCount = 0;
 	bAutoHostIfNoSession = false;
+}
+
+void UCSAdvancedGameInstance::SafeJoinSession(const FBlueprintSessionResult& SearchResult)
+{
+	const FOnlineSessionSearchResult& NativeResult = SearchResult.OnlineResult;
+	UE_LOG(LogTemp, Warning, TEXT("SafeJoinSession called"));
+	
+	const int32 BuildID = NativeResult.Session.SessionSettings.BuildUniqueId;
+	const int32 Ping = NativeResult.PingInMs;
+	const bool bValidInfo = NativeResult.Session.SessionInfo.IsValid();
+
+	const bool bDefinitelyDead = (BuildID == 0 && Ping == 9999);
+	if (bDefinitelyDead || !bValidInfo)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Session filtered before Join: BuildID = %d, Ping = %d, InfoValid = %d"),
+			BuildID,
+			Ping,
+			bValidInfo);
+
+		OnJoinSessionFailed.Broadcast();
+		return;
+	}
+
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (!Subsystem) return;
+
+	IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+	if (!SessionInterface.IsValid()) return;
+
+	APlayerController* PC = GetFirstLocalPlayerController();
+	if (!PC) return;
+
+
+	CachedSessionResult = NativeResult;
+	JoinSessionDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
+		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UCSAdvancedGameInstance::OnJoinSessionComplete)
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("Calling JoinSession - BuildID: %d, Ping: %d"), BuildID, Ping);
+
+	SessionInterface->JoinSession(0, NAME_GameSession, NativeResult);
 }
 
 void UCSAdvancedGameInstance::SetMatchType(EMatchType NewType)
@@ -89,4 +131,37 @@ const FLevelRow* UCSAdvancedGameInstance::FindLevelRow(FName RowName) const
 {
 	if (!LevelData) return nullptr;
 	return LevelData->FindRow<FLevelRow>(RowName, TEXT("FindLevelRow"));
+}
+
+void UCSAdvancedGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (!Subsystem) return;
+
+	IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+	if (!SessionInterface.IsValid()) return;
+
+	SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionDelegateHandle);
+
+	FString ConnectString;
+	if (!SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to resolve connect string."));
+		OnJoinSessionFailed.Broadcast(); 
+		return;
+	}
+
+	if (ConnectString.IsEmpty() || ConnectString.Contains(TEXT(":0")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid ConnectString: %s"), *ConnectString);
+		OnJoinSessionFailed.Broadcast(); 
+		return;
+	}
+
+	APlayerController* PC = GetFirstLocalPlayerController();
+	if (PC)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Joining session at %s"), *ConnectString);
+		PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
+	}
 }

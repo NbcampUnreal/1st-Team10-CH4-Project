@@ -249,6 +249,7 @@ void UCSCombatComponent::OnRep_IsAttacking()
 
 void UCSCombatComponent::SetSuddenDeathActive(bool bActive)
 {
+    UE_LOG(LogTemp, Warning, TEXT("CombatComponent: SetSuddenDeathActivate!"));
     if (GetOwnerRole() == ROLE_Authority)
     {
         if (bIsSuddenDeathActive != bActive)

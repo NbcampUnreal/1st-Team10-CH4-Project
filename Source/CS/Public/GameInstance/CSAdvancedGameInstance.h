@@ -8,8 +8,12 @@
 #include "Data/CSLevelRow.h"
 #include "Data/CSPlayerLobbyData.h"
 #include "OnlineSessionSettings.h"
+#include "OnlineSubsystemTypes.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Misc/NetworkVersion.h"
 #include "CSAdvancedGameInstance.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnJoinSessionFailed);
 
 UCLASS()
 class CS_API UCSAdvancedGameInstance : public UAdvancedFriendsGameInstance
@@ -18,6 +22,12 @@ class CS_API UCSAdvancedGameInstance : public UAdvancedFriendsGameInstance
 
 public:
 	virtual void Init() override;
+
+	UFUNCTION(BlueprintCallable)
+	void SafeJoinSession(const FBlueprintSessionResult& SearchResult);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnJoinSessionFailed OnJoinSessionFailed;
 
 	/** MatchType 관련 게터&세터 */
 	UFUNCTION(BlueprintCallable)
@@ -61,9 +71,10 @@ public:
 	TObjectPtr<UDataTable> LevelData;
 
 private:
-	IOnlineSessionPtr SessionInterface;
-	TSharedPtr<FOnlineSessionSearch> SessionSearch;
-	FDelegateHandle DestroySessionCompleteDelegateHandle;
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	FDelegateHandle JoinSessionDelegateHandle;
+	FOnlineSessionSearchResult CachedSessionResult;
 
 	UPROPERTY()
 	EMatchType MatchType;

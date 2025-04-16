@@ -79,6 +79,9 @@ protected:
 	/** 매치 상태를 갱신하고 GameState에 전달 */
 	void SetMatchPhase(EMatchPhase NewPhase);
 
+	/** 사망하지 않은 팀원 컨트롤러 반환 함수 */
+	AController* FindAliveTeammate(AController* DeadPlayer);
+
 	UPROPERTY(BlueprintReadOnly)
 	EMatchType MatchType;
 	UPROPERTY(BlueprintReadOnly)

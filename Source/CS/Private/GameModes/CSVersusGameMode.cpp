@@ -60,6 +60,16 @@ void ACSVersusGameMode::HandlePlayerDeath(AController* DeadPlayer)
 	{
 		CSPlayerState->bIsAlive = false;
 
+		AController* Spectator = FindAliveTeammate(DeadPlayer);
+		if (Spectator)
+		{
+			if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(DeadPlayer))
+			{
+				APawn* AlivePawn = Spectator->GetPawn();
+				CSPlayerController->Client_SpectateTarget(AlivePawn);
+			}
+		}
+
 		UpdateAliveTeams(CSPlayerState);
 
 		CheckWinCondition();
@@ -88,6 +98,7 @@ void ACSVersusGameMode::CheckWinCondition()
 
 void ACSVersusGameMode::TriggerSuddenDeath()
 {
+	UE_LOG(LogTemp, Warning, TEXT("VersusGameMode: TriggerSuddenDeath Activate!"));
 	if (!VersusGameState) return;
 
 	VersusGameState->bIsSuddenDeath = true;

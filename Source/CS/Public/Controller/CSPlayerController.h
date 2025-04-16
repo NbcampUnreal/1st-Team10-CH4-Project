@@ -70,6 +70,11 @@ public:
 	void Client_OnSuddenDeath();
 	virtual void Client_OnSuddenDeath_Implementation();
 
+	// 사망 후 시점 전환
+	UFUNCTION(Client, Reliable)
+	void Client_SpectateTarget(APawn* NewTarget);
+	void Client_SpectateTarget_Implementation(APawn* NewTarget);
+
 	bool bIsHostPlayer;
 
 protected:

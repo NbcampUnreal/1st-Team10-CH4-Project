@@ -137,6 +137,27 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 	}
 }
 
+AController* ACSGameModeBase::FindAliveTeammate(AController* DeadPlayer)
+{
+	if (!DeadPlayer) return nullptr;
+
+	ACSPlayerState* DeadState = DeadPlayer->GetPlayerState<ACSPlayerState>();
+	if (!DeadState) return nullptr;
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState);
+		if (!CSPlayerState) continue;
+
+		if (CSPlayerState->TeamID == DeadState->TeamID && CSPlayerState->bIsAlive && CSPlayerState != DeadState)
+		{
+			return Cast<AController>(CSPlayerState->GetOwningController());
+		}
+	}
+
+	return nullptr;
+}
+
 void ACSGameModeBase::SpawnAllPlayers()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SpawnAllPlayers: 호출됨"));

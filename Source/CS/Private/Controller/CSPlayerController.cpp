@@ -209,6 +209,13 @@ void ACSPlayerController::Client_OnSuddenDeath_Implementation()
     }
 }
 
+void ACSPlayerController::Client_SpectateTarget_Implementation(APawn* NewTarget)
+{
+    if (!NewTarget) return;
+
+    SetViewTargetWithBlend(NewTarget, 0.5f);
+}
+
 void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
 {
     if (IsLocalController() && CurrentActiveUI) {
