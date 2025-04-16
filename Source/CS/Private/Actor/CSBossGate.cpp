@@ -1,6 +1,8 @@
 #include "Actor/CSBossGate.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 ACSBossGate::ACSBossGate()
 {
@@ -64,6 +66,11 @@ void ACSBossGate::OnTriggerBegin(
 
 		ElapsedOpenTime = 0.0f;
 		bHasOpened = true;
+
+		if (GateOpenSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, GateOpenSound, GetActorLocation());
+		}
 	}
 }
 

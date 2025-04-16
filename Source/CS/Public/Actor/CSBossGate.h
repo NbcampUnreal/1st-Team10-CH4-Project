@@ -42,6 +42,10 @@ protected:
 
 	float ElapsedOpenTime;
 
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* GateOpenSound;
+
+
 	bool bIsActive;
 	bool bHasOpened;
 };
