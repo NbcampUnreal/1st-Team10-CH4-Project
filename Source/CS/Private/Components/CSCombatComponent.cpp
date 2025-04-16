@@ -254,6 +254,11 @@ void UCSCombatComponent::SetSuddenDeathActive(bool bActive)
     {
         if (bIsSuddenDeathActive != bActive)
         {
+            if (GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, bIsSuddenDeathActive ? TEXT("Sudden Death Active") : TEXT("Sudden Death Inactive"));
+            }
+
             bIsSuddenDeathActive = bActive;
         }
     }
