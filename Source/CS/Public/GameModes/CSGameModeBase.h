@@ -46,8 +46,15 @@ protected:
 	/** 제한 시간 카운트다운 갱신 */
 	virtual void UpdateMatchTimer();
 
+	/** 메인 메뉴로 복귀 */
+	UFUNCTION(BlueprintCallable)
+	void ReturnToMainMenu(AController* TargetPlayer);
+	UFUNCTION(BlueprintCallable)
+	void ReturnAllPlayersToMainMenu();
+
 	/** 로비로 복귀 */
-	virtual void ReturnToLobby();
+	UFUNCTION(BlueprintCallable)
+	void ReturnToLobby();
 
 	/** 플레이어 스폰 처리 */
 	void SpawnAllPlayers();

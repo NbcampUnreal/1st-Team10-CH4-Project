@@ -70,8 +70,6 @@ public:
 	void Client_OnSuddenDeath();
 	virtual void Client_OnSuddenDeath_Implementation();
 
-	void RequestEnterMultiplayerMode(EMatchType NewMatchType);
-
 	bool bIsHostPlayer;
 
 protected:

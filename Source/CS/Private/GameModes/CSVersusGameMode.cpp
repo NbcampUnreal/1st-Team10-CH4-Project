@@ -1,5 +1,5 @@
 #include "GameModes/CSVersusGameMode.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSVersusGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"

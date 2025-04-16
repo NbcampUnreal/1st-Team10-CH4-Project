@@ -1,9 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Characters/Type/CSLobbyCharacter.h"
 #include "CSTypes/CSCharacterTypes.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 
 ACSLobbyCharacter::ACSLobbyCharacter()
 {

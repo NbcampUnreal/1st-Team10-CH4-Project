@@ -2,7 +2,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "Controller/CSPlayerController.h"
 #include "CSTypes/CSGameTypes.h"
 #include "TimerManager.h" // 알림 타이머
@@ -14,8 +14,6 @@ void UCSMainMenu::NativeConstruct()
 	Super::NativeConstruct();
 	// 버튼 클릭 이벤트 바인딩
 	if (ArcadeModeButton) ArcadeModeButton->OnClicked.AddDynamic(this, &UCSMainMenu::OnArcadeModeClicked);
-	if (VersusModeButton) VersusModeButton->OnClicked.AddDynamic(this, &UCSMainMenu::OnVersusModeClicked);
-	if (CoopModeButton) CoopModeButton->OnClicked.AddDynamic(this, &UCSMainMenu::OnCoopModeClicked);
 	if (ExitButton) ExitButton->OnClicked.AddDynamic(this, &UCSMainMenu::OnExitClicked);
 
 	if (NotificationText) NotificationText->SetVisibility(ESlateVisibility::Collapsed); // 처음엔 숨김
@@ -36,7 +34,7 @@ void UCSMainMenu::NativeDestruct()
 void UCSMainMenu::OnArcadeModeClicked()
 {
 	UE_LOG(LogTemp, Log, TEXT("Arcade Mode Clicked"));
-	UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+	UCSAdvancedGameInstance* GI = GetGameInstance<UCSAdvancedGameInstance>();
 	UWorld* World = GetWorld(); // GetWorld() 호출
 	if (GI && World) {
 		GI->SetMatchType(EMatchType::EMT_Single);
@@ -46,63 +44,6 @@ void UCSMainMenu::OnArcadeModeClicked()
 		UE_LOG(LogTemp, Log, TEXT("Opening SingleModeLevel for Arcade Mode."));
 	}
 	else { UE_LOG(LogTemp, Error, TEXT("Failed to get GameInstance or World for Arcade Mode.")); }
-}
-
-void UCSMainMenu::OnVersusModeClicked()
-{
-	UE_LOG(LogTemp, Error, TEXT("🟧 OnVersusModeClicked CALLED!!"));
-
-	APlayerController* PlayerController = GetOwningPlayer();
-	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(PlayerController))
-	{
-		CSPlayerController->RequestEnterMultiplayerMode(EMatchType::EMT_Versus); // ← 이 함수가 서버 또는 클라 판단 후 적절히 실행
-	}
-}
-
-void UCSMainMenu::OnCoopModeClicked()
-{
-	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(this, 0)))
-	{
-		CSPlayerController->RequestEnterMultiplayerMode(EMatchType::EMT_Coop); // ← 이 함수가 서버 또는 클라 판단 후 적절히 실행
-	}
-}
-
-// 멀티플레이 버튼 공통 처리 함수
-void UCSMainMenu::HandleMultiplayerButtonClick(EMatchType MatchType)
-{
-	UWorld* World = GetWorld();
-	UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
-
-	if (!GI || !World) {
-		ShowNotification(FText::FromString(TEXT("Error: Cannot initialize multiplayer!")));
-		return;
-	}
-
-	// GameInstance에 선택한 MatchType 설정 (로비 UI 로딩 등에 사용)
-	GI->SetMatchType(MatchType);
-
-	// 현재 NetMode 확인
-	ENetMode NetMode = World->GetNetMode();
-
-	// 버튼 비활성화
-	SetMultiplayerButtonsEnabled(false);
-
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-	const bool bIsHost = PC && PC->HasAuthority() && PC->IsLocalController() && PC == GetGameInstance()->GetFirstLocalPlayerController();
-
-	if (bIsHost)
-	{
-		UE_LOG(LogTemp, Log, TEXT("✅ I'm the true HOST (verified by GetFirstLocalPlayerController)."));
-		GI->HostSession(MatchType);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("🟢 I'm a CLIENT. FindSessions called."));
-		GI->FindSessions();
-	}
-	// 버튼 재활성화 및 알림 숨기기는 GameInstance의 콜백에서 처리되어야 함
-	// (예: Client_ShowNoSessionPopup 호출 시 ShowNotification 에서 처리)
 }
 
 void UCSMainMenu::ShowNotification(const FText& Message, float Duration)

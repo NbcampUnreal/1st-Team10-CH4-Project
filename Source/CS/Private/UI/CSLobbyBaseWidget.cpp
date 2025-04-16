@@ -8,7 +8,7 @@
 #include "GameModes/CSLobbyGameMode.h"   // StartMatchIfReady 사용
 #include "Kismet/GameplayStatics.h"
 #include "UI/CSPlayerEntry.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "Data/CSCharacterRow.h"
 #include "UObject/ConstructorHelpers.h" // StaticEnum
 

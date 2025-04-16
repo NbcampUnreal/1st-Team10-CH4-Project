@@ -8,7 +8,7 @@
 #include "GameModes/CSMainMenuGameMode.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "GameStates/CSLobbyGameState.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
 #include "UI/CSUIBaseWidget.h"
 #include "UI/CSMainMenu.h"
@@ -43,7 +43,7 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
     }
 
     UWorld* World = GetWorld();
-    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+    UCSAdvancedGameInstance* GI = GetGameInstance<UCSAdvancedGameInstance>();
     if (!GI || !World) { UE_LOG(LogTemp, Error, TEXT("ClientRestart: GI or World is NULL!")); return; }
 
     FName CurrentLevelName = FName(*World->GetName());
@@ -92,7 +92,7 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
 void ACSPlayerController::InitializeCurrentUI()
 {
     UWorld* World = GetWorld();
-    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+    UCSAdvancedGameInstance* GI = GetGameInstance<UCSAdvancedGameInstance>();
     if (!GI || !World) return;
 
     FName CurrentLevelName = FName(*World->GetName());
@@ -141,7 +141,7 @@ void ACSPlayerController::Client_ShowLobbyUI_Implementation()
     if (!IsLocalController()) return;
     if (CurrentActiveUI) { CurrentActiveUI->RemoveFromParent(); CurrentActiveUI = nullptr; }
 
-    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+    UCSAdvancedGameInstance* GI = GetGameInstance<UCSAdvancedGameInstance>();
 
     EMatchType CurrentMatchType = GI->GetMatchType();
     TSubclassOf<UCSLobbyBaseWidget> LobbyClassToCreate = nullptr;
@@ -225,26 +225,6 @@ void ACSPlayerController::Client_OnSuddenDeath_Implementation()
 {
     if (IsLocalController() && CurrentActiveUI) {
         // CurrentActiveUI->TriggerSuddenDeathUI(); // 위젯 함수 호출
-    }
-}
-
-void ACSPlayerController::RequestEnterMultiplayerMode(EMatchType NewMatchType)
-{
-    if (UCSGameInstance* GameInstance = GetGameInstance<UCSGameInstance>())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("🟩 RequestEnterMultiplayerMode | Player: %s | NetMode: %d | IsHost: %d"),
-            *GetName(), (int32)GetNetMode(), bIsHostPlayer);
-
-        if (bIsHostPlayer) // Listen Server
-        {
-            GameInstance->SetMatchType(NewMatchType);
-            GameInstance->HostSession(NewMatchType);
-        }
-        else // Client
-        {
-            GameInstance->SetMatchType(NewMatchType);
-            GameInstance->FindSessions();
-        }
     }
 }
 
