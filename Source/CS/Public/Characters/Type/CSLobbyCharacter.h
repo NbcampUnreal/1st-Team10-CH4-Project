@@ -18,7 +18,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Lobby Character")
 	void UpdateMeshFromJobType(EJobTypes JobType);
-
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateMesh(EJobTypes NewJob);
+	void Multicast_UpdateMesh_Implementation(EJobTypes NewJob);
+	
 protected:
 	virtual void BeginPlay() override;
 

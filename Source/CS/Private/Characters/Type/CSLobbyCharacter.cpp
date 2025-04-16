@@ -19,6 +19,11 @@ ACSLobbyCharacter::ACSLobbyCharacter()
     }
 }
 
+void ACSLobbyCharacter::Multicast_UpdateMesh_Implementation(EJobTypes NewJob)
+{
+    UpdateMeshFromJobType(NewJob);
+}
+
 void ACSLobbyCharacter::BeginPlay()
 {
     Super::BeginPlay();

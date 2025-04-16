@@ -386,7 +386,7 @@ void ACSLobbyGameMode::SetSelectedPlayerJob(APlayerController* Player, EJobTypes
 
 		if (ACSLobbyCharacter* LobbyCharacter = LobbyCharacterMap.FindRef(Player))
 		{
-			LobbyCharacter->UpdateMeshFromJobType(NewJob);
+			LobbyCharacter->Multicast_UpdateMesh(NewJob);
 		}
 	}
 }
