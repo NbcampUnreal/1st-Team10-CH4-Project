@@ -1,13 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Controller/CSPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameStateBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameModes/CSGameModeBase.h"
 #include "GameModes/CSLobbyGameMode.h"
-#include "GameModes/CSMainMenuGameMode.h"
 #include "PlayerStates/CSPlayerState.h"
-#include "GameStates/CSLobbyGameState.h"
 #include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSGameStateBase.h"
 #include "UI/CSUIBaseWidget.h"
@@ -16,7 +14,10 @@
 #include "UI/CSVersusLobbyWidget.h"
 #include "UI/CSCoopLobbyWidget.h"
 #include "UI/CSInGameHUD.h"
-#include "Kismet/GameplayStatics.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Engine/World.h"
+#include "GameFramework/Pawn.h"
+#include "Engine/LocalPlayer.h"
 
 ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr), bIsHostPlayer(false) {}
 
@@ -35,10 +36,8 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
 {
     Super::ClientRestart_Implementation(NewPawn);
 
-    UE_LOG(LogTemp, Warning, TEXT("ACSPlayerController::ClientRestart --- Called for Controller: %s"), *GetName());
 
     if (!IsLocalPlayerController()) {
-        UE_LOG(LogTemp, Log, TEXT("ClientRestart: Not Local Player Controller. Skipping UI/Input setup."));
         return;
     }
 
@@ -52,14 +51,11 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
     // 메인 메뉴나 로비 레벨에서는 실행 안 함
     if (CurrentLevelName == FName("MainMenuLevel") || CurrentLevelName == FName("LobbyLevel")) { return; }
 
-    UE_LOG(LogTemp, Warning, TEXT("ClientRestart: In Gameplay Level. Setting up HUD and Game Input Mode..."));
 
-    // 기존 UI 제거
     if (CurrentActiveUI) { CurrentActiveUI->RemoveFromParent(); CurrentActiveUI = nullptr; }
 
-    // 레벨에 맞는 HUD 클래스 결정
     TSubclassOf<UCSUIBaseWidget> UIClassToCreate = nullptr;
-    // ... (레벨 이름으로 HUD 클래스 결정 로직 - 이전과 동일) ...
+
     if (CurrentLevelName == FName("SingleModeLevel")) { UIClassToCreate = StageHUDClass; }
     else if (CurrentLevelName == FName("SingleModeBossLevel")) { UIClassToCreate = BossHUDClass; }
     else if (CurrentLevelName == FName("VersusModeLevel")) { UIClassToCreate = VersusHUDClass; }
@@ -71,24 +67,18 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
         CurrentActiveUI = CreateWidget<UCSUIBaseWidget>(this, UIClassToCreate);
         if (CurrentActiveUI) {
             CurrentActiveUI->AddToViewport();
-            UE_LOG(LogTemp, Log, TEXT("ClientRestart: Initialized Gameplay UI: %s"), *UIClassToCreate->GetName());
         }
-        else { UE_LOG(LogTemp, Error, TEXT("ClientRestart: CreateWidget FAILED!")); }
     }
-    else { UE_LOG(LogTemp, Warning, TEXT("ClientRestart: No HUD Class determined!")); }
 
     // 입력 모드 설정 (GameOnly)
     FInputModeGameOnly InputModeData;
     SetInputMode(InputModeData);
     bShowMouseCursor = false;
-    UE_LOG(LogTemp, Warning, TEXT("ClientRestart: >>> Input Mode SET TO GAME ONLY <<<"));
 
     // 뷰포트 포커스 설정
     FSlateApplication::Get().SetUserFocusToGameViewport(0);
-    UE_LOG(LogTemp, Log, TEXT("ClientRestart: >>> Set Focus to Game Viewport <<<"));
 }
 
-// InitializeCurrentUI 함수 단순화: 메인 메뉴만 처리
 void ACSPlayerController::InitializeCurrentUI()
 {
     UWorld* World = GetWorld();
@@ -96,23 +86,16 @@ void ACSPlayerController::InitializeCurrentUI()
     if (!GI || !World) return;
 
     FName CurrentLevelName = FName(*World->GetName());
-    UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Checking Level=%s"), *CurrentLevelName.ToString());
 
-    // --- 로비 레벨 예외 처리 유지 ---
     if (CurrentLevelName == FName("LobbyLevel")) {
-        UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: In LobbyLevel, skipping UI creation/removal logic."));
-        // 로비 진입 시 입력 모드는 Client_ShowLobbyUI 에서 처리
         return;
     }
-    // --- 예외 처리 끝 ---
 
-    // 다른 레벨에서 혹시 남아있을 수 있는 UI 제거
     if (CurrentActiveUI) {
         CurrentActiveUI->RemoveFromParent();
         CurrentActiveUI = nullptr;
     }
 
-    // 메인 메뉴 레벨일 경우에만 메인 메뉴 UI 로드
     if (CurrentLevelName == FName("MainMenuLevel")) {
         TSubclassOf<UCSUIBaseWidget> UIClassToCreate = MainMenuWidgetClass;
         if (UIClassToCreate) {
@@ -120,19 +103,13 @@ void ACSPlayerController::InitializeCurrentUI()
             if (CurrentActiveUI) {
                 CurrentActiveUI->AddToViewport();
                 UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Initialized UI: %s"), *UIClassToCreate->GetName());
-                // 메인 메뉴 입력 모드 설정
+
                 FInputModeUIOnly InputModeData;
-                InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget()); // 메인 메뉴에 포커스
+                InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget());
                 SetInputMode(InputModeData);
                 bShowMouseCursor = true;
-                UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Set Input Mode to UIOnly for MainMenu."));
             }
-            else { UE_LOG(LogTemp, Error, TEXT("InitializeCurrentUI: Failed to create MainMenuWidget!")); }
         }
-        else { UE_LOG(LogTemp, Warning, TEXT("InitializeCurrentUI: MainMenuWidgetClass is not set!")); }
-    }
-    else {
-        UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Not MainMenuLevel, UI will be handled by OnPossess or Client_ShowLobbyUI."));
     }
 }
 
@@ -191,8 +168,6 @@ void ACSPlayerController::Server_SelectCharacter_Implementation(EJobTypes Select
 {
     ACSLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ACSLobbyGameMode>();
     if (LobbyGameMode) {
-        // LobbyGameMode의 SetPlayerSelection 함수 시그니처도 EJobTypes 로 변경 필요
-        // 확인 후 호출 또는 주석 처리
         LobbyGameMode->SetSelectedPlayerJob(this, SelectedJob);
     }
 }
@@ -202,22 +177,28 @@ void ACSPlayerController::Server_RequestReady_Implementation(bool bReady)
 {
     ACSPlayerState* PS = GetPlayerState<ACSPlayerState>();
     if (PS) { PS->SetIsReady(bReady); }
-    else { UE_LOG(LogTemp, Warning, TEXT("Server_RequestReady: PlayerState not found.")); }
 }
 
 bool ACSPlayerController::Server_RequestReturnToMainMenu_Validate() { return true; }
 void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
 {
-    // TODO: 메인 메뉴 레벨로 이동
     UWorld* World = GetWorld();
-    if (World) {
-        UE_LOG(LogTemp, Log, TEXT("Server: Returning to Main Menu..."));
-        // UGameplayStatics::OpenLevel(World, FName("MainMenuLevel")); // 클라이언트에게는 적용 안 됨
-        // 모든 클라이언트에게 이동 명령 필요
-        // GetWorld()->ServerTravel(TEXT("/Game/Maps/MainMenuLevel?listen")); // 리슨 서버 호스트만 이동
-        // TODO: 각 클라이언트가 스스로 MainMenuLevel 로 이동하도록 처리 (예: GameMode에서 RPC 호출)
-        AGameModeBase* GM = World->GetAuthGameMode();
-        // if (GM) GM->RequestClientsReturnToMainMenu(); // GameMode에 함수 추가 필요
+    if (!World) {
+        return;
+    }
+
+    AGameModeBase* CurrentGM = UGameplayStatics::GetGameMode(World);
+
+    if (!CurrentGM) {
+        return; // GameMode 없으면 진행 불가
+    }
+    if (ACSLobbyGameMode* LobbyGM = Cast<ACSLobbyGameMode>(CurrentGM)) {
+        LobbyGM->ReturnAllPlayersToMainMenu();
+    }
+    else if (ACSGameModeBase* CastedGameModeBase = Cast<ACSGameModeBase>(CurrentGM)) {
+        CastedGameModeBase->ReturnAllPlayersToMainMenu();
+    }
+    else {
     }
 }
 

@@ -10,21 +10,18 @@
 #include "UI/CSPlayerEntry.h"
 #include "GameInstance/CSAdvancedGameInstance.h"
 #include "Data/CSCharacterRow.h"
-#include "UObject/ConstructorHelpers.h" // StaticEnum
+#include "UObject/ConstructorHelpers.h"
+#include "GameFramework/GameStateBase.h"
 
 void UCSLobbyBaseWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (ReadyButton) // Null 체크 추가
-	{
-		ReadyButton->OnClicked.AddDynamic(this, &UCSLobbyBaseWidget::OnReadyClicked);
-	}
-	if (StartButton) // Null 체크 추가
-	{
-		StartButton->OnClicked.AddDynamic(this, &UCSLobbyBaseWidget::OnStartClicked);
-		StartButton->SetVisibility(ESlateVisibility::Collapsed);
-	}
-	// SetupCharacterSelection(); // BP 에서 처리 권장
+	if (ReadyButton) { ReadyButton->OnClicked.AddDynamic(this, &UCSLobbyBaseWidget::OnReadyClicked); }
+	if (ExitButton) { ExitButton->OnClicked.AddDynamic(this, &UCSLobbyBaseWidget::OnExitClicked); }
+
+	// Tick 업데이트 간격 설정
+	ReadyCountUpdateInterval = 0.25f; // 예: 0.25초마다 Ready 카운트 업데이트
+	TimeSinceLastReadyCountUpdate = ReadyCountUpdateInterval; // 처음엔 바로 업데이트하도록
 }
 
 void UCSLobbyBaseWidget::InitializeLobby(EMatchType CurrentMatchType)
@@ -32,38 +29,60 @@ void UCSLobbyBaseWidget::InitializeLobby(EMatchType CurrentMatchType)
 	LobbyMatchType = CurrentMatchType;
 	bLocalPlayerIsReady = false;
 	UpdateLocalReadyStatus(bLocalPlayerIsReady);
-
-	APlayerController* PC = GetOwningPlayer();
-	// TObjectPtr 사용 시 -> 또는 Get() 사용, Null 체크 필수
-	if (StartButton && PC && PC->HasAuthority())
-	{
-		StartButton->SetVisibility(ESlateVisibility::Visible);
-		StartButton->SetIsEnabled(false); // SetIsEnabled 직접 호출
-	}
 	UpdatePlayerList();
+}
+
+// NativeTick 함수 구현 추가!
+void UCSLobbyBaseWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	TimeSinceLastReadyCountUpdate += InDeltaTime;
+	if (TimeSinceLastReadyCountUpdate >= ReadyCountUpdateInterval)
+	{
+		TimeSinceLastReadyCountUpdate = 0.0f; // 타이머 리셋
+
+		AGameStateBase* GS = UGameplayStatics::GetGameState(GetWorld());
+		if (GS && ReadyCountText) // GameState와 Text 위젯 유효성 검사
+		{
+			int32 CurrentReadyCount = 0;
+			int32 TotalPlayerCount = GS->PlayerArray.Num();
+
+			for (APlayerState* Player : GS->PlayerArray)
+			{
+				ACSPlayerState* CSPlayer = Cast<ACSPlayerState>(Player);
+				if (CSPlayer && CSPlayer->bIsReady) // Ready 상태인지 확인
+				{
+					CurrentReadyCount++;
+				}
+			}
+
+			FText ReadyCountDisplayText = FText::Format(NSLOCTEXT("LobbyWidget", "ReadyCountFormat", "Ready: {0}/{1}"),
+				FText::AsNumber(CurrentReadyCount),
+				FText::AsNumber(TotalPlayerCount));
+			ReadyCountText->SetText(ReadyCountDisplayText);
+		}
+	}
 }
 
 void UCSLobbyBaseWidget::UpdatePlayerList()
 {
-	AGameStateBase* GS = UGameplayStatics::GetGameState(GetWorld()); // 기본 GameState 가져오기
+	AGameStateBase* GS = UGameplayStatics::GetGameState(GetWorld());
 	if (GS) {
-		RefreshPlayerList(GS->PlayerArray); // 파생 클래스에서 오버라이드된 함수 호출
+		RefreshPlayerList(GS->PlayerArray);
 	}
-	// Base의 UpdatePlayerList 에서는 Start 버튼 로직 제거 (파생 클래스 책임)
 }
 
-// 파생 클래스에서 오버라이드 필요
 void UCSLobbyBaseWidget::RefreshPlayerList(const TArray<APlayerState*>& PlayerArray)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UCSLobbyBaseWidget::RefreshPlayerList should be overridden!"));
-	// 기본 구현의 Start 버튼 로직 (Fallback)
-	APlayerController* PC = GetOwningPlayer();
-	if (StartButton && PC && PC->HasAuthority()) {
-		// GameState 캐스팅 및 헤더 포함 확인
-		ACSLobbyGameState* LG = GetWorld() ? Cast<ACSLobbyGameState>(GetWorld()->GetGameState()) : nullptr;
-		bool bAllReady = LG ? LG->AreAllPlayerReady() : false;
-		bool bMinPlayerCondition = (PlayerArray.Num() > 0);
-		StartButton->SetIsEnabled(bMinPlayerCondition && bAllReady); // SetIsEnabled 직접 호출
+}
+
+void UCSLobbyBaseWidget::OnExitClicked()
+{
+	ACSPlayerController* PC = GetOwningCSPlayerController();
+	if (PC)
+	{
+		PC->Server_RequestReturnToMainMenu();
 	}
 }
 
@@ -71,7 +90,7 @@ void UCSLobbyBaseWidget::RefreshPlayerList(const TArray<APlayerState*>& PlayerAr
 void UCSLobbyBaseWidget::UpdateLocalReadyStatus(bool bIsReady)
 {
 	bLocalPlayerIsReady = bIsReady;
-	if (ReadyButtonText) // Null 체크
+	if (ReadyButtonText)
 	{
 		ReadyButtonText->SetText(FText::FromString(bIsReady ? TEXT("CANCEL") : TEXT("READY")));
 	}
@@ -81,38 +100,16 @@ void UCSLobbyBaseWidget::HandleCharacterSelected(EJobTypes SelectedJob)
 {
 	ACSPlayerController* PC = GetOwningCSPlayerController();
 	if (PC) {
-		UE_LOG(LogTemp, Log, TEXT("UI: Character selected: %d. Calling RPC."), (int32)SelectedJob);
-		// PlayerController RPC 호출 (주석 해제!)
 		PC->Server_SelectCharacter(SelectedJob);
 	}
-	else { UE_LOG(LogTemp, Warning, TEXT("HandleCharacterSelected: PlayerController is null!")); }
 }
 
 void UCSLobbyBaseWidget::OnReadyClicked()
 {
 	ACSPlayerController* PC = GetOwningCSPlayerController();
 	if (PC) {
-		bool bWantsToBeReady = !bLocalPlayerIsReady; // 현재 상태의 반대 값 요청
-		UE_LOG(LogTemp, Log, TEXT("UI: Ready button clicked. Requesting ready state: %d"), bWantsToBeReady);
-		// PlayerController RPC 호출 (주석 해제!)
+		bool bWantsToBeReady = !bLocalPlayerIsReady;
 		PC->Server_RequestReady(bWantsToBeReady);
-		// 로컬 UI 즉시 반영은 PlayerState의 OnRep_IsReady 에서 처리하므로 여기서는 제거
-		// UpdateLocalReadyStatus(bWantsToBeReady);
-	}
-	else { UE_LOG(LogTemp, Warning, TEXT("OnReadyClicked: PlayerController is null!")); }
-}
-
-void UCSLobbyBaseWidget::OnStartClicked()
-{
-	APlayerController* PC = GetOwningPlayer();
-	if (PC && PC->HasAuthority()) {
-		// GameMode 캐스팅 및 헤더 포함 확인
-		ACSLobbyGameMode* GM = GetWorld()->GetAuthGameMode<ACSLobbyGameMode>();
-		if (GM) {
-			UE_LOG(LogTemp, Log, TEXT("UI: Start button clicked by host."));
-			GM->StartMatchIfReady();
-		}
-		else { UE_LOG(LogTemp, Warning, TEXT("UI: Start clicked, but LobbyGameMode not found!")); }
 	}
 }
 
@@ -124,14 +121,5 @@ void UCSLobbyBaseWidget::SetupCharacterSelection()
     TArray<EJobTypes> AvailableJobs = { EJobTypes::EJT_Fighter, EJobTypes::EJT_SwordMan }; // 예시 직업 목록
 
     for (EJobTypes Job : AvailableJobs) {
-        // BP에서 버튼 미리 만들고 연결하는 것이 더 좋음
-        // C++ 동적 생성 예시 (이전 답변 참고, 여기서는 생략하고 BP 방식 권장)
-        UE_LOG(LogTemp, Log, TEXT("Character button for %d should be created/handled in Blueprint."), (int32)Job);
     }
-}
-
-// 캐릭터 버튼 공통 클릭 핸들러 (BP에서 각 버튼 이벤트를 직접 사용하는 것을 권장)
-void UCSLobbyBaseWidget::OnCharacterButtonClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("OnCharacterButtonClicked called. BP implementation recommended!"));
 }

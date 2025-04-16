@@ -2,6 +2,7 @@
 #include "Controller/CSPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "UI/CSUIBaseWidget.h"
 
 ACSVersusGameState::ACSVersusGameState()
 {
@@ -14,9 +15,15 @@ void ACSVersusGameState::OnRep_OnSuddenDeath()
 {
 	if (!bIsSuddenDeath) return;
 
-	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(UGameplayStatics::GetPlayerController(this, 0)))
-	{
-		/*CSPlayerController->OnSuddenDeathUI();*/
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC && PC->IsLocalController()) {
+		ACSPlayerController* CSPC = Cast<ACSPlayerController>(PC);
+		if (CSPC) {
+			UCSUIBaseWidget* CurrentUI = CSPC->GetCurrentUI();
+			if (CurrentUI) {
+				CurrentUI->TriggerSuddenDeathUI();
+			}
+		}
 	}
 }
 
