@@ -41,8 +41,5 @@ void AAISwordManController::SetupPerceptionSystem()
 
 void AAISwordManController::OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus)
 {
-	if (auto* const character = Cast<ACSPlayerCharacter>(Actor))
-	{
-		GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed());
-	}
+	Super::OnTargetDetected(Actor, Stimulus);
 }

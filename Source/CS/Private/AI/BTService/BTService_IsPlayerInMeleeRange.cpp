@@ -20,13 +20,13 @@ void UBTService_IsPlayerInMeleeRange::TickNode(UBehaviorTreeComponent& OwnerComp
 		{
 			if (auto* AI = Cast<AAIBaseCharacter>(Cont->GetPawn()))
 			{
-				if (auto* Player = UGameplayStatics::GetPlayerCharacter(AI->GetWorld(), 0))
+				UObject* TargetObject = BB->GetValueAsObject("TargetActor");
+				if (auto* TargetActor = Cast<AActor>(TargetObject))
 				{
-					const float Distance = AI->GetDistanceTo(Player);
+					const float Distance = AI->GetDistanceTo(TargetActor);
 					const bool bInRange = Distance <= MeleeRange;
 
 					BB->SetValueAsBool(GetSelectedBlackboardKey(), bInRange);
-					
 				}
 			}
 		}
