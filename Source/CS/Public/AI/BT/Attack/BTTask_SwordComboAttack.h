@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,9 +5,7 @@
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
 #include "BTTask_SwordComboAttack.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class CS_API UBTTask_SwordComboAttack : public UBTTask_BlackboardBase
 {
@@ -18,9 +15,9 @@ public:
 	
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-private:
-
-	void FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp);
-	bool MontageHasfinished(class AAIBaseCharacter* const AI);
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+	bool MontageHasfinished(AAIBaseCharacter* AI);
+	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
 };

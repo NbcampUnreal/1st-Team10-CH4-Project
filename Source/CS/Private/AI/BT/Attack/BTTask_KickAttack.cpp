@@ -26,8 +26,6 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 		return EBTNodeResult::Failed;
 	}
 	
-	
-	
 	if (const auto* Controller = OwnerComp.GetAIOwner())
 	{
 		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
@@ -38,14 +36,14 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 				if (MontageHasfinished(NPC))
 				{
 					BB->SetValueAsBool(FName("IsBusy"), true);
+					CachedOwnerComp = &OwnerComp;
 
 					Combat->Execute_SecondAttack(NPC);
-					FTimerHandle AttackCooldownTimerHandle;
-					NPC->GetWorldTimerManager().SetTimer(
-						AttackCooldownTimerHandle,
-						FTimerDelegate::CreateUObject(this, &UBTTask_KickAttack::FinishLatentTaskEarly, &OwnerComp),
-						0.4f, false
-					);
+
+					if (UAnimInstance* AnimInst = NPC->GetMesh()->GetAnimInstance())
+					{
+						AnimInst->OnMontageEnded.AddDynamic(this, &UBTTask_KickAttack::OnMontageEnded);
+					}
 
 					return EBTNodeResult::InProgress;
 				}
@@ -56,35 +54,19 @@ EBTNodeResult::Type UBTTask_KickAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 	return EBTNodeResult::Failed;
 }
 
-void UBTTask_KickAttack::FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp)
+void UBTTask_KickAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!OwnerComp) return;
+	if (!CachedOwnerComp.IsValid()) return;
 
-	if (auto* Controller = OwnerComp->GetAIOwner())
+	if (UBlackboardComponent* BB = CachedOwnerComp.Get()->GetBlackboardComponent())
 	{
-		if (auto* NPC = Cast<AAIBaseCharacter>(Controller->GetPawn()))
-		{
-			if (UBlackboardComponent* BBComp = OwnerComp->GetBlackboardComponent())
-			{
-				BBComp->SetValueAsBool(FName("IsBusy"), false);
-				BBComp->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
-			}
-			if (MontageHasfinished(NPC))
-			{
-				FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
-			}
-			else
-			{
-				FTimerHandle AttackCooldownTimerHandle;
-				NPC->GetWorldTimerManager().SetTimer(
-					AttackCooldownTimerHandle,
-					FTimerDelegate::CreateUObject(this, &UBTTask_KickAttack::FinishLatentTaskEarly, OwnerComp),
-					0.2f, false
-				);
-			}
-		}
+		BB->SetValueAsBool(FName("IsBusy"), false);
+		BB->SetValueAsBool(FName("PlayerIsInMeleeRange"), false);
 	}
+
+	FinishLatentTask(*CachedOwnerComp.Get(), EBTNodeResult::Succeeded);
 }
+
 
 bool UBTTask_KickAttack::MontageHasfinished(AAIBaseCharacter* const AI)
 {

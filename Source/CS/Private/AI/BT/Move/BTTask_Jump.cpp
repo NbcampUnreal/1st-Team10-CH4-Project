@@ -29,6 +29,10 @@ EBTNodeResult::Type UBTTask_Jump::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	}
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	if (BB && BB->GetValueAsBool(FName("IsHitReacting")))
+	{
+		return EBTNodeResult::Failed;
+	}
 	BB->SetValueAsBool(FName("IsBusy"), true);
 
 	AIPawn->Jump();

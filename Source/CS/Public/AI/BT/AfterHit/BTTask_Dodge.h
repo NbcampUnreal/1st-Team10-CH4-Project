@@ -17,7 +17,6 @@ public:
 	UBTTask_Dodge();
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	virtual void FinishDodge(UBehaviorTreeComponent* OwnerComp);
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	struct FBlackboardKeySelector ShouldDodgeKey;

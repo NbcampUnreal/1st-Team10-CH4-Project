@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/Character/AIBaseCharacter.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
 #include "BTTask_LowComboAttack.generated.h"
 
@@ -18,9 +19,10 @@ public:
 	
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+	bool MontageHasfinished(AAIBaseCharacter* AI);
 
-private:
-
-	void FinishLatentTaskEarly(UBehaviorTreeComponent* OwnerComp);
-	bool MontageHasfinished(class AAIBaseCharacter* const AI);
+	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
 };

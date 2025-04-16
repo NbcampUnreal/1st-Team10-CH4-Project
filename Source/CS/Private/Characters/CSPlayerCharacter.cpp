@@ -14,8 +14,6 @@
 #include "Components/CSCombatComponent.h"
 #include "Net/UnrealNetwork.h"
 
-
-
 ACSPlayerCharacter::ACSPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -42,8 +40,8 @@ ACSPlayerCharacter::ACSPlayerCharacter()
 
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 
-	SetNetUpdateFrequency(100.f);			// 초당 최대 업데이트 횟수
-	SetMinNetUpdateFrequency(30.f);		// 최소 보장 횟수
+	SetNetUpdateFrequency(100.f);
+	SetMinNetUpdateFrequency(30.f);
 }
 
 void ACSPlayerCharacter::BeginPlay()
@@ -194,18 +192,13 @@ void ACSPlayerCharacter::GuardEnd()
 
 void ACSPlayerCharacter::DodgeStart()
 {
-	if (ActionState == ECharacterTypes::ECT_Unoccupied)
-	{
-		Server_PerformDodge();
-	}
+	if (ActionState == ECharacterTypes::ECT_Launch) return;
+	Server_PerformDodge();
 }
 
 void ACSPlayerCharacter::DodgeEnd()
 {
-	if (ActionState == ECharacterTypes::ECT_Dodge)
-	{
-		Server_FinishDodge();
-	}
+	Server_FinishDodge();
 }
 
 void ACSPlayerCharacter::StopMovement_Implementation()
@@ -221,20 +214,6 @@ void ACSPlayerCharacter::Server_PerformDodge_Implementation()
 	{
 		ActionState = ECharacterTypes::ECT_Dodge;
 		OnRep_ActionState();
-
-		Multicast_PlayDodgeMontage();
-	}
-}
-
-void ACSPlayerCharacter::Multicast_PlayDodgeMontage_Implementation()
-{
-	if (DodgeMontage)
-	{
-		UAnimInstance* AnimInstance = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
-		if (AnimInstance)
-		{
-			AnimInstance->Montage_Play(DodgeMontage, 1.f);
-		}
 	}
 }
 

@@ -1,6 +1,7 @@
 #include "AI/Character/AIFighterCharacter.h"
 
 #include "AI/Controller/AIFighterController.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AAIFighterCharacter::AAIFighterCharacter()
@@ -13,7 +14,20 @@ AAIFighterCharacter::AAIFighterCharacter()
 void AAIFighterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (!PatrolPath)
+	{
+		TArray<AActor*> FoundPaths;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APatrolPath::StaticClass(), FoundPaths);
+
+		for (AActor* Actor : FoundPaths)
+		{
+			if (Actor->ActorHasTag(FName("CoopPatrol")))
+			{
+				PatrolPath = Cast<APatrolPath>(Actor);
+				break;
+			}
+		}
+	}
 }
 
 
