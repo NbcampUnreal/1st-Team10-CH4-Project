@@ -192,13 +192,22 @@ void ACSPlayerCharacter::GuardEnd()
 
 void ACSPlayerCharacter::DodgeStart()
 {
-	if (ActionState == ECharacterTypes::ECT_Launch) return;
-	Server_PerformDodge();
+	if (ActionState == ECharacterTypes::ECT_Unoccupied)
+	{
+		//PlayAnimMontage(DodgeMontage);
+		Server_PerformDodge();
+	}
 }
 
 void ACSPlayerCharacter::DodgeEnd()
 {
-	Server_FinishDodge();
+	if (IsLocallyControlled() || GetLocalRole() == ROLE_Authority)
+	{
+		if (ActionState == ECharacterTypes::ECT_Dodge)
+		{
+			Server_FinishDodge();
+		}
+	}
 }
 
 void ACSPlayerCharacter::StopMovement_Implementation()
@@ -210,10 +219,10 @@ void ACSPlayerCharacter::StopMovement_Implementation()
 
 void ACSPlayerCharacter::Server_PerformDodge_Implementation()
 {
-	if (ActionState == ECharacterTypes::ECT_Unoccupied)
+	if (ActionState == ECharacterTypes::ECT_Unoccupied && DodgeMontage)
 	{
-		ActionState = ECharacterTypes::ECT_Dodge;
-		OnRep_ActionState();
+		MultiSetActionState(ECharacterTypes::ECT_Dodge);
+		Multicast_PlayDodgeMontage();
 	}
 }
 
@@ -222,12 +231,23 @@ void ACSPlayerCharacter::Server_FinishDodge_Implementation()
 	if (ActionState == ECharacterTypes::ECT_Dodge)
 	{
 		ActionState = ECharacterTypes::ECT_Unoccupied;
-		OnRep_ActionState();
+		//OnRep_ActionState();
+	}
+}
+
+void ACSPlayerCharacter::Multicast_PlayDodgeMontage_Implementation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && DodgeMontage)
+	{
+		AnimInstance->Montage_Play(DodgeMontage, 1.0f);
 	}
 }
 
 void ACSPlayerCharacter::StartAttack(UAnimMontage* PlayMontage, FName Section)
 {
+	if (ActionState != ECharacterTypes::ECT_Unoccupied) return;
 	if (CombatComponent)
 	{
 		if (HasAuthority())

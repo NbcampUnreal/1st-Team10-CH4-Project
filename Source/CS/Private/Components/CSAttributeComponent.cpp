@@ -66,6 +66,11 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 		LookRot.Yaw + 90.0f
 	);
 
+	if (OwningCharacter->GetActionState() == ECharacterTypes::ECT_Dodge)
+	{
+		return;
+	}
+
 	if (bIsFrontHit)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Front Hit!!!"));
