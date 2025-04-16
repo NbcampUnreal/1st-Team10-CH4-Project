@@ -20,7 +20,8 @@ public class CS : ModuleRules
 				"Slate",
 				"SlateCore",
 				"OnlineSubsystem",
-				"OnlineSubsystemUtils"
+				"OnlineSubsystemUtils",
+				"AdvancedSessions"
 			});
 
 

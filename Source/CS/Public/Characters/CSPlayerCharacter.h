@@ -61,6 +61,9 @@ public:
 	void Server_FinishDodge();
 	void Server_FinishDodge_Implementation();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDodgeMontage();
+
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void ActivateSuddenDeathMode();
 

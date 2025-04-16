@@ -6,15 +6,18 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-AAIBaseController::AAIBaseController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
+AAIBaseController::AAIBaseController(FObjectInitializer const& FObjectInitializer)
 {
-	AAIBaseController::SetupPerceptionSystem();
 	/*bStartAILogicOnPossess = false;*/
 	bStartAILogicOnPossess = true;
+
+	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("Signt Config");
+	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component")));
 }
 
 void AAIBaseController::OnPossess(APawn* InPawn)
 {
+	AAIBaseController::SetupPerceptionSystem();
 	Super::OnPossess(InPawn);
 
 	if (AAIBaseCharacter* const NPC = Cast<AAIBaseCharacter>(InPawn))
@@ -35,11 +38,9 @@ void AAIBaseController::OnPossess(APawn* InPawn)
 
 void AAIBaseController::SetupPerceptionSystem()
 {
-	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("Signt Config");
+
 	if (SenseConfig)
 	{
-		SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(
-		TEXT("Perception Component")));
 		SenseConfig->SightRadius = 500.0f;
 		SenseConfig->LoseSightRadius = SenseConfig->SightRadius + 100.f;
 		SenseConfig->PeripheralVisionAngleDegrees = 270.0f;
@@ -51,9 +52,7 @@ void AAIBaseController::SetupPerceptionSystem()
 
 		GetPerceptionComponent()->SetDominantSense(*SenseConfig->GetSenseImplementation());
 		GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAIBaseController::OnTargetDetected);
-		GetPerceptionComponent()->ConfigureSense(*SenseConfig);
-		
-		
+		GetPerceptionComponent()->ConfigureSense(*SenseConfig);		
 	}
 }
 

@@ -1,6 +1,6 @@
 #include "GameModes/CSGameModeBase.h"
 #include "GameStates/CSGameStateBase.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "AI/Controller/AIBaseController.h"
 #include "Managers/CSSpawnManager.h"
@@ -30,7 +30,7 @@ void ACSGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CSGameInstance = GetGameInstance<UCSGameInstance>();
+	CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>();
 	BaseGameState = GetGameState<ACSGameStateBase>();
 
 	SetMatchPhase(EMatchPhase::EMP_Waiting);
@@ -278,6 +278,53 @@ void ACSGameModeBase::UpdateMatchTimer()
 			GetWorldTimerManager().ClearTimer(MatchTimerHandle);
 		}
 	}
+}
+
+void ACSGameModeBase::ReturnToMainMenu(AController* TargetPlayer)
+{
+	if (!CSGameInstance) return;
+
+	const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("MainMenuLevel"));
+	if (!LevelRow || LevelRow->MapPath.IsEmpty()) return;
+
+	const FString TravelURL = LevelRow->MapPath;
+
+
+	// 싱글플레이
+	if (GetNetMode() == NM_Standalone)
+	{
+		UGameplayStatics::OpenLevel(this, FName(*TravelURL));
+		return;
+	}
+
+	// 호스트가 전체 이동
+	if (HasAuthority() && !TargetPlayer)
+	{
+		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+		IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+		if (Session.IsValid()) Session->DestroySession(NAME_GameSession);
+
+		GetWorld()->ServerTravel(TravelURL);
+		return;
+	}
+
+	// 특정 플레이어(게스트 한 명) 이동
+	if (TargetPlayer)
+	{
+		APlayerController* PC = Cast<APlayerController>(TargetPlayer);
+		if (!PC) return;
+
+		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+		IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
+		if (Session.IsValid()) Session->DestroySession(NAME_GameSession);
+
+		PC->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+	}
+}
+
+void ACSGameModeBase::ReturnAllPlayersToMainMenu()
+{
+	ReturnToMainMenu(nullptr);
 }
 
 void ACSGameModeBase::ReturnToLobby()

@@ -13,7 +13,7 @@ class CS_API AAIBaseController : public AAIController
     GENERATED_BODY()
 
 public:
-    explicit AAIBaseController(FObjectInitializer const& FObjectInitializer);
+    AAIBaseController(FObjectInitializer const& FObjectInitializer);
     void StartLogicAI();
     
 protected:

@@ -14,7 +14,5 @@ public:
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
-	bool CheackShouldStartTravel();
-
 	bool bHasServerTraveld;
 };

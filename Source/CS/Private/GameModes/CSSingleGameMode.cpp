@@ -1,5 +1,5 @@
 #include "GameModes/CSSingleGameMode.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSSingleGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "AI/Character/AIBaseCharacter.h"

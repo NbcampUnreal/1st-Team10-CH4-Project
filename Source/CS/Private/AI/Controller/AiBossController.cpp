@@ -4,20 +4,23 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-AAIBossController::AAIBossController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
-{
-	AAIBossController::SetupPerceptionSystem();
+
+AAIBossController::AAIBossController(FObjectInitializer const& FObjectInitializer) : Super(FObjectInitializer)
+{	
+	bStartAILogicOnPossess = true;
+	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("Sight Config");
 }
 
 void AAIBossController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	
+	AAIBossController::SetupPerceptionSystem();
 }
 
 void AAIBossController::SetupPerceptionSystem()
 {
-	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config")); 
+	Super::SetupPerceptionSystem();
+
 	if (SenseConfig && GetPerceptionComponent())
 	{
 		SenseConfig->SightRadius = 1500.0f;
@@ -29,7 +32,7 @@ void AAIBossController::SetupPerceptionSystem()
 		SenseConfig->DetectionByAffiliation.bDetectEnemies = true;
 		SenseConfig->DetectionByAffiliation.bDetectFriendlies = true;
 		SenseConfig->DetectionByAffiliation.bDetectNeutrals = true;
-		
+
 		GetPerceptionComponent()->SetDominantSense(*SenseConfig->GetSenseImplementation());
 		GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAIBossController::OnTargetDetected);
 		GetPerceptionComponent()->ConfigureSense(*SenseConfig);
@@ -39,8 +42,5 @@ void AAIBossController::SetupPerceptionSystem()
 
 void AAIBossController::OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus)
 {
-	if (auto* const character = Cast<ACSPlayerCharacter>(Actor))
-	{
-		GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed());
-	}
+	Super::OnTargetDetected(Actor, Stimulus);
 }

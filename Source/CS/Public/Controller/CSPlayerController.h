@@ -8,9 +8,14 @@
 #include "CSTypes/CSCharacterTypes.h"
 #include "CSPlayerController.generated.h"
 
+// 전방 선언
 class UCSUIBaseWidget;
 class UCSVersusLobbyWidget;
 class UCSCoopLobbyWidget;
+class APawn; // 추가
+class UCSMainMenu;
+class UCSLobbyBaseWidget;
+class UCSInGameHUD;
 
 UCLASS()
 class CS_API ACSPlayerController : public APlayerController
@@ -65,12 +70,11 @@ public:
 	void Client_OnSuddenDeath();
 	virtual void Client_OnSuddenDeath_Implementation();
 
-	void RequestEnterMultiplayerMode(EMatchType NewMatchType);
-
 	bool bIsHostPlayer;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void ClientRestart_Implementation(APawn* NewPawn) override;
 
 	bool bHasInitializedUI = false;
 

@@ -1,5 +1,5 @@
 #include "GameModes/CSLobbyGameMode.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "GameStates/CSLobbyGameState.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
@@ -8,6 +8,9 @@
 #include "Camera/CameraActor.h"
 #include "Data/CSLevelRow.h"
 #include "Kismet/GameplayStatics.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h"
+#include "OnlineSubsystemUtils.h"
 
 ACSLobbyGameMode::ACSLobbyGameMode()
 {
@@ -22,7 +25,7 @@ void ACSLobbyGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+	if (const UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
 	{
 		MatchType = CSGameInstance->GetMatchType();
 	}
@@ -32,9 +35,38 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
+	if (HasAuthority())
+	{
+		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+		if (Subsystem)
+		{
+			IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+			if (SessionInterface.IsValid())
+			{
+				APlayerState* PS = NewPlayer->PlayerState;
+				if (PS)
+				{
+					FUniqueNetIdRepl ReplId = PS->GetUniqueId();  // ✅ 이걸로 접근 가능
+					if (ReplId.IsValid())
+					{
+						const TSharedPtr<const FUniqueNetId> NetId = ReplId.GetUniqueNetId();
+						if (NetId.IsValid())
+						{
+							const FName SessionName = NAME_GameSession;
+							const bool bWasSuccessful = SessionInterface->RegisterPlayer(SessionName, *NetId, false);
+
+							UE_LOG(LogTemp, Log, TEXT("✅ RegisterPlayer: %s | Success: %s"),
+								*NetId->ToString(),
+								bWasSuccessful ? TEXT("true") : TEXT("false"));
+						}
+					}
+				}
+			}
+		}
+	}
 	if (MatchType == EMatchType::EMT_None)
 	{
-		if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+		if (const UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
 		{
 			MatchType = CSGameInstance->GetMatchType();
 		}
@@ -77,7 +109,7 @@ void ACSLobbyGameMode::HandleSeamlessTravelPlayer(AController*& C)
 
 	if (MatchType == EMatchType::EMT_None)
 	{
-		if (const UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+		if (const UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
 		{
 			MatchType = CSGameInstance->GetMatchType();
 		}
@@ -147,7 +179,7 @@ void ACSLobbyGameMode::TryStartMatch()
 	const ACSLobbyGameState* LobbyGameState = GetGameState<ACSLobbyGameState>();
 	if (!LobbyGameState || LobbyGameState->SelectedMap == NAME_None) return;
 
-	if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+	if (UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
 	{
 		const int32 PlayerCount = GameState->PlayerArray.Num();
 		CSGameInstance->ExpectedPlayerCount = PlayerCount;
@@ -347,14 +379,14 @@ void ACSLobbyGameMode::SetSelectedPlayerJob(APlayerController* Player, EJobTypes
 		LobbyData.PlayerIndex = CSPlayerState->PlayerIndex;
 		LobbyData.TeamID = CSPlayerState->TeamID;
 
-		if (UCSGameInstance* CSGameInstance = GetGameInstance<UCSGameInstance>())
+		if (UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
 		{
 			CSGameInstance->SetPlayerLobbyData(CSPlayerState->GetPlayerName(), LobbyData);
 		}
 
 		if (ACSLobbyCharacter* LobbyCharacter = LobbyCharacterMap.FindRef(Player))
 		{
-			LobbyCharacter->UpdateMeshFromJobType(NewJob);
+			LobbyCharacter->Multicast_UpdateMesh(NewJob);
 		}
 	}
 }

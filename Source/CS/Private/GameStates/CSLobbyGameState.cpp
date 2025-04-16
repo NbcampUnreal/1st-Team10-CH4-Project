@@ -1,5 +1,5 @@
 #include "GameStates/CSLobbyGameState.h"
-#include "GameInstance/CSGameInstance.h"
+#include "GameInstance/CSAdvancedGameInstance.h"
 #include "PlayerStates/CSPlayerState.h"
 #include "Controller/CSPlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,7 +11,7 @@ void ACSLobbyGameState::BeginPlay()
 
     if (HasAuthority())
     {
-        if (const UCSGameInstance* GameInstance = GetGameInstance<UCSGameInstance>())
+        if (const UCSAdvancedGameInstance* GameInstance = GetGameInstance<UCSAdvancedGameInstance>())
         {
             switch (GameInstance->GetMatchType())
             {

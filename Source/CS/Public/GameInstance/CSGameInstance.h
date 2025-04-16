@@ -59,6 +59,9 @@ public:
 	void SetPlayerLobbyData(const FString& PlayerName, const FPlayerLobbyData& Data);
 	FPlayerLobbyData GetPlayerLobbyData(const FString& PlayerName) const;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Match")
+	bool bAutoHostIfNoSession;
+
 private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
