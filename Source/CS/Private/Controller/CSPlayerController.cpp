@@ -31,6 +31,64 @@ void ACSPlayerController::BeginPlay()
     }
 }
 
+void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
+{
+    Super::ClientRestart_Implementation(NewPawn);
+
+    UE_LOG(LogTemp, Warning, TEXT("ACSPlayerController::ClientRestart --- Called for Controller: %s"), *GetName());
+
+    if (!IsLocalPlayerController()) {
+        UE_LOG(LogTemp, Log, TEXT("ClientRestart: Not Local Player Controller. Skipping UI/Input setup."));
+        return;
+    }
+
+    UWorld* World = GetWorld();
+    UCSGameInstance* GI = GetGameInstance<UCSGameInstance>();
+    if (!GI || !World) { UE_LOG(LogTemp, Error, TEXT("ClientRestart: GI or World is NULL!")); return; }
+
+    FName CurrentLevelName = FName(*World->GetName());
+    UE_LOG(LogTemp, Log, TEXT("ClientRestart: Level=%s"), *CurrentLevelName.ToString());
+
+    // 메인 메뉴나 로비 레벨에서는 실행 안 함
+    if (CurrentLevelName == FName("MainMenuLevel") || CurrentLevelName == FName("LobbyLevel")) { return; }
+
+    UE_LOG(LogTemp, Warning, TEXT("ClientRestart: In Gameplay Level. Setting up HUD and Game Input Mode..."));
+
+    // 기존 UI 제거
+    if (CurrentActiveUI) { CurrentActiveUI->RemoveFromParent(); CurrentActiveUI = nullptr; }
+
+    // 레벨에 맞는 HUD 클래스 결정
+    TSubclassOf<UCSUIBaseWidget> UIClassToCreate = nullptr;
+    // ... (레벨 이름으로 HUD 클래스 결정 로직 - 이전과 동일) ...
+    if (CurrentLevelName == FName("SingleModeLevel")) { UIClassToCreate = StageHUDClass; }
+    else if (CurrentLevelName == FName("SingleModeBossLevel")) { UIClassToCreate = BossHUDClass; }
+    else if (CurrentLevelName == FName("VersusModeLevel")) { UIClassToCreate = VersusHUDClass; }
+    else if (CurrentLevelName == FName("CoopModeLevel")) { UIClassToCreate = CoopHUDClass; }
+    else { UE_LOG(LogTemp, Warning, TEXT("ClientRestart: Unknown Gameplay Level %s"), *CurrentLevelName.ToString()); }
+
+    // HUD 생성 및 표시
+    if (UIClassToCreate) {
+        CurrentActiveUI = CreateWidget<UCSUIBaseWidget>(this, UIClassToCreate);
+        if (CurrentActiveUI) {
+            CurrentActiveUI->AddToViewport();
+            UE_LOG(LogTemp, Log, TEXT("ClientRestart: Initialized Gameplay UI: %s"), *UIClassToCreate->GetName());
+        }
+        else { UE_LOG(LogTemp, Error, TEXT("ClientRestart: CreateWidget FAILED!")); }
+    }
+    else { UE_LOG(LogTemp, Warning, TEXT("ClientRestart: No HUD Class determined!")); }
+
+    // 입력 모드 설정 (GameOnly)
+    FInputModeGameOnly InputModeData;
+    SetInputMode(InputModeData);
+    bShowMouseCursor = false;
+    UE_LOG(LogTemp, Warning, TEXT("ClientRestart: >>> Input Mode SET TO GAME ONLY <<<"));
+
+    // 뷰포트 포커스 설정
+    FSlateApplication::Get().SetUserFocusToGameViewport(0);
+    UE_LOG(LogTemp, Log, TEXT("ClientRestart: >>> Set Focus to Game Viewport <<<"));
+}
+
+// InitializeCurrentUI 함수 단순화: 메인 메뉴만 처리
 void ACSPlayerController::InitializeCurrentUI()
 {
     UWorld* World = GetWorld();
@@ -38,60 +96,43 @@ void ACSPlayerController::InitializeCurrentUI()
     if (!GI || !World) return;
 
     FName CurrentLevelName = FName(*World->GetName());
-    EMatchType CurrentMatchType = GI->GetMatchType();
-    UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Checking Level=%s, MatchType=%d"), *CurrentLevelName.ToString(), (int32)CurrentMatchType);
+    UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Checking Level=%s"), *CurrentLevelName.ToString());
 
-    if (CurrentLevelName == FName("LobbyLevel"))
-    {
+    // --- 로비 레벨 예외 처리 유지 ---
+    if (CurrentLevelName == FName("LobbyLevel")) {
         UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: In LobbyLevel, skipping UI creation/removal logic."));
-        FInputModeUIOnly InputModeData;
-        SetInputMode(InputModeData);
-        bShowMouseCursor = true;
+        // 로비 진입 시 입력 모드는 Client_ShowLobbyUI 에서 처리
         return;
     }
+    // --- 예외 처리 끝 ---
+
+    // 다른 레벨에서 혹시 남아있을 수 있는 UI 제거
     if (CurrentActiveUI) {
         CurrentActiveUI->RemoveFromParent();
         CurrentActiveUI = nullptr;
     }
 
-    TSubclassOf<UCSUIBaseWidget> UIClassToCreate = nullptr;
-
+    // 메인 메뉴 레벨일 경우에만 메인 메뉴 UI 로드
     if (CurrentLevelName == FName("MainMenuLevel")) {
-        UIClassToCreate = MainMenuWidgetClass;
-    }
-    else if (CurrentLevelName == FName("SingleModeLevel")) {
-        UIClassToCreate = StageHUDClass;
-    }
-    else if (CurrentLevelName == FName("SingleModeBossLevel")) {
-        UIClassToCreate = BossHUDClass;
-    }
-    else if (CurrentLevelName == FName("VersusModeLevel")) {
-        UIClassToCreate = VersusHUDClass;
-    }
-    else if (CurrentLevelName == FName("CoopModeLevel")) {
-        UIClassToCreate = CoopHUDClass;
-    }
-
-    if (UIClassToCreate) {
-        CurrentActiveUI = CreateWidget<UCSUIBaseWidget>(this, UIClassToCreate);
-        if (CurrentActiveUI) {
-            CurrentActiveUI->AddToViewport();
-            UE_LOG(LogTemp, Log, TEXT("Initialized UI: %s"), *UIClassToCreate->GetName());
-
-            bool bIsUIInputMode = (CurrentLevelName == FName("MainMenuLevel"));
-            if (bIsUIInputMode) {
+        TSubclassOf<UCSUIBaseWidget> UIClassToCreate = MainMenuWidgetClass;
+        if (UIClassToCreate) {
+            CurrentActiveUI = CreateWidget<UCSUIBaseWidget>(this, UIClassToCreate);
+            if (CurrentActiveUI) {
+                CurrentActiveUI->AddToViewport();
+                UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Initialized UI: %s"), *UIClassToCreate->GetName());
+                // 메인 메뉴 입력 모드 설정
                 FInputModeUIOnly InputModeData;
-                InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget());
+                InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget()); // 메인 메뉴에 포커스
                 SetInputMode(InputModeData);
                 bShowMouseCursor = true;
+                UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Set Input Mode to UIOnly for MainMenu."));
             }
-            else {
-                FInputModeGameOnly InputModeData;
-                SetInputMode(InputModeData);
-                bShowMouseCursor = false;
-                FSlateApplication::Get().SetUserFocusToGameViewport(0);
-            }
+            else { UE_LOG(LogTemp, Error, TEXT("InitializeCurrentUI: Failed to create MainMenuWidget!")); }
         }
+        else { UE_LOG(LogTemp, Warning, TEXT("InitializeCurrentUI: MainMenuWidgetClass is not set!")); }
+    }
+    else {
+        UE_LOG(LogTemp, Log, TEXT("InitializeCurrentUI: Not MainMenuLevel, UI will be handled by OnPossess or Client_ShowLobbyUI."));
     }
 }
 
