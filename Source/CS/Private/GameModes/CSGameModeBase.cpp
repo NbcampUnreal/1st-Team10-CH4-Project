@@ -9,7 +9,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h" 
 #include "GameFramework/Pawn.h"           
-#include "TimerManager.h"               
+#include "TimerManager.h"           
+#include "Controller/CSPlayerController.h"
+#include "UI/CSUIBaseWidget.h"   
+#include "Framework/Application/SlateApplication.h" 
 
 ACSGameModeBase::ACSGameModeBase()
 {
@@ -129,11 +132,49 @@ void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
 
 void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
+	if (MatchPhase == NewPhase) return;
+
+	UE_LOG(LogTemp, Log, TEXT("ACSGameModeBase::SetMatchPhase: Changing Phase from %d to %d"), (int32)MatchPhase, (int32)NewPhase);
 	MatchPhase = NewPhase;
 
-	if (BaseGameState)
+	if (BaseGameState) {
+		BaseGameState->SetMatchPhase(NewPhase); // 리플리케이트될 GameState 변수 설정
+	}
+
+	// --- 호스트(리슨 서버) UI 직접 업데이트 로직 추가 ---
+	if (HasAuthority()) // 서버에서만 실행
 	{
-		BaseGameState->SetMatchPhase(NewPhase);
+		// 호스트의 로컬 플레이어 컨트롤러 가져오기 (Index 0)
+		APlayerController* HostPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (HostPC && HostPC->IsLocalPlayerController())
+		{
+			ACSPlayerController* HostCSPC = Cast<ACSPlayerController>(HostPC);
+			if (HostCSPC)
+			{
+				UCSUIBaseWidget* HostUI = HostCSPC->GetCurrentUI();
+				if (HostUI)
+				{
+					// 호스트 UI의 이벤트 직접 호출
+					HostUI->HandleMatchPhaseChanged(NewPhase);
+					UE_LOG(LogTemp, Log, TEXT("ACSGameModeBase::SetMatchPhase: Called HandleMatchPhaseChanged on Host UI."));
+
+					// --- 호스트 입력 모드 설정 (여기서 하는 것이 더 안정적) ---
+					if (NewPhase == EMatchPhase::EMP_Playing) {
+						UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Setting Input Mode to GameOnly for Host"));
+						FInputModeGameOnly InputModeData;
+						HostCSPC->SetInputMode(InputModeData);
+						HostCSPC->bShowMouseCursor = false;
+						FSlateApplication::Get().SetUserFocusToGameViewport(0);
+					}
+					else {
+						UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Setting Input Mode to UIOnly for Host"));
+						FInputModeUIOnly InputModeData;
+						HostCSPC->SetInputMode(InputModeData);
+						HostCSPC->bShowMouseCursor = true;
+					}
+				}
+			}
+		}
 	}
 }
 
