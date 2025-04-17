@@ -14,67 +14,33 @@ ACSGameStateBase::ACSGameStateBase()
 
 void ACSGameStateBase::OnRep_MatchPhase()
 {
-    // 로컬 플레이어 컨트롤러 가져오기 (싱글/멀티 공통)
+    // 이 함수는 클라이언트에서만 호출됨
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PC && PC->IsLocalController())
-    {
+    if (PC && PC->IsLocalController()) {
         ACSPlayerController* CSPC = Cast<ACSPlayerController>(PC);
-        if (CSPC)
-        {
-            UE_LOG(LogTemp, Log, TEXT("GameState OnRep_MatchPhase: New Phase = %d"), (int32)MatchPhase);
-            // PlayerController의 함수를 호출하여 상태 변경 알림 (선택적)
-            // CSPC->OnMatchPhaseChanged(MatchPhase);
-
-            // 또는 PlayerController를 통해 현재 UI 위젯을 직접 가져와서 처리
+        if (CSPC) {
+            UE_LOG(LogTemp, Log, TEXT("GameState OnRep_MatchPhase: New Phase = %d (Client)"), (int32)MatchPhase);
             UCSUIBaseWidget* CurrentUI = CSPC->GetCurrentUI();
-            if (CurrentUI)
-            {
-                // 위젯의 HandleMatchPhaseChanged 함수 호출 (BlueprintNativeEvent)
+            if (CurrentUI) {
                 CurrentUI->HandleMatchPhaseChanged(MatchPhase);
-                UE_LOG(LogTemp, Log, TEXT("GameState OnRep_MatchPhase: Called HandleMatchPhaseChanged on Current UI."));
-
-                // --- 여기서 입력 모드 변경을 추가할 수도 있음 ---
-                if (MatchPhase == EMatchPhase::EMP_Playing)
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("GameState OnRep_MatchPhase: Setting Input Mode to GameOnly (via GameState RepNotify)"));
-                    FInputModeGameOnly InputModeData;
-                    CSPC->SetInputMode(InputModeData);
-                    CSPC->bShowMouseCursor = false;
-                    // 포커스 설정도 추가 가능
-                    FSlateApplication::Get().SetUserFocusToGameViewport(0);
-                }
-                else // Waiting, Finished, None 등
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("GameState OnRep_MatchPhase: Setting Input Mode to UI Only (via GameState RepNotify)"));
-                    FInputModeUIOnly InputModeData;
-                    // InputModeData.SetWidgetToFocus(...); // 포커스 줄 위젯 필요 시 설정
-                    CSPC->SetInputMode(InputModeData);
-                    CSPC->bShowMouseCursor = true;
-                }
-                // -----------------------------------------------
+                UE_LOG(LogTemp, Log, TEXT("GameState OnRep_MatchPhase: Called HandleMatchPhaseChanged on Client UI."));
             }
-            else { UE_LOG(LogTemp, Warning, TEXT("GameState OnRep_MatchPhase: CurrentUI is NULL.")); }
+            else { UE_LOG(LogTemp, Warning, TEXT("GameState OnRep_MatchPhase: CurrentUI is NULL on Client.")); }
         }
     }
 }
 
 void ACSGameStateBase::OnRep_RemainingMatchTime()
 {
-    // 로컬 플레이어 컨트롤러 가져오기
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (PC && PC->IsLocalController())
-    {
+    if (PC && PC->IsLocalController()) {
         ACSPlayerController* CSPC = Cast<ACSPlayerController>(PC);
-        if (CSPC)
-        {
+        if (CSPC) {
             UCSUIBaseWidget* CurrentUI = CSPC->GetCurrentUI();
-            if (CurrentUI)
-            {
-                // 위젯의 UpdateMatchTimer 함수 호출 (BlueprintNativeEvent)
+            if (CurrentUI) {
                 CurrentUI->UpdateMatchTimer(RemainingMatchTime);
-                // UE_LOG(LogTemp, Verbose, TEXT("GameState OnRep_RemainingMatchTime: Called UpdateMatchTimer on Current UI. Time = %d"), RemainingMatchTime);
             }
-            else { UE_LOG(LogTemp, Warning, TEXT("GameState OnRep_RemainingMatchTime: CurrentUI is NULL.")); }
+            else { UE_LOG(LogTemp, Warning, TEXT("GameState OnRep_RemainingMatchTime: CurrentUI is NULL on Client.")); }
         }
     }
 }

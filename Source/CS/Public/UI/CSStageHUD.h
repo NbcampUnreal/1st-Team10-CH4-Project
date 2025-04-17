@@ -5,7 +5,7 @@
 #include "CSStageHUD.generated.h"
 
 class UTextBlock;
-class UButton;
+class UButton; // ExitButton 위해 추가!
 
 UCLASS()
 class CS_API UCSStageHUD : public UCSInGameHUD

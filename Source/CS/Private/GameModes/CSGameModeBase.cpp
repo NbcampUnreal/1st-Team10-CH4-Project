@@ -132,7 +132,7 @@ void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
 
 void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
-	if (MatchPhase == NewPhase) return;
+	if (MatchPhase == NewPhase) return; // 변경 없을 시 리턴
 
 	UE_LOG(LogTemp, Log, TEXT("ACSGameModeBase::SetMatchPhase: Changing Phase from %d to %d"), (int32)MatchPhase, (int32)NewPhase);
 	MatchPhase = NewPhase;
@@ -146,6 +146,7 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 	{
 		// 호스트의 로컬 플레이어 컨트롤러 가져오기 (Index 0)
 		APlayerController* HostPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		// IsLocalController() 대신 IsLocalPlayerController() 가 더 명확할 수 있음
 		if (HostPC && HostPC->IsLocalPlayerController())
 		{
 			ACSPlayerController* HostCSPC = Cast<ACSPlayerController>(HostPC);
@@ -166,16 +167,22 @@ void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 						HostCSPC->bShowMouseCursor = false;
 						FSlateApplication::Get().SetUserFocusToGameViewport(0);
 					}
-					else {
+					else { // Waiting, Finished, None 등
 						UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Setting Input Mode to UIOnly for Host"));
 						FInputModeUIOnly InputModeData;
+						// if (NewPhase == EMatchPhase::EMP_Finished && HostUI) { // 결과 화면에 포커스
+						//     InputModeData.SetWidgetToFocus(HostUI->TakeWidget());
+						// }
 						HostCSPC->SetInputMode(InputModeData);
 						HostCSPC->bShowMouseCursor = true;
 					}
+					// ----------------------------------------------------
 				}
+				else { UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Host CurrentUI is NULL.")); }
 			}
 		}
 	}
+	// -------------------------------------------------
 }
 
 AController* ACSGameModeBase::FindAliveTeammate(AController* DeadPlayer)
