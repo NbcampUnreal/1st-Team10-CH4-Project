@@ -11,11 +11,7 @@ AAINormalController::AAINormalController(FObjectInitializer const& FObjectInitia
 void AAINormalController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	
-	if (Tree)
-	{
-		RunBehaviorTree(Tree);
-	}
+	AAINormalController::SetupPerceptionSystem();
 }
 
 void AAINormalController::OnTargetDetected(AActor* Actor, FAIStimulus Stimulus)
