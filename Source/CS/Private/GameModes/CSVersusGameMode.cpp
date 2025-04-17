@@ -15,7 +15,7 @@ ACSVersusGameMode::ACSVersusGameMode()
 	MatchTimerHandle.Invalidate();
 	ReturnToLobbyHandle.Invalidate();
 
-    MatchTimeLimit = 90.0f;
+    MatchTimeLimit = 15.0f;
 	AlivePlayersPerTeam = { 0,0 };
 	SlotCursor = { 0,0 };
 
@@ -116,6 +116,10 @@ void ACSVersusGameMode::TriggerSuddenDeath()
 					if (ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(Pawn))
 					{
 						Character->ActivateSuddenDeathMode();
+						if (GEngine)
+						{
+							GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Sudden Death Activated"));
+						}
 					}
 				}
 			}

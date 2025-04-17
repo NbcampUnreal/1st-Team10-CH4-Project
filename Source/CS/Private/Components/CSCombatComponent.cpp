@@ -21,7 +21,7 @@ UCSCombatComponent::UCSCombatComponent()
 
     CurrentAttackDamage = 0.f;
 	bIsSuddenDeathActive = false;
-    SuddenDeathDamage = 100.f;
+    SuddenDeathDamage = 9999.f;
 }
 
 void UCSCombatComponent::BeginPlay()
