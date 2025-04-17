@@ -8,18 +8,18 @@
 
 AAIFighterController::AAIFighterController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
 {
-	AAIFighterController::SetupPerceptionSystem();
 }
 
 void AAIFighterController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	
+	AAIFighterController::SetupPerceptionSystem();
 }
 
 void AAIFighterController::SetupPerceptionSystem()
 {
-	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config")); 
+	Super::SetupPerceptionSystem();
+	
 	if (SenseConfig && GetPerceptionComponent())
 	{
 		SenseConfig->SightRadius = 1500.0f;
@@ -33,7 +33,10 @@ void AAIFighterController::SetupPerceptionSystem()
 		SenseConfig->DetectionByAffiliation.bDetectNeutrals = true;
 		
 		GetPerceptionComponent()->SetDominantSense(*SenseConfig->GetSenseImplementation());
-		GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAIFighterController::OnTargetDetected);
+		if (!GetPerceptionComponent()->OnTargetPerceptionUpdated.IsAlreadyBound(this,  &AAIFighterController::OnTargetDetected))
+		{
+			GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this,  &AAIFighterController::OnTargetDetected);
+		}
 		GetPerceptionComponent()->ConfigureSense(*SenseConfig);
 	}
 }
