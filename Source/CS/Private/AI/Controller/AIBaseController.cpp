@@ -6,20 +6,20 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-AAIBaseController::AAIBaseController(FObjectInitializer const& FObjectInitializer)
+AAIBaseController::AAIBaseController(const FObjectInitializer& FObjectInitializer)
+	: Super(FObjectInitializer)
 {
-	/*bStartAILogicOnPossess = false;*/
 	bStartAILogicOnPossess = true;
-
-	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("Signt Config");
+	
+	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
 	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component")));
 }
 
+
 void AAIBaseController::OnPossess(APawn* InPawn)
 {
-	AAIBaseController::SetupPerceptionSystem();
 	Super::OnPossess(InPawn);
-
+	AAIBaseController::SetupPerceptionSystem();
 	if (AAIBaseCharacter* const NPC = Cast<AAIBaseCharacter>(InPawn))
 	{
 		if (UBehaviorTree* const Tree = NPC->GetBehaviorTree())
@@ -38,7 +38,6 @@ void AAIBaseController::OnPossess(APawn* InPawn)
 
 void AAIBaseController::SetupPerceptionSystem()
 {
-
 	if (SenseConfig)
 	{
 		SenseConfig->SightRadius = 500.0f;
@@ -51,8 +50,11 @@ void AAIBaseController::SetupPerceptionSystem()
 		SenseConfig->DetectionByAffiliation.bDetectNeutrals = true;
 
 		GetPerceptionComponent()->SetDominantSense(*SenseConfig->GetSenseImplementation());
-		GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAIBaseController::OnTargetDetected);
-		GetPerceptionComponent()->ConfigureSense(*SenseConfig);		
+		if (!GetPerceptionComponent()->OnTargetPerceptionUpdated.IsAlreadyBound(this, &AAIBaseController::OnTargetDetected))
+		{
+			GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAIBaseController::OnTargetDetected);
+		}
+		GetPerceptionComponent()->ConfigureSense(*SenseConfig);
 	}
 }
 

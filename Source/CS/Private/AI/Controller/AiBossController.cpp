@@ -6,9 +6,7 @@
 
 
 AAIBossController::AAIBossController(FObjectInitializer const& FObjectInitializer) : Super(FObjectInitializer)
-{	
-	bStartAILogicOnPossess = true;
-	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("Sight Config");
+{
 }
 
 void AAIBossController::OnPossess(APawn* InPawn)
@@ -34,7 +32,11 @@ void AAIBossController::SetupPerceptionSystem()
 		SenseConfig->DetectionByAffiliation.bDetectNeutrals = true;
 
 		GetPerceptionComponent()->SetDominantSense(*SenseConfig->GetSenseImplementation());
-		GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAIBossController::OnTargetDetected);
+		if (!GetPerceptionComponent()->OnTargetPerceptionUpdated.IsAlreadyBound(this,  &AAIBossController::OnTargetDetected))
+		{
+			GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this,  &AAIBossController::OnTargetDetected);
+		}
+
 		GetPerceptionComponent()->ConfigureSense(*SenseConfig);
 	}
 }

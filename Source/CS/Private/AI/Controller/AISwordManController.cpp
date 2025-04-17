@@ -8,18 +8,18 @@
 
 AAISwordManController::AAISwordManController(FObjectInitializer const& FObjectInitializer): Super(FObjectInitializer)
 {
-	AAISwordManController::SetupPerceptionSystem();
 }
 
 void AAISwordManController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	
+	AAISwordManController::SetupPerceptionSystem();
 }
 
 void AAISwordManController::SetupPerceptionSystem()
 {
-	SenseConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config")); 
+	Super::SetupPerceptionSystem();
+	
 	if (SenseConfig && GetPerceptionComponent())
 	{
 		SenseConfig->SightRadius = 1500.0f;
@@ -33,7 +33,10 @@ void AAISwordManController::SetupPerceptionSystem()
 		SenseConfig->DetectionByAffiliation.bDetectNeutrals = true;
 		
 		GetPerceptionComponent()->SetDominantSense(*SenseConfig->GetSenseImplementation());
-		GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &AAISwordManController::OnTargetDetected);
+		if (!GetPerceptionComponent()->OnTargetPerceptionUpdated.IsAlreadyBound(this,  &AAISwordManController::OnTargetDetected))
+		{
+			GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this,  &AAISwordManController::OnTargetDetected);
+		}
 		GetPerceptionComponent()->ConfigureSense(*SenseConfig);
 	}
 }
