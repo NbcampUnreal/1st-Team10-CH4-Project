@@ -23,6 +23,7 @@ class CS_API UCSAdvancedGameInstance : public UAdvancedFriendsGameInstance
 public:
 	virtual void Init() override;
 
+	/** 세션 유효성 검증 */
 	UFUNCTION(BlueprintCallable)
 	void SafeJoinSession(const FBlueprintSessionResult& SearchResult);
 

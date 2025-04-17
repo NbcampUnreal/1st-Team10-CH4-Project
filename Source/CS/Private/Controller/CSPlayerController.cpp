@@ -19,7 +19,7 @@
 #include "GameFramework/Pawn.h"
 #include "Engine/LocalPlayer.h"
 
-ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr), bIsHostPlayer(false) {}
+ACSPlayerController::ACSPlayerController() : CurrentActiveUI(nullptr) {}
 
 
 void ACSPlayerController::BeginPlay()

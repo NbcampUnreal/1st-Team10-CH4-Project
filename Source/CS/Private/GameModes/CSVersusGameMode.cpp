@@ -16,7 +16,7 @@ ACSVersusGameMode::ACSVersusGameMode()
 	MatchTimerHandle.Invalidate();
 	ReturnToLobbyHandle.Invalidate();
 
-    MatchTimeLimit = 15.0f;
+    MatchTimeLimit = 60.0f;
 	AlivePlayersPerTeam = { 0,0 };
 	SlotCursor = { 0,0 };
 

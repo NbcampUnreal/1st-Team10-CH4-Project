@@ -15,12 +15,15 @@ void ACSVersusGameState::OnRep_OnSuddenDeath()
 {
 	if (!bIsSuddenDeath) return;
 
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PC && PC->IsLocalController()) {
-		ACSPlayerController* CSPC = Cast<ACSPlayerController>(PC);
-		if (CSPC) {
-			UCSUIBaseWidget* CurrentUI = CSPC->GetCurrentUI();
-			if (CurrentUI) {
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController && PlayerController->IsLocalController()) 
+	{
+		ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(PlayerController);
+		if (CSPlayerController) 
+		{
+			UCSUIBaseWidget* CurrentUI = CSPlayerController->GetCurrentUI();
+			if (CurrentUI) 
+			{
 				CurrentUI->TriggerSuddenDeathUI();
 			}
 		}

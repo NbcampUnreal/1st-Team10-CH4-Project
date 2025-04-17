@@ -12,7 +12,7 @@ ACSCoopGameMode::ACSCoopGameMode()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	MatchTimeLimit = 90;
+	MatchTimeLimit = 60;
 	AlivePlayerCount = -1;
 	RemainingEnemyCount = -1;
 

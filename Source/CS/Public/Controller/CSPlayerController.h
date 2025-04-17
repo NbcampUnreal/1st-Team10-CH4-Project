@@ -75,8 +75,6 @@ public:
 	void Client_SpectateTarget(APawn* NewTarget);
 	void Client_SpectateTarget_Implementation(APawn* NewTarget);
 
-	bool bIsHostPlayer;
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void ClientRestart_Implementation(APawn* NewPawn) override;
