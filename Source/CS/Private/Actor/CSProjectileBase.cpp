@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/CSAttributeComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "PlayerStates/CSPlayerState.h"
+#include "Characters/CSBaseCharacter.h"
 
 // Sets default values
 ACSProjectileBase::ACSProjectileBase()
@@ -45,6 +47,20 @@ void ACSProjectileBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 	if (SpawnActor != OtherActor)
 	{
 		MultiDestroyProjectile();
+
+		ACSBaseCharacter* VictimCharacter = Cast<ACSBaseCharacter>(OtherActor);
+		ACSBaseCharacter* AttackCharacter = Cast<ACSBaseCharacter>(SpawnActor);
+
+		if (AttackCharacter && VictimCharacter)
+		{
+			ACSPlayerState* VictimState = Cast<ACSPlayerState>(VictimCharacter->GetPlayerState());
+			ACSPlayerState* AttackState = Cast<ACSPlayerState>(AttackCharacter->GetPlayerState());
+
+			if (AttackState && VictimState && AttackState->TeamID == VictimState->TeamID)
+			{
+				return;
+			}
+		}
 
 		UCSAttributeComponent* VictimAttributes = OtherActor->FindComponentByClass<UCSAttributeComponent>();
 		if (VictimAttributes)

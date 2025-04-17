@@ -73,7 +73,6 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 
 	if (bIsFrontHit)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Front Hit!!!"));
 		if (OwningCharacter->GetActionState() == ECharacterTypes::ECT_Defending)
 		{
 			FVector LaunchVector = DamageCauser->GetActorForwardVector();
@@ -81,13 +80,8 @@ void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* Event
 			return;
 		}
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Back Hit!!!"));
-	}
 	
 	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("Server: %s - New Health: %.1f"), *GetOwner()->GetName(), Health);
 
 	if (!IsAlive())
 	{
