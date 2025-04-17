@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/CSInGameHUD.h" // 베이스 HUD 상속
+#include "UI/CSInGameHUD.h"
 #include "CSStageHUD.generated.h"
 
-// 전방 선언
 class UTextBlock;
+class UButton; // ExitButton 위해 추가!
 
 UCLASS()
 class CS_API UCSStageHUD : public UCSInGameHUD
@@ -27,6 +27,10 @@ protected:
 	TObjectPtr<UTextBlock> StageInfoText;
 	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
 	TObjectPtr<UTextBlock> BossAppearText;
+	UPROPERTY(meta = (BindWidgetOptional), BlueprintReadOnly)
+	TObjectPtr<UTextBlock> ResultMessageText;
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
+	TObjectPtr<UButton> ExitButton;
 
 	// virtual void NativeConstruct() override; // 필요 시 오버라이드
 };

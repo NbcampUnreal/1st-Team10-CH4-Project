@@ -6,6 +6,7 @@
 #include "Characters/CSBaseCharacter.h"
 #include "Characters/CSPlayerCharacter.h"
 #include "Managers/CSSpawnManager.h"
+#include "UI/CSUIBaseWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 ACSVersusGameMode::ACSVersusGameMode()
@@ -98,27 +99,42 @@ void ACSVersusGameMode::CheckWinCondition()
 
 void ACSVersusGameMode::TriggerSuddenDeath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("VersusGameMode: TriggerSuddenDeath Activate!"));
-	if (!VersusGameState) return;
+	if (!VersusGameState || VersusGameState->bIsSuddenDeath) return;
 
+	UE_LOG(LogTemp, Warning, TEXT("ACSVersusGameMode::TriggerSuddenDeath --- Called on Server."));
 	VersusGameState->bIsSuddenDeath = true;
 
-	for (APlayerState* PlayerState : GameState->PlayerArray)
+	// --- 호스트 UI 직접 업데이트 로직 추가 ---
+	APlayerController* HostPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (HostPC && HostPC->IsLocalPlayerController())
 	{
-		if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
+		ACSPlayerController* HostCSPC = Cast<ACSPlayerController>(HostPC);
+		if (HostCSPC)
 		{
-			if (!CSPlayerState->bIsAlive) continue;
-
-			if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
+			UCSUIBaseWidget* HostUI = HostCSPC->GetCurrentUI();
+			if (HostUI)
 			{
-				if (APawn* Pawn = PlayerController->GetPawn())
+				HostUI->TriggerSuddenDeathUI(); // 호스트 UI 이벤트 직접 호출
+
+				for (APlayerState* PlayerState : GameState->PlayerArray)
 				{
-					if (ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(Pawn))
+					if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(PlayerState))
 					{
-						Character->ActivateSuddenDeathMode();
-						if (GEngine)
+						if (!CSPlayerState->bIsAlive) continue;
+
+						if (APlayerController* PlayerController = Cast<APlayerController>(CSPlayerState->GetOwner()))
 						{
-							GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Sudden Death Activated"));
+							if (APawn* Pawn = PlayerController->GetPawn())
+							{
+								if (ACSPlayerCharacter* Character = Cast<ACSPlayerCharacter>(Pawn))
+								{
+									Character->ActivateSuddenDeathMode();
+									if (GEngine)
+									{
+										GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Sudden Death Activated"));
+									}
+								}
+							}
 						}
 					}
 				}
