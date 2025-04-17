@@ -33,12 +33,8 @@ void UCSAdvancedGameInstance::SafeJoinSession(const FBlueprintSessionResult& Sea
 	const bool bDefinitelyDead = (BuildID == 0 && Ping == 9999);
 	if (bDefinitelyDead || !bValidInfo)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Session filtered before Join: BuildID = %d, Ping = %d, InfoValid = %d"),
-			BuildID,
-			Ping,
-			bValidInfo);
-
 		OnJoinSessionFailed.Broadcast();
+
 		return;
 	}
 
@@ -48,8 +44,8 @@ void UCSAdvancedGameInstance::SafeJoinSession(const FBlueprintSessionResult& Sea
 	IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
 	if (!SessionInterface.IsValid()) return;
 
-	APlayerController* PC = GetFirstLocalPlayerController();
-	if (!PC) return;
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!PlayerController) return;
 
 
 	CachedSessionResult = NativeResult;
@@ -57,9 +53,39 @@ void UCSAdvancedGameInstance::SafeJoinSession(const FBlueprintSessionResult& Sea
 		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UCSAdvancedGameInstance::OnJoinSessionComplete)
 	);
 
-	UE_LOG(LogTemp, Warning, TEXT("Calling JoinSession - BuildID: %d, Ping: %d"), BuildID, Ping);
-
 	SessionInterface->JoinSession(0, NAME_GameSession, NativeResult);
+}
+
+void UCSAdvancedGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (!Subsystem) return;
+
+	IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+	if (!SessionInterface.IsValid()) return;
+
+	SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionDelegateHandle);
+
+	FString ConnectString;
+	if (!SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
+	{
+		OnJoinSessionFailed.Broadcast();
+
+		return;
+	}
+
+	if (ConnectString.IsEmpty() || ConnectString.Contains(TEXT(":0")))
+	{
+		OnJoinSessionFailed.Broadcast();
+
+		return;
+	}
+
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (PlayerController)
+	{
+		PlayerController->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
+	}
 }
 
 void UCSAdvancedGameInstance::SetMatchType(EMatchType NewType)
@@ -133,35 +159,3 @@ const FLevelRow* UCSAdvancedGameInstance::FindLevelRow(FName RowName) const
 	return LevelData->FindRow<FLevelRow>(RowName, TEXT("FindLevelRow"));
 }
 
-void UCSAdvancedGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
-{
-	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if (!Subsystem) return;
-
-	IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
-	if (!SessionInterface.IsValid()) return;
-
-	SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionDelegateHandle);
-
-	FString ConnectString;
-	if (!SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to resolve connect string."));
-		OnJoinSessionFailed.Broadcast(); 
-		return;
-	}
-
-	if (ConnectString.IsEmpty() || ConnectString.Contains(TEXT(":0")))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid ConnectString: %s"), *ConnectString);
-		OnJoinSessionFailed.Broadcast(); 
-		return;
-	}
-
-	APlayerController* PC = GetFirstLocalPlayerController();
-	if (PC)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Joining session at %s"), *ConnectString);
-		PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
-	}
-}

@@ -56,8 +56,6 @@ protected:
 	/** 제한 시간 카운트다운 갱신 */
 	virtual void UpdateMatchTimer();
 
-	
-
 	/** 플레이어 스폰 처리 */
 	void SpawnAllPlayers();
 
