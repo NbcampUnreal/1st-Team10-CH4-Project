@@ -2,7 +2,6 @@
 
 
 #include "Characters/CSBaseCharacter.h"
-
 #include "AIController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameModes/CSGameModeBase.h"
@@ -15,6 +14,10 @@
 #include "Components/WidgetComponent.h"
 #include "Components/CSAttributeComponent.h"
 #include "AI/UI/HealthBarWidget.h"
+#include "GameFrameWork/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 ACSBaseCharacter::ACSBaseCharacter()
 {
@@ -30,7 +33,7 @@ ACSBaseCharacter::ACSBaseCharacter()
     if (WidgetComponent)
     {
         WidgetComponent->SetupAttachment(RootComponent);
-        WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+        WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
         static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("/Game/Blueprints/AI/UI/BP_AIHealthBar"));
         if (WidgetClass.Succeeded())
         {
@@ -70,7 +73,7 @@ void ACSBaseCharacter::Die()
         if (CurrentGameMode && MyController)
         {
             CurrentGameMode->HandlePlayerDeath(MyController);
-        }        
+        }
     }
 }
 
@@ -122,6 +125,19 @@ bool ACSBaseCharacter::CanAttack()
 void ACSBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    if (WidgetComponent && WidgetComponent->GetWidgetSpace() == EWidgetSpace::World)
+    {
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+        if (PlayerController && PlayerController->PlayerCameraManager)
+        {
+            FVector WidgetLocation = WidgetComponent->GetComponentLocation();
+            FVector CameraLocation = PlayerController->PlayerCameraManager->GetCameraLocation();
+
+			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(WidgetLocation, CameraLocation);
+            WidgetComponent->SetWorldRotation(LookAtRotation);
+        }
+    }
 
     if (WidgetComponent && AttributeComponent)
     {
