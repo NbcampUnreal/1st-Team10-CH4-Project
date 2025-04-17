@@ -70,10 +70,7 @@ void ACSBaseCharacter::Die()
         if (CurrentGameMode && MyController)
         {
             CurrentGameMode->HandlePlayerDeath(MyController);
-        }
-
-        SetLifeSpan(5.0f);
-        
+        }        
     }
 }
 

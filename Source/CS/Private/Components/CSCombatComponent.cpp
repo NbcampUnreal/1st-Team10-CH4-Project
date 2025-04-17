@@ -21,7 +21,7 @@ UCSCombatComponent::UCSCombatComponent()
 
     CurrentAttackDamage = 0.f;
 	bIsSuddenDeathActive = false;
-    SuddenDeathDamage = 100.f;
+    SuddenDeathDamage = 9999.f;
 }
 
 void UCSCombatComponent::BeginPlay()
@@ -254,11 +254,6 @@ void UCSCombatComponent::SetSuddenDeathActive(bool bActive)
     {
         if (bIsSuddenDeathActive != bActive)
         {
-            if (GEngine)
-            {
-                GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, bIsSuddenDeathActive ? TEXT("Sudden Death Active") : TEXT("Sudden Death Inactive"));
-            }
-
             bIsSuddenDeathActive = bActive;
         }
     }
