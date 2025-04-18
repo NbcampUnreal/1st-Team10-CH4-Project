@@ -31,18 +31,6 @@ void ACSLobbyGameState::BeginPlay()
     }
 }
 
-void ACSLobbyGameState::OnRep_SelectedMap()
-{
-    // 맵 바뀔 때 클라에 UI 갱신
-    /*if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
-    {
-        if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(PC))
-        {
-            CSPlayerController->UpdateSelectedMapUI(SelectedMap);
-        }
-    }*/
-}
-
 bool ACSLobbyGameState::AreAllPlayerReady() const
 {
     for (APlayerState* PlayerState : PlayerArray)
