@@ -23,7 +23,6 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	/** 세션 관련 함수 */
 	UFUNCTION(BlueprintCallable, Category = "Session")
 	void HostSession(EMatchType TypeToHost);
 
@@ -31,31 +30,26 @@ public:
 	void FindSessions();
 	void JoinFoundSession(const FOnlineSessionSearchResult& SearchResult);
 
-	/** 싱글 플레이 시작 */
 	UFUNCTION(BlueprintCallable, Category = "Game Flow")
 	void StartArcadeMode();
 
-	/** 레벨 이동 */
 	UFUNCTION(BlueprintCallable, Category = "Game Flow")
 	void ServerTravelToLevel(FName LevelID);
 	UFUNCTION(BlueprintCallable, Category = "Game Flow")
 	void OpenLevelByID(FName LevelID);
 
-	/** MatchType 관리 */
 	UFUNCTION(BlueprintCallable)
 	void SetMatchType(EMatchType NewType);
-	UFUNCTION(BlueprintPure, Category = "Game Flow") // BlueprintPure 로 변경
+	UFUNCTION(BlueprintPure, Category = "Game Flow")
 	EMatchType GetMatchType() const { return MatchType; }
 	UFUNCTION(BlueprintCallable)
 	void ResetLobbySettings();
 
-	/** 헬퍼 함수 */
 	const FCharacterRow* FindCharacterRowByJob(EJobTypes Job) const;
 	const FLevelRow* FindLevelRow(FName RowName) const;
 
 	bool bIsSessionCreated;
 
-	/** 로비 유저 데이터 관리 */
 	void SetPlayerLobbyData(const FString& PlayerName, const FPlayerLobbyData& Data);
 	FPlayerLobbyData GetPlayerLobbyData(const FString& PlayerName) const;
 

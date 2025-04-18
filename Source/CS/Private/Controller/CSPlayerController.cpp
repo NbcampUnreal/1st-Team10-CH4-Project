@@ -48,7 +48,6 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
     FName CurrentLevelName = FName(*World->GetName());
     UE_LOG(LogTemp, Log, TEXT("ClientRestart: Level=%s"), *CurrentLevelName.ToString());
 
-    // 메인 메뉴나 로비 레벨에서는 실행 안 함
     if (CurrentLevelName == FName("MainMenuLevel") || CurrentLevelName == FName("LobbyLevel")) { return; }
 
 
@@ -62,7 +61,6 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
     else if (CurrentLevelName == FName("CoopModeLevel")) { UIClassToCreate = CoopHUDClass; }
     else { UE_LOG(LogTemp, Warning, TEXT("ClientRestart: Unknown Gameplay Level %s"), *CurrentLevelName.ToString()); }
 
-    // HUD 생성 및 표시
     if (UIClassToCreate) {
         CurrentActiveUI = CreateWidget<UCSUIBaseWidget>(this, UIClassToCreate);
         if (CurrentActiveUI) {
@@ -70,12 +68,10 @@ void ACSPlayerController::ClientRestart_Implementation(APawn* NewPawn)
         }
     }
 
-    // 입력 모드 설정 (GameOnly)
     FInputModeGameOnly InputModeData;
     SetInputMode(InputModeData);
     bShowMouseCursor = false;
 
-    // 뷰포트 포커스 설정
     FSlateApplication::Get().SetUserFocusToGameViewport(0);
 }
 
@@ -135,8 +131,8 @@ void ACSPlayerController::Client_ShowLobbyUI_Implementation()
         if (LobbyWidget) {
             CurrentActiveUI = LobbyWidget;
             CurrentActiveUI->AddToViewport();
-            LobbyWidget->InitializeLobby(CurrentMatchType); // 초기화 함수 호출
-            // UI 입력 모드 설정
+            LobbyWidget->InitializeLobby(CurrentMatchType);
+            
             FInputModeUIOnly InputModeData;
             InputModeData.SetWidgetToFocus(CurrentActiveUI->TakeWidget());
             SetInputMode(InputModeData);
@@ -190,7 +186,7 @@ void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
     AGameModeBase* CurrentGM = UGameplayStatics::GetGameMode(World);
 
     if (!CurrentGM) {
-        return; // GameMode 없으면 진행 불가
+        return;
     }
     if (ACSLobbyGameMode* LobbyGM = Cast<ACSLobbyGameMode>(CurrentGM)) {
         LobbyGM->ReturnAllPlayersToMainMenu();
@@ -205,7 +201,6 @@ void ACSPlayerController::Server_RequestReturnToMainMenu_Implementation()
 void ACSPlayerController::Client_OnSuddenDeath_Implementation()
 {
     if (IsLocalController() && CurrentActiveUI) {
-        // CurrentActiveUI->TriggerSuddenDeathUI(); // 위젯 함수 호출
     }
 }
 
@@ -225,10 +220,8 @@ void ACSPlayerController::HealthUpdate(float Health, float MaxHealth)
     }
 }
 
-// 매치 단계 변경
 void ACSPlayerController::OnMatchPhaseChanged(EMatchPhase MatchPhase)
 {
     if (IsLocalController() && CurrentActiveUI) {
-        // CurrentActiveUI->HandleMatchPhaseChanged(MatchPhase); // 위젯 함수 호출
     }
 }
