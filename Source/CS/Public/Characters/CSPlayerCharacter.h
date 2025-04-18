@@ -99,7 +99,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCSCombatComponent* CombatComponent;
 	
-
 	// Montage animation server connect function "DuringAttack" Check
 	UFUNCTION(BlueprintCallable, Category = "Combo")
 	void ComboCheck();

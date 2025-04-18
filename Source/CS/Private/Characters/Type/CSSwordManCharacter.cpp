@@ -10,15 +10,11 @@
 
 ACSSwordManCharacter::ACSSwordManCharacter()
 {
-
 }
 
 void ACSSwordManCharacter::BeginPlay()
 {
-	Super::BeginPlay();
-
-	// Initialize the CombatComponent if not already set
-	
+	Super::BeginPlay();	
 }
 
 void ACSSwordManCharacter::Tick(float DeltaTime)
