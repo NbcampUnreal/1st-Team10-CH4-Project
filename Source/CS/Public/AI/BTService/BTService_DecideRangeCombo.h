@@ -16,11 +16,11 @@ protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	
 	UPROPERTY(EditAnywhere, Category = "AI")
-	float MinRange = 130.f;    // 최소 거리
+	float MinRange = 130.f; 
 	UPROPERTY(EditAnywhere, Category = "AI")
-	float MaxRange = 200.f;    // 최대 거리
+	float MaxRange = 200.f;   
 	UPROPERTY(EditAnywhere, Category = "AI")
-	float Chance = 0.6f;       // 발동 확률
+	float Chance = 0.6f;      
 	
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector RangeComboKey;

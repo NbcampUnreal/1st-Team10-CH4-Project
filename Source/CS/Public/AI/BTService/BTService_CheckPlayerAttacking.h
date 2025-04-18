@@ -5,9 +5,7 @@
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "BTService_CheckPlayerAttacking.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class CS_API UBTService_CheckPlayerAttacking : public UBTService_BlackboardBase
 {
