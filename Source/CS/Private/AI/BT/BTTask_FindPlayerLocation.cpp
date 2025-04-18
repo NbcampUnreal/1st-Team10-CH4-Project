@@ -18,7 +18,6 @@ EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeCompone
 	APawn* ControlledPawn = OwnerComp.GetAIOwner()->GetPawn();
 	if (!ControlledPawn)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[BTTask] No controlled pawn found."));
 		return EBTNodeResult::Failed;
 	}
 

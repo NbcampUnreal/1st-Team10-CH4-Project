@@ -484,7 +484,6 @@ int AAIBaseCharacter::RunAway_Implementation(AActor* Attacker)
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
 		{
 			AIController->MoveToLocation(NavLocation.Location, -1.f, true);
-			UE_LOG(LogTemp, Warning, TEXT("RunAway MoveTo Location: %s"), *NavLocation.Location.ToString());
 		}
 	}
 
