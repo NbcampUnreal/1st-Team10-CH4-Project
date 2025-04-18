@@ -22,7 +22,11 @@ protected:
     virtual void SetupPerceptionSystem();
     UFUNCTION()
     virtual void OnTargetDetected(AActor* Actor, FAIStimulus const Stimulus);
+    
     UPROPERTY()
     class UAISenseConfig_Sight* SenseConfig;
+    
+    UPROPERTY()
+    UBehaviorTreeComponent* BehaviorTreeCom;
     
 };

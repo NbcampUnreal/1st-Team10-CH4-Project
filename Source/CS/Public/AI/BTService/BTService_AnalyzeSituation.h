@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,9 +5,7 @@
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "BTService_AnalyzeSituation.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class CS_API UBTService_AnalyzeSituation : public UBTService_BlackboardBase
 {

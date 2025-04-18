@@ -22,7 +22,7 @@ protected:
 	virtual FComboAttackData GetLowComboAttackData() const override;
 	virtual FComboAttackData GetRangeComboAttackData() const override;
 	
-	//소드맨
+
 	UAnimMontage* GetFirstAttackMontage2() const { return FirstAttackMontage2; }
 	UAnimMontage* GetSecondAttackMontage2() const { return SecondAttackMontage2; }
 	UAnimMontage* GetLowComboAttackMontage2() const { return LowComboAttackMontage2; }
@@ -41,8 +41,6 @@ protected:
 
 
 protected:
-	// 스워드맨 모드
-
 	
 	UPROPERTY(EditAnywhere, Category = "Combat2")
 	UAnimMontage* FirstAttackMontage2;

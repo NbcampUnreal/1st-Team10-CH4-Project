@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,9 +5,6 @@
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
 #include "BTTask_MeleeNormalAttack.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class CS_API UBTTask_MeleeNormalAttack : public UBTTask_BlackboardBase
 {
