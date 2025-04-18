@@ -1,11 +1,11 @@
-#include "UI/CSLobbyBaseWidget.h" // 경로 확인
+#include "UI/CSLobbyBaseWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/PanelWidget.h"
 #include "Controller/CSPlayerController.h"
 #include "PlayerStates/CSPlayerState.h"
-#include "GameStates/CSLobbyGameState.h" // AreAllPlayerReady 사용
-#include "GameModes/CSLobbyGameMode.h"   // StartMatchIfReady 사용
+#include "GameStates/CSLobbyGameState.h"
+#include "GameModes/CSLobbyGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/CSPlayerEntry.h"
 #include "GameInstance/CSAdvancedGameInstance.h"
@@ -19,9 +19,8 @@ void UCSLobbyBaseWidget::NativeConstruct()
 	if (ReadyButton) { ReadyButton->OnClicked.AddDynamic(this, &UCSLobbyBaseWidget::OnReadyClicked); }
 	if (ExitButton) { ExitButton->OnClicked.AddDynamic(this, &UCSLobbyBaseWidget::OnExitClicked); }
 
-	// Tick 업데이트 간격 설정
-	ReadyCountUpdateInterval = 0.25f; // 예: 0.25초마다 Ready 카운트 업데이트
-	TimeSinceLastReadyCountUpdate = ReadyCountUpdateInterval; // 처음엔 바로 업데이트하도록
+	ReadyCountUpdateInterval = 0.25f;
+	TimeSinceLastReadyCountUpdate = ReadyCountUpdateInterval;
 }
 
 void UCSLobbyBaseWidget::InitializeLobby(EMatchType CurrentMatchType)
@@ -32,7 +31,6 @@ void UCSLobbyBaseWidget::InitializeLobby(EMatchType CurrentMatchType)
 	UpdatePlayerList();
 }
 
-// NativeTick 함수 구현 추가!
 void UCSLobbyBaseWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -40,10 +38,10 @@ void UCSLobbyBaseWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 	TimeSinceLastReadyCountUpdate += InDeltaTime;
 	if (TimeSinceLastReadyCountUpdate >= ReadyCountUpdateInterval)
 	{
-		TimeSinceLastReadyCountUpdate = 0.0f; // 타이머 리셋
+		TimeSinceLastReadyCountUpdate = 0.0f;
 
 		AGameStateBase* GS = UGameplayStatics::GetGameState(GetWorld());
-		if (GS && ReadyCountText) // GameState와 Text 위젯 유효성 검사
+		if (GS && ReadyCountText)
 		{
 			int32 CurrentReadyCount = 0;
 			int32 TotalPlayerCount = GS->PlayerArray.Num();
@@ -51,7 +49,7 @@ void UCSLobbyBaseWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 			for (APlayerState* Player : GS->PlayerArray)
 			{
 				ACSPlayerState* CSPlayer = Cast<ACSPlayerState>(Player);
-				if (CSPlayer && CSPlayer->bIsReady) // Ready 상태인지 확인
+				if (CSPlayer && CSPlayer->bIsReady)
 				{
 					CurrentReadyCount++;
 				}
@@ -118,7 +116,7 @@ void UCSLobbyBaseWidget::SetupCharacterSelection()
     if (!CharacterSelectionPanel) return;
     CharacterSelectionPanel->ClearChildren();
 
-    TArray<EJobTypes> AvailableJobs = { EJobTypes::EJT_Fighter, EJobTypes::EJT_SwordMan }; // 예시 직업 목록
+    TArray<EJobTypes> AvailableJobs = { EJobTypes::EJT_Fighter, EJobTypes::EJT_SwordMan };
 
     for (EJobTypes Job : AvailableJobs) {
     }

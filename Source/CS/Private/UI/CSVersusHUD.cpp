@@ -1,11 +1,10 @@
-// CSVersusHUD.cpp
 #include "UI/CSVersusHUD.h"
 #include "Components/TextBlock.h"
-#include "Kismet/GameplayStatics.h"        // GetGameState, GetPlayerController
-#include "GameFramework/PlayerController.h" // HasAuthority
-#include "GameStates/CSVersusGameState.h"   // VersusGameState 사용
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
+#include "GameStates/CSVersusGameState.h"
 
-// NativeConstruct 에서 초기화 (필요 시)
+
 // void UCSVersusHUD::NativeConstruct()
 // {
 //     Super::NativeConstruct();
@@ -23,9 +22,8 @@
 
 void UCSVersusHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-    Super::NativeTick(MyGeometry, InDeltaTime); // 부모 Tick 호출
+    Super::NativeTick(MyGeometry, InDeltaTime);
 
-    // 호스트(리슨 서버)인 경우에만 직접 점수 업데이트
     APlayerController* PC = GetOwningPlayer();
     if (PC && PC->HasAuthority())
     {
@@ -34,7 +32,6 @@ void UCSVersusHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         {
             TimeSinceLastHostScoreUpdate = 0.0f;
 
-            // GameState 가져오기 (캐싱 활용)
             if (!CachedVersusGameState.IsValid()) {
                 CachedVersusGameState = GetWorld() ? Cast<ACSVersusGameState>(GetWorld()->GetGameState()) : nullptr;
             }
