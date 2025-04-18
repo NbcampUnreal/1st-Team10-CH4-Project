@@ -194,7 +194,6 @@ void ACSPlayerCharacter::DodgeStart()
 {
 	if (ActionState == ECharacterTypes::ECT_Unoccupied)
 	{
-		//PlayAnimMontage(DodgeMontage);
 		Server_PerformDodge();
 	}
 }
@@ -231,7 +230,6 @@ void ACSPlayerCharacter::Server_FinishDodge_Implementation()
 	if (ActionState == ECharacterTypes::ECT_Dodge)
 	{
 		ActionState = ECharacterTypes::ECT_Unoccupied;
-		//OnRep_ActionState();
 	}
 }
 
