@@ -8,16 +8,6 @@ ACSSingleGameState::ACSSingleGameState()
 	TotalAICount = -1;
 }
 
-void ACSSingleGameState::OnRep_DeadAICount()
-{
-	// UI 업데이트
-}
-
-void ACSSingleGameState::OnRep_IsBossPhase()
-{
-	// 보스 단계 UI 업데이트
-}
-
 void ACSSingleGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

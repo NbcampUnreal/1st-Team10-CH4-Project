@@ -23,16 +23,10 @@ public:
 	void SetBossPhase(bool bBossPhase) { bIsBossPhase = bBossPhase; }
 
 protected:
-	UFUNCTION()
-	void OnRep_DeadAICount();
-
-	UFUNCTION()
-	void OnRep_IsBossPhase();
-
-	UPROPERTY(ReplicatedUsing = OnRep_IsBossPhase)
+	UPROPERTY(Replicated)
 	bool bIsBossPhase;
 
-	UPROPERTY(ReplicatedUsing = OnRep_DeadAICount)
+	UPROPERTY(Replicated)
 	int32 DeadAICount;
 
 	UPROPERTY(Replicated)

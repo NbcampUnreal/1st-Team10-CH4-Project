@@ -164,9 +164,6 @@ void ACSVersusGameMode::FinishMatch(int32 WinningTeamID)
 
 	HandleEndGame();
 
-	// 승리 연출 구현 필요(카메라 전환, 승리 팀 캐릭터 배치 등)
-	// UI는 OnMatchPhaseChanged(EMatchPhase MatchPhase) 함수에서 적용
-
 	GetWorld()->GetTimerManager().SetTimer(ReturnToLobbyHandle, this, &ACSVersusGameMode::ReturnToLobby, 10.0f, false);
 }
 

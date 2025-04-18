@@ -11,7 +11,6 @@
 void UCSVersusLobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	// TObjectPtr 사용 시 -> 또는 Get() 사용, Null 체크 권장
 	if (ChangeTeamButton)
 	{
 		ChangeTeamButton->OnClicked.AddDynamic(this, &UCSVersusLobbyWidget::OnChangeTeamClicked);
@@ -29,7 +28,6 @@ void UCSVersusLobbyWidget::InitializeLobby(EMatchType CurrentMatchType)
 
 void UCSVersusLobbyWidget::RefreshPlayerList(const TArray<APlayerState*>& PlayerArray)
 {
-	// 목록 비우기 (Null 체크 추가)
 	if (Team0_PlayerList) Team0_PlayerList->ClearChildren();
 	if (Team1_PlayerList) Team1_PlayerList->ClearChildren();
 
@@ -41,7 +39,7 @@ void UCSVersusLobbyWidget::RefreshPlayerList(const TArray<APlayerState*>& Player
 			UCSPlayerEntry* EntryWidget = CreateWidget<UCSPlayerEntry>(this, PlayerEntryWidgetClass);
 			if (EntryWidget) {
 				EntryWidget->SetupPlayerEntry(CSPlayer);
-				UVerticalBox* TargetList = (CSPlayer->TeamID == 0) ? Team0_PlayerList.Get() : Team1_PlayerList.Get(); // Get() 사용
+				UVerticalBox* TargetList = (CSPlayer->TeamID == 0) ? Team0_PlayerList.Get() : Team1_PlayerList.Get();
 				if (TargetList) TargetList->AddChildToVerticalBox(EntryWidget);
 			}
 		}
@@ -53,7 +51,6 @@ void UCSVersusLobbyWidget::OnChangeTeamClicked()
 	ACSPlayerController* PC = GetOwningCSPlayerController();
 	if (PC) {
 		UE_LOG(LogTemp, Log, TEXT("UI: Change team button clicked."));
-		// PlayerController RPC 호출 (주석 해제!)
 		PC->Server_RequestTeamChange();
 	}
 	else { UE_LOG(LogTemp, Warning, TEXT("OnChangeTeamClicked: PlayerController is null!")); }

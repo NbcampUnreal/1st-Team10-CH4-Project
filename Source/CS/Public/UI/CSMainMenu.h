@@ -35,19 +35,15 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> NotificationText;
 
-	// --- 생명 주기 ---
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 private:
-	// --- 버튼 클릭 핸들러 ---
 	UFUNCTION() void OnArcadeModeClicked();
 	UFUNCTION() void OnExitClicked();
 
-	// 알림 숨기기 타이머 관련
 	FTimerHandle NotificationTimerHandle;
 	UFUNCTION() void HideNotification();
 
-	// 버튼 비활성화 처리
 	void SetMultiplayerButtonsEnabled(bool bEnabled);
 };

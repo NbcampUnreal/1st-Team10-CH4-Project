@@ -11,11 +11,8 @@ class CS_API ACSLobbyGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(ReplicatedUsing = OnRep_SelectedMap)
+	UPROPERTY(Replicated)
 	FName SelectedMap;
-
-	UFUNCTION()
-	void OnRep_SelectedMap();
 
 	bool AreAllPlayerReady() const;
 

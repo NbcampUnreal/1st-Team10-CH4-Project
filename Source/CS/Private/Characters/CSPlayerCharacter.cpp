@@ -86,29 +86,19 @@ void ACSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		if (MovementAction) EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Move);
-		else UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: MovementAction is NULL!"));
-
 		if (JumpAction) EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::Jump);
-		else UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: JumpAction is NULL!"));
-
-		if (CrouchAction) {
-			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
+		if (CrouchAction) {	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACSPlayerCharacter::CrouchStart);
 			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::CrouchEnd);
 		}
-		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: CrouchAction is NULL!")); }
 
 		if (GuardAction) {
 			EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::GuardStart);
 			EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &ACSPlayerCharacter::GuardEnd);
 		}
-		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: GuardAction is NULL!")); }
-
 		if (DodgeAction) {
 			EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &ACSPlayerCharacter::DodgeStart);
 		}
-		else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: DodgeAction is NULL!")); }
 	}
-	else { UE_LOG(LogTemp, Error, TEXT("SetupPlayerInputComponent: Failed to cast PlayerInputComponent to UEnhancedInputComponent!")); }
 }
 
 void ACSPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -194,7 +184,6 @@ void ACSPlayerCharacter::DodgeStart()
 {
 	if (ActionState == ECharacterTypes::ECT_Unoccupied)
 	{
-		//PlayAnimMontage(DodgeMontage);
 		Server_PerformDodge();
 	}
 }
@@ -231,7 +220,6 @@ void ACSPlayerCharacter::Server_FinishDodge_Implementation()
 	if (ActionState == ECharacterTypes::ECT_Dodge)
 	{
 		ActionState = ECharacterTypes::ECT_Unoccupied;
-		//OnRep_ActionState();
 	}
 }
 

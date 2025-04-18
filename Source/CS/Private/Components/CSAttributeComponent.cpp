@@ -15,7 +15,6 @@
 UCSAttributeComponent::UCSAttributeComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	//bReplicates = true; 
 	SetIsReplicatedByDefault(true);
 	
 
@@ -49,8 +48,6 @@ void UCSAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 void UCSAttributeComponent::ReceiveDamage(float DamageAmount, AController* EventInstigator, AActor* DamageCauser, ELaunchTypes DType, FHitResult HitResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server: %s - ReceiveDamage Called. Damage: %.1f"), *GetOwner()->GetName(), DamageAmount);
-
 	if (!GetOwner()->HasAuthority()) return;
 	if (!IsAlive() || DamageAmount <= 0.f) return;
 
@@ -161,8 +158,6 @@ void UCSAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UCSAttributeComponent::OnRep_Health()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Client: %s - OnRep_Health Called. Current Health: %.1f"), *GetOwner()->GetName(), Health); // OnRep 호출 및 현재 체력 로그
-
 	ACSPlayerCharacter* PlayerCharacter = Cast<ACSPlayerCharacter>(GetOwner());
 
 	if (PlayerCharacter)
