@@ -24,7 +24,6 @@ void UCSAdvancedGameInstance::Init()
 void UCSAdvancedGameInstance::SafeJoinSession(const FBlueprintSessionResult& SearchResult)
 {
 	const FOnlineSessionSearchResult& NativeResult = SearchResult.OnlineResult;
-	UE_LOG(LogTemp, Warning, TEXT("SafeJoinSession called"));
 	
 	const int32 BuildID = NativeResult.Session.SessionSettings.BuildUniqueId;
 	const int32 Ping = NativeResult.PingInMs;
@@ -47,8 +46,6 @@ void UCSAdvancedGameInstance::SafeJoinSession(const FBlueprintSessionResult& Sea
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!PlayerController) return;
 
-
-	CachedSessionResult = NativeResult;
 	JoinSessionDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
 		FOnJoinSessionCompleteDelegate::CreateUObject(this, &UCSAdvancedGameInstance::OnJoinSessionComplete)
 	);
