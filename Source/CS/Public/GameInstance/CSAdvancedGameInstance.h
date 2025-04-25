@@ -75,7 +75,6 @@ private:
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	FDelegateHandle JoinSessionDelegateHandle;
-	FOnlineSessionSearchResult CachedSessionResult;
 
 	UPROPERTY()
 	EMatchType MatchType;

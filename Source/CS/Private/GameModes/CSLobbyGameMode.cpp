@@ -36,62 +36,13 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (HasAuthority())
-	{
-		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-		if (Subsystem)
-		{
-			IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
-			if (SessionInterface.IsValid())
-			{
-				APlayerState* PS = NewPlayer->PlayerState;
-				if (PS)
-				{
-					FUniqueNetIdRepl ReplId = PS->GetUniqueId();  // ✅ 이걸로 접근 가능
-					if (ReplId.IsValid())
-					{
-						const TSharedPtr<const FUniqueNetId> NetId = ReplId.GetUniqueNetId();
-						if (NetId.IsValid())
-						{
-							const FName SessionName = NAME_GameSession;
-							const bool bWasSuccessful = SessionInterface->RegisterPlayer(SessionName, *NetId, false);
+	RegisterPlayerToSession(NewPlayer);
 
-							UE_LOG(LogTemp, Log, TEXT("✅ RegisterPlayer: %s | Success: %s"),
-								*NetId->ToString(),
-								bWasSuccessful ? TEXT("true") : TEXT("false"));
-						}
-					}
-				}
-			}
-		}
-	}
-	if (MatchType == EMatchType::EMT_None)
-	{
-		if (const UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
-		{
-			MatchType = CSGameInstance->GetMatchType();
-		}
-	}
+	SetInitPlayerInfo(NewPlayer);
 
 	if (ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(NewPlayer))
 	{
 		CSPlayerController->Client_ShowLobbyUI();
-	}
-
-	if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(NewPlayer->PlayerState))
-	{
-		int32 Num = GameState.Get()->PlayerArray.Num();
-
-		CSPlayerState->PlayerIndex = Num;
-
-		if (MatchType == EMatchType::EMT_Versus)
-		{
-			CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
-		}
-		else if (MatchType == EMatchType::EMT_Coop)
-		{
-			CSPlayerState->TeamID = 0;
-		}
 	}
 
 	FTimerHandle DelayHandle;
@@ -104,17 +55,13 @@ void ACSLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		}, 1.0f, false);
 }
 
-// --- 메인 메뉴 복귀 함수 구현 추가! ---
 void ACSLobbyGameMode::ReturnAllPlayersToMainMenu()
 {
-	UE_LOG(LogTemp, Log, TEXT("ACSLobbyGameMode::ReturnAllPlayersToMainMenu called."));
-
 	UWorld* World = GetWorld();
-	UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>(); // GameInstance 타입 확인!
+	UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>(); 
 	if (!World || !CSGameInstance) return;
 
-	// 1. 세션 파괴 (호스트만)
-	if (HasAuthority()) // GameMode는 서버에서만 실행되므로 항상 true (리슨서버)
+	if (HasAuthority()) 
 	{
 		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 		if (Subsystem)
@@ -127,18 +74,11 @@ void ACSLobbyGameMode::ReturnAllPlayersToMainMenu()
 		}
 	}
 
-	// 2. 메인 메뉴 레벨 경로 찾기
 	const FLevelRow* LevelRow = CSGameInstance->FindLevelRow(FName("MainMenuLevel"));
-	if (!LevelRow || LevelRow->MapPath.IsEmpty())
-	{
-		UE_LOG(LogTemp, Error, TEXT("ReturnAllPlayersToMainMenu: Cannot find MainMenuLevel path in LevelData!"));
-		return;
-	}
+	if (!LevelRow || LevelRow->MapPath.IsEmpty()) return;
 
-	// 3. 모든 플레이어 이동 (ServerTravel 사용 - listen 옵션 없이)
-	const FString TravelURL = LevelRow->MapPath; // ?listen 없음!
-	UE_LOG(LogTemp, Log, TEXT("Returning all players to Main Menu: %s"), *TravelURL);
-	// bUseSeamlessTravel = false; // 로비->메뉴는 Seamless 불필요할 수 있음 (선택적)
+	const FString TravelURL = LevelRow->MapPath; 
+
 	World->ServerTravel(TravelURL);
 }
 
@@ -444,6 +384,59 @@ bool ACSLobbyGameMode::IsTeamBalanced()
 	}
 
 	return Team_0 == Team_1;
+}
+
+void ACSLobbyGameMode::RegisterPlayerToSession(APlayerController* NewPlayer)
+{
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (Subsystem)
+	{
+		IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
+		if (SessionInterface.IsValid())
+		{
+			APlayerState* PlayerState = NewPlayer->PlayerState;
+			if (PlayerState)
+			{
+				FUniqueNetIdRepl ReplId = PlayerState->GetUniqueId();
+				if (ReplId.IsValid())
+				{
+					const TSharedPtr<const FUniqueNetId> NetId = ReplId.GetUniqueNetId();
+					if (NetId.IsValid())
+					{
+						const FName SessionName = NAME_GameSession;
+						const bool bWasSuccessful = SessionInterface->RegisterPlayer(SessionName, *NetId, false);
+					}
+				}
+			}
+		}
+	}
+}
+
+void ACSLobbyGameMode::SetInitPlayerInfo(APlayerController* NewPlayer)
+{
+	if (MatchType == EMatchType::EMT_None)
+	{
+		if (const UCSAdvancedGameInstance* CSGameInstance = GetGameInstance<UCSAdvancedGameInstance>())
+		{
+			MatchType = CSGameInstance->GetMatchType();
+		}
+	}
+
+	if (ACSPlayerState* CSPlayerState = Cast<ACSPlayerState>(NewPlayer->PlayerState))
+	{
+		int32 Num = GameState.Get()->PlayerArray.Num();
+
+		CSPlayerState->PlayerIndex = Num;
+
+		if (MatchType == EMatchType::EMT_Versus)
+		{
+			CSPlayerState->TeamID = (Num % 2 == 0) ? 1 : 0;
+		}
+		else if (MatchType == EMatchType::EMT_Coop)
+		{
+			CSPlayerState->TeamID = 0;
+		}
+	}
 }
 
 void ACSLobbyGameMode::SetViewLobbyCam(APlayerController* NewPlayer)

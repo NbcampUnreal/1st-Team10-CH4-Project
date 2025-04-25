@@ -44,6 +44,12 @@ protected:
 	/** 현재 매치 타입 (Versus / Coop) */
 	EMatchType MatchType;
 
+	/** 플레이어 세션 등록 */
+	void RegisterPlayerToSession(APlayerController* NewPlayer);
+
+	/** 플레이어 초기 로비 세팅 */
+	void SetInitPlayerInfo(APlayerController* NewPlayer);
+
 	/** 초기 카메라 세팅 */
 	void SetViewLobbyCam(APlayerController* NewPlayer);
 
