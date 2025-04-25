@@ -124,57 +124,46 @@ void ACSGameModeBase::AllAIStartLogic(const TArray<APawn*>& InAIPawns)
 
 void ACSGameModeBase::SetMatchPhase(EMatchPhase NewPhase)
 {
-	if (MatchPhase == NewPhase) return; // 변경 없을 시 리턴
+	if (MatchPhase == NewPhase) return;
 
-	UE_LOG(LogTemp, Log, TEXT("ACSGameModeBase::SetMatchPhase: Changing Phase from %d to %d"), (int32)MatchPhase, (int32)NewPhase);
 	MatchPhase = NewPhase;
 
-	if (BaseGameState) {
-		BaseGameState->SetMatchPhase(NewPhase); // 리플리케이트될 GameState 변수 설정
+	if (BaseGameState) 
+	{
+		BaseGameState->SetMatchPhase(NewPhase);
 	}
 
-	// --- 호스트(리슨 서버) UI 직접 업데이트 로직 추가 ---
-	if (HasAuthority()) // 서버에서만 실행
+	if (HasAuthority()) 
 	{
-		// 호스트의 로컬 플레이어 컨트롤러 가져오기 (Index 0)
-		APlayerController* HostPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		// IsLocalController() 대신 IsLocalPlayerController() 가 더 명확할 수 있음
-		if (HostPC && HostPC->IsLocalPlayerController())
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+		if (PlayerController && PlayerController->IsLocalPlayerController())
 		{
-			ACSPlayerController* HostCSPC = Cast<ACSPlayerController>(HostPC);
-			if (HostCSPC)
+			ACSPlayerController* CSPlayerController = Cast<ACSPlayerController>(PlayerController);
+			if (CSPlayerController)
 			{
-				UCSUIBaseWidget* HostUI = HostCSPC->GetCurrentUI();
+				UCSUIBaseWidget* HostUI = CSPlayerController->GetCurrentUI();
 				if (HostUI)
 				{
-					// 호스트 UI의 이벤트 직접 호출
 					HostUI->HandleMatchPhaseChanged(NewPhase);
-					UE_LOG(LogTemp, Log, TEXT("ACSGameModeBase::SetMatchPhase: Called HandleMatchPhaseChanged on Host UI."));
 
-					// --- 호스트 입력 모드 설정 (여기서 하는 것이 더 안정적) ---
-					if (NewPhase == EMatchPhase::EMP_Playing) {
-						UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Setting Input Mode to GameOnly for Host"));
+					if (NewPhase == EMatchPhase::EMP_Playing) 
+					{
 						FInputModeGameOnly InputModeData;
-						HostCSPC->SetInputMode(InputModeData);
-						HostCSPC->bShowMouseCursor = false;
+						CSPlayerController->SetInputMode(InputModeData);
+						CSPlayerController->bShowMouseCursor = false;
 						FSlateApplication::Get().SetUserFocusToGameViewport(0);
 					}
-					else { // Waiting, Finished, None 등
-						UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Setting Input Mode to UIOnly for Host"));
+					else 
+					{ 
 						FInputModeUIOnly InputModeData;
-						// if (NewPhase == EMatchPhase::EMP_Finished && HostUI) { // 결과 화면에 포커스
-						//     InputModeData.SetWidgetToFocus(HostUI->TakeWidget());
-						// }
-						HostCSPC->SetInputMode(InputModeData);
-						HostCSPC->bShowMouseCursor = true;
+						CSPlayerController->SetInputMode(InputModeData);
+						CSPlayerController->bShowMouseCursor = true;
 					}
-					// ----------------------------------------------------
 				}
-				else { UE_LOG(LogTemp, Warning, TEXT("ACSGameModeBase::SetMatchPhase: Host CurrentUI is NULL.")); }
 			}
 		}
 	}
-	// -------------------------------------------------
 }
 
 AController* ACSGameModeBase::FindAliveTeammate(AController* DeadPlayer)
@@ -343,14 +332,14 @@ void ACSGameModeBase::ReturnToMainMenu(AController* TargetPlayer)
 	// 특정 플레이어(게스트 한 명) 이동
 	if (TargetPlayer)
 	{
-		APlayerController* PC = Cast<APlayerController>(TargetPlayer);
-		if (!PC) return;
+		APlayerController* PlayerController = Cast<APlayerController>(TargetPlayer);
+		if (!PlayerController) return;
 
 		IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 		IOnlineSessionPtr Session = Subsystem->GetSessionInterface();
 		if (Session.IsValid()) Session->DestroySession(NAME_GameSession);
 
-		PC->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+		PlayerController->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
 	}
 }
 
