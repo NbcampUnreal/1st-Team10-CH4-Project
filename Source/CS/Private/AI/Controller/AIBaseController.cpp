@@ -31,9 +31,6 @@ void AAIBaseController::OnPossess(APawn* InPawn)
 				Blackboard = BB;
 				
 				RunBehaviorTree(Tree);
-				
-				BehaviorTreeCom = NewObject<UBehaviorTreeComponent>(this, TEXT("BTComponent"));
-				BehaviorTreeCom->RegisterComponent();
 			}
 		}
 	}
